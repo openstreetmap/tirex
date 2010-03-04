@@ -1,0 +1,195 @@
+=head1 NAME
+
+tirex.conf - main Tirex configuration file
+
+=head1 DESCRIPTION
+
+The configuration file B<tirex.conf> is read by the Tirex master daemon
+and most Tirex utilties. The following lists all configuration options
+that can be set.
+
+=head2 GENERAL OPTIONS
+
+=over 2
+
+=item B<metatile_rows>, B<metatile_columns>
+
+The number of rows and columns in one meta tile. 
+Both default to I<8> for backward compatibility.
+
+=item B<metatile_dir>
+
+The directory where meta tiles are stored. Tirex will
+create one subdirectory per map style.
+
+Defaults to F</usr/lib/tirex/tiles>.
+
+=item B<master_udp_port>
+
+UDP port (on localhost) where the master listens for commands (including render requests). 
+Defaults to I<9322>.
+
+=item B<syncd_udp_port>
+
+x
+
+=item B<renderd_udp_port>
+
+x
+
+=back
+
+=head2 MASTER DAEMON OPTIONS
+
+=over 3
+
+=item B<bucket>
+
+This config option may appear multiple times, and each occurrence defines one 
+priority bucket for executing render requests. At least one such option must 
+me present, and each I<bucket> option must have the following parameters:
+
+=over 3
+
+=item name=I<name>
+
+the name of the bucket, for display purposes.
+
+=item minprio=I<minprio>
+
+a request with priority I<minprio> or higher is put in this bucket, unless it fits in another bucket with a higher I<minprio>
+
+=item maxload=I<maxload>
+
+this bucket only takes requests if the system load is not more than I<maxload>
+
+=item maxproc=I<maxproc>
+
+a request can only be added to this bucket if the total number of requests in all
+buckets is less than I<maxproc>.
+
+=back
+
+Here is an example for a typical bucket setup:
+
+   bucket name=live       minprio=1  maxproc=4 maxload=20
+   bucket name=important  minprio=10 maxproc=3 maxload=8
+   bucket name=background minprio=20 maxproc=2 maxload=4
+
+The bucket I<live> takes up to four requests of priority 1-9 and is avilable
+at system loads up to 20. The Bucket I<important> takes up to three requests
+of priority 10-19 and is available at system loads up to 8. The I<background>
+bucket takes only 2 requests of priority 20 or higher and is only available at
+system loads up to 4. This setup guarantees that at least one request with
+priority 1..9 can always be added even if the system is constantly battered 
+with requests of priority 10.
+
+=item B<master_logfile>
+
+Where the master daemon writes a log of all processed requests. Defaults to F</var/log/tirex/jobs.log>.
+
+=item B<master_pidfile>
+
+PID file for the master daemon. Defaults to F</var/run/tirex/tirex-master.pid>.
+
+=item B<master_rendering_timeout>
+
+The time (in I<minutes>) after which the master daemon considers a rendering request
+that was passed on to the rendering subsystem as failed, and will remove it from its buckets.
+Defaults to I<10>.
+
+=item B<master_syslog_facility>
+
+Syslog facility under which the master will log messages. Default I<local0>.
+
+=item B<modtile_socket_name>
+
+The Unix domain socket filename used for communication between mod_tile (and other
+"old-style" tools like render_list) and the master daemon. Defaults to F</var/lib/tirex/modtile.sock>.
+Make sure to configure mod_tile and/or renderd accordingly. 
+
+=item B<sync_to_host>
+
+XXX
+
+=back 
+
+=head2 RENDERD OPTIONS
+
+=over 3
+
+=item B<mapnik_fontdir>
+
+The directory where the Mapnik rendering engine loads its TrueType fonts from.
+If the style sheet references fonts that are not present here, the renderer will 
+throw an exception. Defaults to F</usr/lib/mapnik/fonts>.
+
+=item B<mapnik_fontdir_recurse>
+
+Set this to I<1> if you want fonts loaded recursively from directories
+inside the I<mapnik_fontdir> directory. Defaults to I<0>.
+
+=item B<mapnik_mapdir>
+
+The directory where the map files for rendering reside. The map files must have 
+a file extension of .xml, and all .xml files present in this directory will be 
+loaded as map styles. Tirex will only process requests that have a "map" parameter
+matching one of these files. Defaults to I</etc/mapnik-osm-data>.
+
+=item B<mapnik_plugindir>
+
+The directory where the Mapnik rendering engine loads its plugins from. 
+Defaults to F</usr/lib/mapnik/input>.
+
+=item B<renderd_processes>
+
+The number of renderd processes to start. This should be the same, or slightly 
+smaller, than the maximum I<maxprocs> value used in a I<bucket> section. If you have
+more processes than I<maxprocs> then they will never be assigned a job; if you 
+have less processes than I<maxprocs> then the master will hand out more requests
+than can be processed. Defaults to I<5>.
+
+=back
+
+=head2 SYNCD OPTIONS
+
+=over 3
+
+=item B<sync_to_host>
+
+x
+
+=item B<syncd_pidfile>
+
+x
+
+=back
+
+
+=head1 EXAMPLE
+
+A standard Tirex configuration file:
+
+    metatile_dir=/var/lib/tirex/tiles
+    renderd_udp_port=9320
+    master_udp_port=9322
+    master_pidfile=/var/run/tirex/tirex-master.pid
+    master_logfile=/var/log/tirex/master.log
+    modtile_socket_name=/var/run/tirex/modtile_sock
+
+    bucket name=live       minprio=1  maxproc=4 maxload=20
+    bucket name=important  minprio=10 maxproc=3 maxload=8
+    bucket name=background minprio=20 maxproc=2 maxload=4
+
+    renderd_processes=5
+
+    mapnik_fontdir=/usr/lib/mapnik/fonts
+    mapnik_mapdir=/etc/mapnik-osm-data/
+    mapnik_plugindir=/usr/lib/mapnik/input
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut

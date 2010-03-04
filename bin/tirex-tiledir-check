@@ -1,0 +1,336 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-tiledir-check
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use File::Find;
+use File::stat;
+use Pod::Usage;
+use List::Util;
+use IO::File;
+use IO::Handle;
+use JSON;
+
+use Tirex;
+
+#-----------------------------------------------------------------------------
+
+my $EMPTY_TILE_SIZE = 7124;
+
+my %opts = ( list => '', stats => '' );
+GetOptions( \%opts, 'help|h', 'config|c=s', 'list|l=s', 'stats|s=s' ) or exit(2);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-tiledir-check - check tile dir\n",
+        -exitval => 0
+    );
+}
+
+die("--list and --stats can't both be -\n") if ($opts{'list'} eq '-' && $opts{'stats'} eq '-');
+
+my $fh_list;
+my $fh_stats;
+
+if ($opts{'list'} eq '-')
+{
+    $fh_list = IO::Handle->new();
+    $fh_list->fdopen(fileno(STDOUT), 'w');
+}
+elsif ($opts{'list'})
+{
+    $fh_list = IO::File->new($opts{'list'}, 'w') or die("Can't open list file '$opts{'list'}': $!\n");
+}
+
+if ($opts{'stats'} eq '-')
+{
+    $fh_stats = IO::Handle->new();
+    $fh_stats->fdopen(fileno(STDOUT), 'w');
+}
+elsif ($opts{'stats'})
+{
+    $fh_stats = IO::File->new($opts{'stats'}, 'w') or die("Can't open stats file '$opts{'stats'}': $!\n");
+}
+
+my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $REGEX_DIR  = qr{^/[a-zA-Z0-9_-]+(/[0-9]+){0,5}$};
+my $REGEX_FILE = qr{^/[a-zA-Z0-9_-]+(/[0-9]+){0,5}/[0-9]+\.meta$};
+my $REGEX_TMP  = qr{^/[a-zA-Z0-9_-]+(/[0-9]+){0,5}/[0-9]+\.meta\.[0-9]+\.tmp$};
+
+my $BLOCKSIZE = 512;
+
+my $mtdir = Tirex::Config::get('metatile_dir');
+chop $mtdir if ($mtdir =~ qr{/$});
+
+my %stats;
+my $exitcode = 0;
+my $list = '';
+
+find({ wanted => \&process, follow_fast => 1, no_chdir => 1 }, $mtdir);
+
+if ($fh_list)
+{
+    $fh_list->print($list);
+}
+if ($fh_stats)
+{
+    my $json = JSON::to_json(\%stats, { pretty => 1 });
+    $fh_stats->print("$json\n");
+}
+
+exit($exitcode);
+
+#-----------------------------------------------------------------------------
+
+sub error
+{
+    my $errmsg = shift;
+
+    print STDERR "$errmsg\n";
+    $exitcode = 1;
+}
+
+sub process
+{
+    (my $path = $_) =~ s/^$mtdir//;
+
+    # directories
+    if (-d $_)
+    {
+        return if ($path eq '');
+
+        if ($path !~ $REGEX_DIR)
+        {
+            $File::Find::prune = 1;
+            error("Unknown directory format: $path");
+        }
+
+        return;
+    }
+
+    my $stat = stat($_);
+
+    # tmp files
+    if ($path =~ $REGEX_TMP)
+    {
+        #  older than 1 minute
+        error("Old tmp file: $path") if ($stat->mtime() < time() - 60);
+        return;
+    }
+
+    # metatile files
+    if ($path !~ $REGEX_FILE)
+    {
+        error("Unknown file format: $path");
+        return;
+    }
+
+    my $metatile = Tirex::Metatile->new_from_filename($path);
+
+    if (!$stat)
+    {
+        error("Can't stat file: $path");
+        return;
+    }
+
+    my $age    = time() - $stat->mtime();
+    my $size   = $stat->size();
+    my $blocks = $stat->blocks();
+
+    $list .= join(',', $age, $size, $blocks, $metatile->to_s()) . "\n" if ($fh_list);
+
+    return unless ($fh_stats);
+
+    if (! defined $stats{$metatile->get_map()}->[$metatile->get_z()])
+    {
+        $stats{$metatile->get_map()}->[$metatile->get_z()] = {
+            'minage'     => 999_999_999,
+            'maxage'     => 0,
+            'sumage'     => 0,
+            'minsize'    => 999_999_999,
+            'maxsize'    => 0,
+            'sumsize'    => 0,
+            'minblocks'  => 999_999_999,
+            'maxblocks'  => 0,
+            'sumblocks'  => 0,
+            'count'      => 0,
+            'countempty' => 0,
+        };
+    }
+
+    my $s = $stats{$metatile->get_map()}->[$metatile->get_z()];
+
+    $s->{'minage'}    = 0 + List::Util::min($s->{'minage'}   , $age);
+    $s->{'maxage'}    = 0 + List::Util::max($s->{'maxage'}   , $age);
+    $s->{'minsize'}   = 0 + List::Util::min($s->{'minsize'}  , $size);
+    $s->{'maxsize'}   = 0 + List::Util::max($s->{'maxsize'}  , $size);
+    $s->{'minblocks'} = 0 + List::Util::min($s->{'minblocks'}, $blocks);
+    $s->{'maxblocks'} = 0 + List::Util::max($s->{'maxblocks'}, $blocks);
+    $s->{'sumage'}    += $age;
+    $s->{'sumsize'}   += $size;
+    $s->{'sumblocks'} += $blocks;
+    $s->{'count'}++;
+    $s->{'countempty'}++ if ($size == $EMPTY_TILE_SIZE);
+}
+
+__END__
+
+=head1 NAME
+
+tirex-tiledir-check - check tile dir
+
+=head1 SYNOPSIS
+
+tirex-tiledir-check [OPTIONS]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<-l>, B<--list=FILE>
+
+Write list of tiles to FILE. See below for format.
+
+=item B<-s>, B<--stats=FILE>
+
+Write stats about tiles to FILE. See below for format.
+
+=back
+
+=head1 DESCRIPTION
+
+Walks recursively through the tiles directory and checks for wrong directory
+or file names or files that can't be accessed. If problems are found, messages
+are written to STDERR.
+
+When the --list and/or --stats options are given, it outputs information about
+each tile and/or generates statistics, respectively. The list and stats are
+written to the filenames given, if you give '-' as the filename STDOUT is used.
+You can only use STDOUT for either the list file or the stats file.
+
+=head1 LIST FILE FORMAT
+
+The list file is in CSV format with one line per metatile. The
+fields are:
+
+=over 8
+
+=item mtime
+
+Last modified time in seconds since epoch.
+
+=item size
+
+Size in bytes of the metatile.
+
+=item blocks
+
+Number of blocks used for this metatile.
+
+=item metatile
+
+Description of metatile. Format: map=foo x=8 y=0 z=10
+
+=back
+
+This data can be read with other programs to create statistics etc.
+
+=head1 STATS FILE FORMAT
+
+The stats file is in JSON format. It contains a hash with the names
+of all maps as keys and a list of zoom levels as their values. For
+each zoom level there is a nested hash containing the statistics:
+
+=over 8
+
+=item count - Number of tiles
+
+=item maxage - Maximum age in seconds
+
+=item maxblocks - Maximum number of blocks
+
+=item maxsize - Maximum file size in bytes
+
+=item minage - Minimum age in seconds
+
+=item minblocks - Minimum number of blocks
+
+=item minsize - Minimum file size in bytes
+
+=item sumage - Sum of ages in seconds
+
+=item sumblocks - Sum of number of blocks
+
+=item sumsize - Sum of file size in bytes
+
+=back
+
+The sumage, sumblocks, and sumsize values can be divided by count to get
+the average.
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Returns 0 if no errors were found or 1 if there were errors. If there were
+errors parsing the command line 2 is returned.
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+
+#-- THE END ------------------------------------------------------------------

@@ -1,0 +1,216 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-tiledir-stat
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use Data::Dumper;
+use Pod::Usage;
+use List::Util;
+use JSON;
+
+use Tirex;
+
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s' ) or exit(2);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-tiledir-stat - create statistics about tile dir\n",
+        -exitval => 0
+    );
+}
+
+$Tirex::DEBUG = 1 if ($opts{'debug'});
+
+my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $BLOCKSIZE = 512;
+
+my $json = join('', <>);
+
+my $stats = JSON::from_json($json);
+
+print <<"EOF";
+                           ------------------Tiles-------------------  ----------Age----------  ----------Size---------  ---------Blocks--------  Block
+Map                  Zoom       Count        Max  Empty Exist% Empty%     Min     Avg     Max      Min     Avg     Max      Min     Avg     Max  Eff %
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+EOF
+
+my $sum = { count => 0, countempty => 0, maxcount => 0, minage => 999_999_999, minsize => 999_999_999, minblocks => 999_999_999, maxage => 0, maxsize => 0, maxblocks => 0 };
+foreach my $map (sort(keys %$stats))
+{
+    foreach my $z (0 .. scalar(@{$stats->{$map}})-1)
+    {
+        my $s = $stats->{$map}->[$z];
+        next unless (defined $s);
+
+        my $maxcount = $z <= 3 ? 1 : 4 ** $z / 64; #XXX
+
+        my $exist = sprintf('%.2f', $s->{'count'}      / $maxcount * 100);
+        my $empty = sprintf('%.2f', $s->{'countempty'} / $maxcount * 100);
+
+        $s->{'avgage'}    = int($s->{'sumage'}    / $s->{'count'});
+        $s->{'avgsize'}   = int($s->{'sumsize'}   / $s->{'count'});
+        $s->{'avgblocks'} = int($s->{'sumblocks'} / $s->{'count'});
+
+        printf "%-20s   %2d  %10d %10d %6d %6s %6s  %7s %7s %7s  %7d %7d %7d  %7d %7d %7d     %0.f\n", $map, $z,
+            $s->{'count'}, $maxcount, $s->{'countempty'}, $exist, $empty,
+            format_time($s->{'minage'}), format_time($s->{'avgage'}), format_time($s->{'maxage'}),
+            $s->{'minsize'},   $s->{'avgsize'}  , $s->{'maxsize'},
+            $s->{'minblocks'}, $s->{'avgblocks'}, $s->{'maxblocks'},
+            $s->{'sumsize'} / ($BLOCKSIZE * $s->{'sumblocks'}) * 100;
+
+        $sum->{'count'}      += $s->{'count'};
+        $sum->{'countempty'} += $s->{'countempty'};
+        $sum->{'maxcount'}   += $maxcount;
+        $sum->{'minage'}      = List::Util::min($sum->{'minage'} ,    $s->{'minage'});
+        $sum->{'minsize'}     = List::Util::min($sum->{'minsize'} ,   $s->{'minsize'});
+        $sum->{'minblocks'}   = List::Util::min($sum->{'minblocks'} , $s->{'minblocks'});
+        $sum->{'maxage'}      = List::Util::max($sum->{'maxage'} ,    $s->{'maxage'});
+        $sum->{'maxsize'}     = List::Util::max($sum->{'maxsize'} ,   $s->{'maxsize'});
+        $sum->{'maxblocks'}   = List::Util::max($sum->{'maxblocks'} , $s->{'maxblocks'});
+        $sum->{'sumage'}     += $s->{'sumage'};
+        $sum->{'sumsize'}    += $s->{'sumsize'};
+        $sum->{'sumblocks'}  += $s->{'sumblocks'};
+    }
+}
+
+print <<"EOF";
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+EOF
+
+my $s = $sum;
+my $exist = sprintf('%.2f', $s->{'count'}      / $s->{'maxcount'} * 100);
+my $empty = sprintf('%.2f', $s->{'countempty'} / $s->{'maxcount'} * 100);
+
+$s->{'avgage'}    = int($s->{'sumage'}    / $s->{'count'});
+$s->{'avgsize'}   = int($s->{'sumsize'}   / $s->{'count'});
+$s->{'avgblocks'} = int($s->{'sumblocks'} / $s->{'count'});
+
+printf "%-20s  ALL  %10d %10d %6d %6s %6s  %7s %7s %7s  %7d %7d %7d  %7d %7d %7d     %0.f\n", 'ALL',
+    $s->{'count'}, $s->{'maxcount'}, $s->{'countempty'}, $exist, $empty,
+    format_time($s->{'minage'}), format_time($s->{'avgage'}), format_time($s->{'maxage'}),
+    $s->{'minsize'},   $s->{'avgsize'}  , $s->{'maxsize'},
+    $s->{'minblocks'}, $s->{'avgblocks'}, $s->{'maxblocks'},
+    $s->{'sumsize'} / ($BLOCKSIZE * $s->{'sumblocks'}) * 100;
+
+exit(0);
+
+sub format_time
+{
+    my $seconds = shift;
+
+    if ($seconds >= 60*60*24)
+    {
+        my $hours = int($seconds / (60*60));
+        return sprintf("%2dd%2dh", int($hours   / 24), int($hours   % 24));
+    }
+    elsif ($seconds >= 60*60)
+    {
+        my $minutes = int($seconds / 60);
+        return sprintf("%2dh%2dm", int($minutes / 60), int($minutes % 60));
+    }
+    elsif ($seconds >= 60)
+    {
+        return sprintf("%2dm%2ds", int($seconds / 60), int($seconds % 60));
+    }
+    else
+    {
+        return $seconds . 's';
+    }
+}
+
+#-----------------------------------------------------------------------------
+
+__END__
+
+=head1 NAME
+
+tirex-tiledir-stat - create statistics about tile dir
+
+=head1 SYNOPSIS
+
+tirex-tiledir-stat [OPTIONS]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode. You'll see the actual messages sent and received.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=back
+
+=head1 DESCRIPTION
+
+Read a JSON stats file generated by tirex-tiledir-check and output a nicely
+formatted table with the data.
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Returns 0 if no errors were found or 1 if there were errors. If there were
+errors parsing the command line 2 is returned.
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+
+#-- THE END ------------------------------------------------------------------

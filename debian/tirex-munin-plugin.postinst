@@ -1,0 +1,29 @@
+#! /bin/sh
+
+set -e
+
+if [ -d /etc/munin/plugins ]
+then
+    for i in /usr/share/munin/plugins/tirex*
+    do
+        if [ -f /etc/munin/plugins/`basename $i` ]
+        then
+           # is a file, leave alone
+           :
+        else
+           # does not exist or is a link
+           ln -sf $i /etc/munin/plugins
+        fi
+    done
+
+    if [ -x /etc/init.d/munin-node ]
+    then
+        if which invoke-rc.d >/dev/null 2>&1; then
+            invoke-rc.d munin-node restart
+        else
+            /etc/init.d/munin-node restart
+        fi
+    fi
+fi
+
+#DEBHELPER#

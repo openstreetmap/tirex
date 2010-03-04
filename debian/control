@@ -1,0 +1,48 @@
+Source: tirex
+Section: web
+Priority: extra
+Maintainer: Frederik Ramm <frederik.ramm@geofabrik.de>
+Build-Depends: debhelper (>= 7), libboost-program-options-dev, libboost-program-options1.34.1
+Standards-Version: 3.8.0
+
+Package: tirex-master
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libjson-perl, libipc-sharelite-perl, adduser
+Suggests: libapache-mod-tile, tirex-utils, tirex-renderd
+Description: Master server for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering for OpenStreetMap.
+ This is the master server which holds the central queues and takes all 
+ policy decisions (priority handling). It hands out rendering requests to 
+ render daemons.
+
+Package: tirex-utils
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-master, libjson-perl, libipc-sharelite-perl
+Description: Utilities for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering for OpenStreetMap.
+ This package contains utilities that work with the master server.
+
+Package: tirex-munin-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-master, libjson-perl, libipc-sharelite-perl, munin-node
+Description: Munin plugin for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering for OpenStreetMap.
+ This package contains a plugin that helps to graph Tirex activity with Munin.
+
+Package: tirex-renderd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libmapnik0.6|libmapnik0.7, adduser
+Description: Tirex rendering daemon
+ The Tirex suite of programs manages map tile rendering for OpenStreetMap.
+ This is the rendering daemon which takes requests from the master server
+ and renders them using the Mapnik rendering engine.
+
+Package: tirex-syncd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-master, adduser
+Description: Tirex sync daemon
+ The Tirex suite of programs manages map tile rendering for OpenStreetMap.
+ This is the sync daemon which listens for messages of tiles fully rendered,
+ and then copies the meta tile to another server. The sync daemon is intended
+ to be used in setups where you have multiple tile servers with their own
+ rendering queues.

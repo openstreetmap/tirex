@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  munin/tirex-status-active-requests.pl
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex::Munin::Status::ActiveRequests;
+
+#-----------------------------------------------------------------------------
+
+my $config_file = $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $map = 'stylesheet_tile';
+my @z   = (Tirex::Zoomrange->new('z0-9', 0, 9), 10 .. 17);
+
+Tirex::Munin::Status::ActiveRequests->new( map => $map, z => \@z )->do();
+
+
+#-- THE END ------------------------------------------------------------------

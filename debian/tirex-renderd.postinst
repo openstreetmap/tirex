@@ -1,0 +1,18 @@
+#! /bin/sh
+
+set -e
+
+if ! getent passwd tirex >/dev/null; then
+adduser --group --system --no-create-home --shell /bin/bash --home /var/lib/tirex tirex;
+fi
+
+[ -d /var/run/tirex ] || mkdir -p /var/run/tirex && chown tirex:tirex /var/run/tirex
+[ -d /var/log/tirex ] || mkdir -p /var/log/tirex && chown tirex:tirex /var/log/tirex
+[ -d /var/lib/tirex/tiles ] || mkdir -p /var/lib/tirex/tiles && chown -R tirex:tirex /var/lib/tirex
+
+dpkg-statoverride --list /var/log/tirex >/dev/null || \
+   dpkg-statoverride --update --add tirex adm 0750 /var/log/tirex
+dpkg-statoverride --list /var/run/tirex >/dev/null || \
+   dpkg-statoverride --update --add tirex root 0755 /var/run/tirex
+
+#DEBHELPER#

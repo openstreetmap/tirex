@@ -1,0 +1,357 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-status
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use JSON;
+use Term::ANSIColor qw(:constants);
+use List::Util qw();
+use Pod::Usage;
+
+use Tirex;
+use Tirex::Status;
+
+#-----------------------------------------------------------------------------
+# Reading command line and config
+#-----------------------------------------------------------------------------
+
+my %opts = ( raw => 0, once => 0 );
+GetOptions( \%opts, 'help|h', 'config|c=s', 'once|o', 'raw|r' ) or exit(2);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-status - show status of tirex master\n",
+        -exitval => 0
+    );
+}
+
+$opts{'once'} = 1 if ($opts{'raw'});
+
+#-----------------------------------------------------------------------------
+
+my $html = 0;
+
+if ($ENV{'SERVER_SOFTWARE'}) # runs as CGI
+{
+    $html = 1;
+    $opts{'once'} = 1;
+}
+
+my $status = eval { Tirex::Status->new(); };
+die("Can't connect to shared memory. Is the tirex-master running?\n") if ($@);
+
+my $clear = $opts{'once'} ? '' : '[H[2J';
+
+#-----------------------------------------------------------------------------
+
+while (1)
+{
+    my $s = $status->read();
+    if (defined $s)
+    {
+        if ($html)
+        {
+            print "Content-Type: text/html\n\n";
+            print html_status(JSON::from_json($s));
+        }
+        else
+        {
+            $s = format_status(JSON::from_json($s)) unless ($opts{'raw'});
+            print $clear, $s;
+        }
+    }
+    else
+    {
+        die("Can't read from shared memory. Did the tirex-master die?\n");
+    }
+    last if ($opts{'once'});
+    sleep(1);
+}
+
+exit(0);
+
+#-----------------------------------------------------------------------------
+
+sub prettydate
+{
+    my $time = shift;
+
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($time);
+    return sprintf("%04d-%02d-%02d %02d:%02d:%02d", $year + 1900, $mon + 1, $mday, $hour, $min, $sec);
+}
+
+sub field
+{
+    my $format = shift;
+    my $var    = shift;
+
+    return sprintf(BOLD . $format . RESET, $var);
+}
+
+sub duration
+{
+    my $seconds = shift;
+
+    my $minutes = int($seconds/60);
+    return sprintf("%d:%02d", $minutes, $seconds-$minutes*60);
+}
+
+sub format_status
+{
+    my $d = shift;
+
+    return "\n " . BOLD . UNDERLINE . "Tirex Master Status" . RESET . ' (updated='
+                 . ($d->{'updated'} < time()-2 ? RED : '') . BOLD . prettydate($d->{'updated'}) . RESET . ")\n\n"
+                 . format_master_server($d)
+                 . format_stats($d->{'rm'}->{'stats'})
+                 . format_queue($d->{'queue'})
+                 . format_buckets($d->{'rm'}, $d->{'queue'})
+                 . format_rendering($d->{'rm'});
+}
+
+sub html_status
+{
+    my $d = shift;
+    my $updated = prettydate($d->{'updated'});
+
+    my $text = <<"EOF";
+<html>
+    <head>
+        <title>Tirex Status</title>
+    </head>
+    <body>
+
+<h1>Tirex Master Status</h1>
+<p>updated=$updated</p>
+EOF
+    $text .= html_master_server($d);
+#           . html_stats($d->{'rm'}->{'stats'})
+#           . html_queue($d->{'queue'})
+#           . html_buckets($d->{'rm'}, $d->{'queue'})
+#           . html_rendering($d->{'rm'});
+    $text .= <<"EOF";
+
+    </body>
+</html>
+EOF
+    return $text;
+}
+
+sub format_master_server
+{
+    my $data = shift;
+
+    my $text = " Master server:\n  started=" . BOLD . prettydate($data->{'started'}) . RESET
+                               . " pid="     . BOLD . $data->{'pid'}                 . RESET "\n";
+
+    return "$text\n";
+}
+
+sub html_master_server
+{
+    my $data = shift;
+
+    my $started = prettydate($data->{'started'});
+    return "<h2>Master server</h2>\n<p>started=$started</p>\n";
+}
+
+sub format_stats
+{
+    my $stats = shift;
+
+    my $text = " Statistics:\n";
+    foreach my $statkey (sort keys %$stats)
+    {
+        my $statvalue = $stats->{$statkey};
+        if (ref($statvalue) eq '')
+        {
+            $text .= "  $statkey=$statvalue";
+        }
+        elsif (ref($statvalue) eq 'HASH')
+        {
+            foreach my $map (sort keys %$statvalue)
+            {
+                $text .= "  $statkey" . "[$map]=";
+                $text .= join(', ', map { $_ || 0 } @{$statvalue->{$map}});
+            }
+        }
+        else
+        {
+            $text .= '?';
+        }
+        $text .= "\n";
+    }
+
+    return "$text\n";
+}
+
+sub format_queue
+{
+    my $q = shift;
+
+    my $text = " Queue:\n  " . UNDERLINE . "Prio   Size Maxsize           Age\n" . RESET;
+
+    foreach my $pq (@{$q->{'prioqueues'}})
+    {
+        $text .= '  ' . field('%4d', $pq->{'prio'}) . ' '
+                      . field('%6d', $pq->{'size'}) . ' '
+                      . field('%7d', $pq->{'maxsize'});
+        $text .= ' '  . field('%13s', duration($pq->{'age_last'}) . '-' . duration($pq->{'age_first'})) if (defined $pq->{'age_last'});
+        $text .= "\n";
+    }
+
+    $text .= '  ' . UNDERLINE . "                                 \n" . RESET;
+    $text .= '   all ' . field('%6d', $q->{'size'}) . ' '
+                       . field('%7d', $q->{'maxsize'});
+
+    my $min_age_last  = List::Util::min(grep { defined $_ } map { $_->{'age_last' } } @{$q->{'prioqueues'}});
+    my $max_age_first = List::Util::max(grep { defined $_ } map { $_->{'age_first'} } @{$q->{'prioqueues'}});
+    $text .= ' '  . field('%13s', duration($min_age_last) . '-' . duration($max_age_first))  if (defined($min_age_last) || defined($max_age_first));
+   
+    return "$text\n\n"; 
+}
+
+sub format_buckets
+{
+    my $rm = shift;
+    my $q  = shift;
+
+    my $text = " Buckets: (load=" . $rm->{'load'} . ")\n  " . UNDERLINE . "Name                 Priority  Rendering  MaxRend  Maxload Active Can Queued           Age\n" . RESET;
+
+    foreach my $b (@{$rm->{'buckets'}}) {
+        $b->{'queued'} = 0;
+        my @queues_for_this_bucket = grep { $b->{'minprio'} <= $_->{'prio'} && ($b->{'maxprio'} == 0 || $_->{'prio'} <= $b->{'maxprio'}) } @{$q->{'prioqueues'}};
+        foreach my $pq (@queues_for_this_bucket)
+        {
+            $b->{'queued'} += $pq->{'size'};
+        }
+        my $min_age_last  = List::Util::min(grep { defined $_ } map { $_->{'age_last' } } @queues_for_this_bucket);
+        my $max_age_first = List::Util::max(grep { defined $_ } map { $_->{'age_first'} } @queues_for_this_bucket);
+
+        $text .= '  ' . field('%-20s', $b->{'name'}) . ' '
+                      . field('%3d', $b->{'minprio'}) . '-'
+                      . field('%4s', $b->{'maxprio'} ? $b->{'maxprio'} : '') . '  '
+                      . field('%9d', $b->{'numproc'}) . '  '
+                      . field('%7d', $b->{'maxproc'}) . '  '
+                      . ($rm->{'load'} > $b->{'maxload'} ? RED : '') . field('%7d', $b->{'maxload'}) . RESET . '    '
+                      . field('%3s', $b->{'active'} ? 'yes' : RED . ' no' . RESET) . ' '
+                      . field('%3s', $b->{'can_render'} ? 'yes' : ' no') . ' '
+                      . field('%6d', $b->{'queued'});
+        $text .= ' '  . field('%13s', duration($min_age_last) . '-' . duration($max_age_first))  if (defined($min_age_last) || defined($max_age_first));
+        $text .= "\n";
+    }
+
+    return "$text\n"; 
+}
+
+sub format_rendering
+{
+    my $rm = shift;
+
+    my $text = " Currently rendering: (num=" . $rm->{'num_rendering'} . ")\n  " . UNDERLINE . "Map                           X          Y   Z Prio Age\n" . RESET;
+
+    foreach my $r (@{$rm->{'rendering'}}) {
+        $text .= '  ' . field("%-20s", $r->{'map'}) . ' '
+                        . field("%10d", $r->{'x'})    . ' '
+                        . field("%10d", $r->{'y'})    . '  '
+                        . field("%2d", $r->{'z'})     . ' '
+                        . field("%4d", $r->{'prio'})  . ' '
+                        . field("%3d", $r->{'age'})
+                        . "\n";
+    }
+
+    return "$text\n"; 
+}
+
+__END__
+
+=head1 NAME
+
+tirex-status - show status of tirex master
+
+=head1 SYNOPSIS
+
+tirex-status [OPTIONS]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<-o>, B<--once>
+
+Show status only once, default is to show it once per second.
+
+=item B<-r>, B<--raw>
+
+Return status in raw JSON format instead of in ANSI coloured human readable
+form. Implies --once.
+
+=back
+
+=head1 DESCRIPTION
+
+Reads out the status of the running tirex-master process through shared memory
+and displays it. The display is formatted for human consumption on a terminal
+and uses ANSI control codes for colour, unless you specify the --raw option.
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+tirex-status returns 1 if there was an error, 0 otherwise.
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+
+#-- THE END ------------------------------------------------------------------

@@ -1,0 +1,74 @@
+#!/usr/bin/make -f
+
+configure: configure-stamp
+configure-stamp: 
+	dh_testdir
+	
+	# commands to configure the package.
+	touch configure-stamp
+
+build: build-stamp
+
+build-stamp: configure-stamp  
+	dh_testdir
+
+	# commands to compile the package.
+	$(MAKE)
+	touch $@
+
+clean: 
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+
+	# commands to clean up after the build process.
+	$(MAKE) clean
+	dh_clean 
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	# commands to install the package into debian/tmp
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+
+# Build architecture-independent files here.
+binary-indep: build install
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs 
+	dh_installdocs
+	dh_installexamples
+	dh_install --no-package tirex-master --sourcedir=$(CURDIR)/debian/tmp
+	dh_install --no-package tirex-utils --no-package tirex-munin-plugin --no-package tirex-renderd --no-package tirex-syncd --exclude Munin --sourcedir=$(CURDIR)/debian/tmp
+#	dh_installmenu
+#	dh_installdebconf	
+#	dh_installlogrotate
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installmime
+#	dh_python
+	dh_installinit
+#	dh_installcron
+#	dh_installinfo
+	dh_installman
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_perl
+#	dh_makeshlibs
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install configure

@@ -1,0 +1,4 @@
+usr/share/man/man3/Tirex::Munin*
+usr/share/perl5/Tirex/Munin
+usr/share/perl5/Tirex/Munin.pm
+usr/share/munin/plugins/*

@@ -1,0 +1,378 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-batch
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Socket;
+use Socket;
+use JSON;
+use Time::HiRes;
+use Pod::Usage;
+
+use Tirex;
+use Tirex::Status;
+
+#-----------------------------------------------------------------------------
+# Reading command line and config
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'num|n=i', 'prio|p=i', 'expire|e=s', 'filter|f=s', 'remove', 'count-only' ) or exit(2);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-batch - send rendering requests to tirex master\n",
+        -exitval => 0
+    );
+}
+
+if ($opts{'debug'})
+{
+    $Tirex::DEBUG = $opts{'debug'};
+}
+
+my $prio = $opts{'prio'} || 99;          # default batch prio is 99
+my $num  = $opts{'num'}  || 999_999_999; # huge queue size as default max size
+
+my @filters;
+@filters = split(qr{\s*;\s*}, $opts{'filter'}) if (defined $opts{'filter'});
+
+foreach my $filter (@filters)
+{
+    if ($filter !~ qr{^exists|not-exists|older\(([0-9]+)\)|multi\(2,[01]\)$})
+    {
+        print STDERR "unknown filter: $filter\n";
+        exit(2);
+    }
+}
+
+if ($Tirex::DEBUG)
+{
+    print STDERR "Using prio: $prio\n";
+    print STDERR "Using expire: $opts{'expire'}\n" if (exists $opts{'expire'});
+    print STDERR "Using filters: ", join(', ', @filters) ,"\n";
+}
+
+my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
+$socket->connect( Socket::pack_sockaddr_in($Tirex::MASTER_UDP_PORT, Socket::inet_aton('localhost')) );
+
+my $status;
+if ($opts{'num'})
+{
+    $status = eval { Tirex::Status->new(); };
+    die("Can't connect to shared memory. Is the tirex-master running?\n") if ($@);
+}
+
+#-----------------------------------------------------------------------------
+
+my $mx = Tirex::Config::get('metatile_columns') || $Tirex::METATILE_COLUMNS;
+my $my = Tirex::Config::get('metatile_rows')    || $Tirex::METATILE_ROWS;
+
+#-----------------------------------------------------------------------------
+
+my $count = 0;
+
+# if there are still command line args, use those as init string
+if (scalar(@ARGV) > 0)
+{
+    $count += handle_init(join(' ', @ARGV));
+}
+# else read init strings from STDIN
+else
+{
+    while (<STDIN>)
+    {
+        chomp;
+        $count += handle_init($_);
+    }
+}
+
+print "metatiles: $count\n" if ($opts{'count-only'});
+
+exit(0);
+
+#-----------------------------------------------------------------------------
+# get queue size of given priority from master
+#-----------------------------------------------------------------------------
+sub queue_size
+{
+    my $prio = shift;
+
+    if (defined $status)
+    {
+        my $s = $status->read();
+        if (defined $s)
+        {
+            my $queues = JSON::from_json($s)->{'queue'}->{'prioqueues'};
+            foreach my $q (@$queues)
+            {
+                return $q->{'size'} if ($q->{'prio'} == $prio);
+            }
+            return 0;
+        }
+        else
+        {
+            die("can't read status\n");
+        }
+    }
+    else
+    {
+        die("can't get status\n");
+    }
+}
+
+#-----------------------------------------------------------------------------
+# handle one init string, ie. decode and send job requests to server
+#-----------------------------------------------------------------------------
+sub handle_init
+{
+    my $init = shift;
+
+    my $count_metatiles = 0;
+
+    # if this looks like a metatile path name, decode it
+    if ($init =~ qr{^\.?/})
+    {
+        my $metatile = Tirex::Metatile->new_from_filename($init);
+        $init = $metatile->to_s();
+    }
+
+    my $range = eval { Tirex::Metatiles::Range->new(init => $init); };
+    if ($@)
+    {
+        print STDERR "Error parsing init string: $@";
+        exit(2);
+    }
+    print STDERR "Range: ", $range->to_s(), "\n" if ($Tirex::DEBUG);
+
+    while (1)
+    {
+        my $queue_size = 0;
+
+        if (!$opts{'count-only'} && $opts{'num'})
+        {
+            # wait for queue to have some space
+            while (($queue_size = queue_size($prio)) >= $opts{'num'})
+            {
+                print STDERR " queue size $queue_size >= max queue size $opts{'num'}. waiting...\n" if ($Tirex::DEBUG);
+                sleep(1);
+            }
+            print STDERR " queue size $queue_size, can send up to ", $opts{'num'}-$queue_size ," jobs\n" if ($Tirex::DEBUG);
+        }
+
+        # send as many jobs as will fit into queue
+        METATILE:
+        while ($queue_size <= $num)
+        {
+            my $metatile = $range->next();
+
+            # if there are no more jobs, we are done
+            return $count_metatiles unless (defined $metatile);
+
+            foreach my $filter (@filters)
+            {
+                if    ($filter eq 'exists')                         { next METATILE unless ($metatile->exists()); }
+                elsif ($filter eq 'not-exists')                     { next METATILE if ($metatile->exists()); }
+                elsif ($filter =~ qr{^older\(([0-9]+)\)$})          { next METATILE if ($metatile->older($1)); }
+                elsif ($filter =~ qr{^multi\(([0-9]+),([0-9]+)\)$}) { next METATILE if (($metatile->get_x()/$mx + $metatile->get_y()/$my) % $1 != $2); }
+            }
+
+            $count_metatiles++;
+            if (!$opts{'count-only'})
+            {
+                $queue_size++;
+
+                my %jobparams = ( metatile => $metatile, prio => $prio );
+                if (defined $opts{'expire'})
+                {
+                    if ($opts{'expire'} =~ /^\+/)
+                    {
+                        $jobparams{'expire'} = time() + $opts{'expire'};
+                    }
+                    else
+                    {
+                        $jobparams{'expire'} = $opts{'expire'};
+                    }
+                }
+                my $job = Tirex::Job->new(%jobparams);
+
+                my $request = $job->to_msg( type => $opts{'remove'} ? 'metatile_remove_request' : 'metatile_enqueue_request' );
+                print STDERR " sending: ", $request->to_s(), "\n" if ($Tirex::DEBUG);
+                my $ret = $request->send($socket);
+                if (! defined $ret)
+                {
+                    print STDERR "Can't send request. Is the master server running?\n";
+                    exit(1);
+                }
+                Time::HiRes::usleep(1000);    # don't send more than 1000 requests/s to not overwhelm the UDP receive buffer or the master
+            }
+        }
+        sleep(1) unless ($opts{'count-only'});
+    }
+}
+
+__END__
+
+=head1 NAME
+
+tirex-batch - send rendering requests to tirex master
+
+=head1 SYNOPSIS
+
+tirex-batch [OPTIONS] [INIT]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode. You'll see the actual messages sent and received.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<-n>, B<--num=NUM>
+
+Try to keep the number of jobs in the queue below this number (Only checked
+once per second). Disable with NUM=0.
+
+=item B<-p>, B<--prio=PRIO>
+
+Priority for requests.
+
+=item B<-e>, B<--expire=TIME>
+
+Expire time (seconds since epoch) for jobs. If it starts with '+', number of
+seconds added to current time.
+
+=item B<-f>, B<--filter>
+
+Add filters to metatile selection, see section FILTERS.
+
+=item B<--remove>
+
+Send remove request instead of rendering request. Jobs will be removed from
+the queue.
+
+=item B<--count-only>
+
+Only count how many metatiles would be rendered, do not actually send the
+requests. This will take the filters into account, so it will possibly
+check the disk for thousands of files!
+
+=back
+
+=head1 DESCRIPTION
+
+INIT is a string describing a range of tiles. If no INIT string is given on the
+command line, tirex-batch reads init strings from STDIN, one per line.
+
+Several different ways of describing the tiles are allowed:
+
+Single metatile:
+ map=foo x=4 y=7 z=15 (coordinates will be rounded to metatile numbers)
+
+Multiple metatiles:
+ map=foo x=0-32 y=16-32 z=15
+
+Using bounding box (8 to 9 degrees longitude, 48 to 49 degrees latitude)
+ map=foo lon=8,9 lat=48,49 z=15-17
+
+Multiple maps are allowed, too:
+ map=foo,bar
+
+You can use a z range (z=10-15). This does not work together with x
+and y ranges, but works with lon/lat ranges.
+
+Ranges of x, y, and z numbers are written as "MIN,MAX" or "MIN-MAX".
+Ranges of lon and lat are written as "MIN,MAX" (lon and lat can be
+negative, so range with "-" is problematic).
+
+You can also just give a pathname of a metatile file as INIT string. It
+has to start with './' or '/'. The first directory component must be
+the name of the map.
+
+=head1 FILTERS
+
+FILTER is a ;-separated list of filter options. Metatiles not matching
+the filter are skipped.
+
+Filter Options:
+
+=over 8
+
+=item exists
+
+=item not-exists
+
+=item older(time)
+
+=item multi(count,num)    only count=2,num=0 or num=1 allowed
+
+=back
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Returns 0 on success, 1 if there was a problem sending the request and 2 if there was
+a problem parsing the command line or init string.
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+
+#-- THE END ----------------------------------------------------------------------------

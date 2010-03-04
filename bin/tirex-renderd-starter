@@ -1,0 +1,440 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-renderd-starter
+#
+#-----------------------------------------------------------------------------
+#
+#  process starter (for tirex-renderd)
+# 
+#  Usage:
+#  tirex-renderd-starter [--debug]
+#
+#  opens a socket and binds it to the proper port (usually 9320),
+#  then starts a number of /usr/bin/tirex-renderd processes
+#  (the number can be configured using the renderd_processes option).
+#  These children are all options received by this script, plus
+#  an additional "--sockfd" option with the file descriptor of the 
+#  socket opened, and a "--parentfd" with the file descriptor of 
+#  a pipe that the child can use to send messages to the starter.
+#
+#  When children die, they are restarted.
+#
+#  If children freeze (and stop sending "alive" messages) they are
+#  killed.
+#
+#  If this process receives a HUP or TERM signal, it sends a HUP signal 
+#  to all children and continues (if the signal received was HUP) or
+#  terminates (if TERM).
+#
+#  For debugging you can set the config option renderd_dummy to 1. This
+#  still forks but instead of rendering just waits for a number of
+#  seconds (specified in the config option renderd_dummy_sleeptime).
+#
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Socket;
+use IO::Socket;
+use IO::Select;
+use IO::Pipe;
+use Sys::Syslog;
+use POSIX qw(sys_wait_h setsid);
+use Fcntl;
+use Tirex;
+
+my $dummy;
+my $debug = 0;
+my $sleeptime;
+
+my $config = '/etc/tirex/tirex.conf';
+
+my @worker_args;
+
+#-----------------------------------------------------------------------------
+# read commandline
+#-----------------------------------------------------------------------------
+while (my $arg = shift)
+{
+    if ($arg eq '--debug')
+    {
+        $debug = 1;
+        push(@worker_args, $arg);
+    }
+    elsif ($arg eq '--dummy')
+    {
+        $dummy = 1;
+    }
+    elsif ($arg =~ /^--dummy-sleeptime(=(\d+))?/)
+    {
+        $sleeptime = $2 || shift;
+        die ('--sleeptime requires numeric argument') unless ($sleeptime > 0);
+    }
+    elsif ($arg =~ /^--config(=(.+))?/)
+    {
+        $config = $2 || shift;
+        die ('--config requires filename argument') unless (-f $config);
+    }
+    push(@worker_args, $arg);
+}
+
+#-----------------------------------------------------------------------------
+# read config
+#-----------------------------------------------------------------------------
+Tirex::Config::init($config);
+
+my $port = Tirex::Config::get('renderd_udp_port', $Tirex::RENDERD_UDP_PORT, qr{^[1-9][0-9]{0,4}$});
+my $pidfile = $Tirex::RENDERD_PIDFILE;
+$sleeptime = Tirex::Config::get('renderd_dummy_sleeptime', $Tirex::RENDERD_DUMMY_SLEEPTIME, qr{^[1-9][0-9]{0,3}$}) unless defined($sleeptime);
+$dummy = Tirex::Config::get('renderd_dummy', $Tirex::RENDERD_DUMMY, qr{^[01]$}) unless defined($dummy);
+my $servers = Tirex::Config::get('renderd_processes', $Tirex::RENDERD_PROCESSES, qr{^[1-9][0-9]{0,2}$});
+my $binary = "/usr/bin/tirex-renderd";
+
+my $fontdir = Tirex::Config::get('mapnik_fontdir', $Tirex::MAPNIK_FONTDIR);
+my $fontdir_recurse = Tirex::Config::get('mapnik_fontdir_recurse', $Tirex::MAPNIK_FONTDIR_RECURSE, qr{^[01]$});
+my $tiledir = Tirex::Config::get('metatile_dir', $Tirex::METATILE_DIR);
+my $plugindir = Tirex::Config::get('mapnik_plugindir', $Tirex::MAPNIK_PLUGINDIR);
+my $mapdir = Tirex::Config::get('mapnik_mapdir', $Tirex::MAPNIK_MAPDIR);
+
+# children must check in every so often; note they will not check
+# in during tile rendering so allow ample time.
+my $alive_timeout = $Tirex::RENDERD_ALIVE_TIMEOUT * 60;
+
+# a child that has been sent a signal must react this quickly
+my $hangup_timeout = 15;
+my $term_timeout = 2;
+
+
+my $keep_running = 1;
+
+die ('refusing to run as root') if ($< == 0);
+
+
+push(@worker_args, "--mapdir", $mapdir);
+push(@worker_args, "--fontdir", $fontdir);
+push(@worker_args, "--fontdir-recurse", $fontdir_recurse);
+push(@worker_args, "--plugindir", $plugindir);
+push(@worker_args, "--tiledir", $tiledir);
+
+#-----------------------------------------------------------------------------
+# create socket for children to send heartbeat to
+#-----------------------------------------------------------------------------
+my $socket = IO::Socket::INET->new(
+    LocalAddr => 'localhost', 
+    LocalPort => $port, 
+    Proto     => 'udp', 
+    ReuseAddr => 1) or die("Cannot open UDP socket: :$!\n");
+$socket->fcntl(F_SETFD, 0); # unset close-on-exec
+push(@worker_args, "--sockfd", $socket->fileno());
+
+#-----------------------------------------------------------------------------
+# daemonize and create pidfile
+#-----------------------------------------------------------------------------
+if (!$debug)
+{
+    chdir '/' or die "Can't chdir to /: $!";
+    open STDIN, '/dev/null' or die "Cannot read /dev/null: $!";
+    open STDOUT, '>/dev/null' or die "Cannot write to /dev/null: $!";
+    defined(my $pid = fork) or die "Cannot fork: $!";
+    exit(0) if $pid;
+    setsid or die "Cannot start a new session: $!";
+    open STDERR, '>&STDOUT' or die "Cannot dup stdout: $!";
+}
+
+# open pidfile, ignore if this fails
+# we'd rather go on without a pidfile than stopping the show
+if (open(my $pidfh, '>', $pidfile)) 
+{
+    print $pidfh "$$\n";
+    close($pidfh);
+}
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+$SIG{CHLD} = \&sigchld_handler;
+$SIG{HUP}  = \&sighup_handler;
+$SIG{TERM} = \&sigterm_handler;
+$SIG{INT}  = \&sigterm_handler;
+
+openlog('tirex-renderd-starter', $debug ? 'pid|perror' : 'pid', 'daemon');
+
+my $workers = {};
+my $children = 0;
+my @closed_children = ();
+
+while (1)
+{
+    while ($children < $servers)
+    {
+        my $reader = IO::Pipe::End->new();
+        my $writer = IO::Pipe::End->new();
+        my $pipe = IO::Pipe->new($reader, $writer);
+        $reader->fcntl(F_SETFD, 0); # unset close-on-exec
+        $writer->fcntl(F_SETFD, 0); # unset close-on-exec
+        $reader->blocking(0);
+        $writer->blocking(0);
+        my $forkresult = fork;
+        if ($forkresult == 0) # child
+        {
+            $pipe->writer();
+            if ($dummy)
+            {
+                $SIG{CHLD} = 'DEFAULT';
+                $SIG{HUP}  = \&dummy_signal_handler;
+                $SIG{TERM} = \&dummy_signal_handler;
+                $SIG{INT}  = \&dummy_signal_handler;
+                dummy_renderd($$, $sleeptime);
+                exit(0);
+            }
+            exec($binary, @worker_args, '--parentfd', $pipe->fileno()) or die "exec failed: $!";
+        }
+        elsif ($forkresult > 0) # parent
+        {
+            $pipe->reader();
+            syslog('info', 'tirex-renderd started with pid %d', $forkresult);
+            $children++;
+            $workers->{$forkresult} = { 
+                pid      => $forkresult,
+                lastcall => time(),
+                handle   => $pipe,
+            };
+        }
+        else
+        {
+            syslog('err', 'error in fork(): %s', $!);
+        }
+    }
+
+    my $select = IO::Select->new();
+    foreach my $worker (values(%$workers))
+    {
+        $select->add([$worker->{handle}, $worker]);
+    }
+
+    my $now = time();
+    foreach my $handle_wrapper ($select->can_read($alive_timeout / 2))
+    {
+        my ($handle, $worker) = @$handle_wrapper;
+        my $buf;
+        $handle->read($buf, 9999);
+        if (length($buf) > 0)
+        {
+            $worker->{lastcall} = $now;
+        }
+    }
+
+    # remove dead children from the worker list
+    while (my $pid = shift @closed_children)
+    {
+        $workers->{$pid}->{handle}->close();
+        delete $workers->{$pid};
+        $children--;
+    }
+
+    # in dummy mode, we're done now
+    next if ($dummy);
+
+    # kill workers that haven't said anything for a while
+    foreach (values(%$workers)) 
+    { 
+        if ($_->{lastcall} < $now - $alive_timeout)
+        {
+            if (!defined($_->{killed}) && defined($_->{terminated}) && ($_->{terminated} < $now - $term_timeout))
+            {
+                syslog('info', 'sending sigkill to pid %d', $_->{pid});
+                kill "KILL", $_->{pid};
+                $_->{killed} = $now;
+            }
+            elsif (!defined($_->{terminated}) && defined($_->{hungup}) && ($_->{hungup} < $now - $hangup_timeout))
+            {
+                syslog('info', 'sending sigterm to pid %d', $_->{pid});
+                kill "TERM", $_->{pid};
+                $_->{terminated} = $now;
+            }
+            elsif (!defined($_->{hungup}))
+            {
+                syslog('err', 'killing child with pid %d due to timeout', $_->{pid});
+                kill "HUP", $_->{pid};
+                $_->{hungup} = $now;
+            }
+        }
+    }
+}
+
+#-----------------------------------------------------------------------------
+# Dummy renderd - for debugging
+#-----------------------------------------------------------------------------
+
+sub dummy_renderd 
+{
+    my ($procnum, $sleeptime) = @_;
+    while ($keep_running)
+    {
+        my $buf;
+        $socket->recv($buf, $Tirex::MAX_PACKET_SIZE) or return; # die("error reading from socket: $!\n");
+
+        print STDERR "[$procnum] got request:\n";
+        my $msg = Tirex::parse_msg($buf);
+        print STDERR Tirex::print_msg($msg);
+
+        print STDERR "[$procnum] doing pretend rendering... (sleep $sleeptime)\n";
+        sleep($sleeptime);
+
+        $msg->{'type'} = 'metatile_render_request';
+        $msg->{'result'} = 'ok';
+        $msg->{'render_time'} = $sleeptime*1000; # milliseconds
+        print STDERR "[$procnum] sending response...\n";
+        print STDERR Tirex::print_msg($msg);
+        $socket->send(Tirex::create_msg($msg)) or die("error when sending: $!\n");
+        print STDERR "[$procnum] done.\n\n";
+    }
+}
+
+sub dummy_signal_handler 
+{
+    $keep_running = 0;
+    $SIG{HUP}  = \&dummy_signal_handler;
+    $SIG{INT}  = \&dummy_signal_handler;
+    $SIG{TERM} = \&dummy_signal_handler;
+}
+
+#-----------------------------------------------------------------------------
+# Signal handler
+#-----------------------------------------------------------------------------
+sub sigchld_handler 
+{
+    while ((my $child = waitpid(-1, WNOHANG)) > 0) 
+    {
+        syslog('warning', 'child %d terminated (%d)', $child, $?);
+        push(@closed_children, $child);
+    }
+    $SIG{CHLD} = \&sigchld_handler;
+}
+
+sub sighup_handler 
+{
+    syslog('info', 'hangup received, forwarding to children: %s', join(' ', keys %$workers));
+    foreach my $pid (keys(%$workers))
+    {
+        kill 'HUP', $pid;
+    }
+    $SIG{HUP} = \&sighup_handler;
+}
+
+sub sigterm_handler 
+{
+    syslog('info', 'sigterm/int received, forwarding to children: %s', join(' ', keys %$workers));
+    foreach my $pid (keys(%$workers))
+    {
+        kill 'HUP', $pid;
+    }
+    exit(0);
+}
+
+__END__
+
+=head1 NAME
+
+tirex-renderd-starter - program that spawns tirex-renderd processes
+
+=head1 SYNOPSIS
+
+tirex-renderd-starter [OPTIONS] 
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode, and pass on the debug flag to spawned processes
+
+=item B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<--dummy>
+
+Start a dummy rendering process instead of the real thing.
+
+=item B<--dummy-sleeptime=I<seconds>>
+
+Instruct the dummy renderer to wait for I<seconds> seconds before answering
+a request.
+
+=item further command line options
+
+All other command line options are passed on verbatim to the renderer process
+being started.
+
+=back
+
+=head1 DESCRIPTION
+
+tirex-renderd-starter runs the renderd starter. This is usually done
+from within an /etc/init.d script. The renderd starter spawns as many
+tirex-renderd processes as given in the configuration, and monitors
+them.
+
+The renderd starter does not handle render requests in any way; these
+are read directly from a local UDP socket by the individual tirex-ren-
+derd processes.
+
+The renderd starter expects each tirex-renderd process to send an
+"alive" message in regular intervals, and will kill the process if it
+does not do so in time.
+
+In addition, if the starter receives a HANGUP signal, it will relay
+this signal to all tirex-renderd children, causing them to exit after
+completing their current request.
+
+If the starter receives a KILL signal, it will send a HANGUP signal to
+all tirex-renderd children and then exit.
+
+=head1 FILES
+
+=over 4
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+The renderd starter logs to the I<daemon> syslog facility unless configured
+otherwise. In debug mode, logging is also copied to stdout.
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut

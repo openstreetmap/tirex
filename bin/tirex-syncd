@@ -1,0 +1,171 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-syncd
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Socket;
+use Socket;
+use POSIX 'setsid';
+use Pod::Usage;
+
+use Tirex;
+
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'dry-run|n' ) or exit(2);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-syncd - sync rendered tiles to backup host\n",
+        -exitval => 0
+    );
+}
+
+$Tirex::DEBUG = $opts{'debug'};
+my $dryrun = $opts{'dry-run'};
+
+my $config_file = $opts{'config'} || '/etc/tirex/tirex.conf';
+
+Tirex::Config::init($config_file);
+
+my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', LocalPort => $Tirex::SYNCD_UDP_PORT, Proto => 'udp', ReuseAddr => 1 ) or die("Can't open UDP socket: :$!\n");
+
+my $host = Tirex::Config::get('sync_to_host');
+
+if (! defined($host) || $host eq '') {
+    die("Please set 'sync_to_host' config option\n");
+}
+
+#-----------------------------------------------------------------------------
+# daemonize and create pidfile
+#-----------------------------------------------------------------------------
+if (!$Tirex::DEBUG)
+{
+    chdir '/' or die "Can't chdir to /: $!";
+    open(STDIN, '<', '/dev/null') or die "Cannot read /dev/null: $!";
+    open(STDOUT, '>', '/dev/null') or die "Cannot write to /dev/null: $!";
+    defined(my $pid = fork) or die "Cannot fork: $!";
+    exit(0) if $pid;
+    setsid() or die "Cannot start a new session: $!";
+    open(STDERR, '>&STDOUT') or die "Cannot dup stdout: $!";
+}
+
+my $pidfile = Tirex::Config::get('syncd_pidfile', $Tirex::SYNCD_PIDFILE);
+open(my $pidfh, '>', $pidfile) or syslog('err', "Can't open pidfile '$pidfile' for writing: $!\n");
+print $pidfh "$$\n";
+close($pidfh);
+
+while (1)
+{
+    my $msg = eval {
+        Tirex::Message->new_from_socket($socket);
+    };
+    die("error reading from socket: $!\n") if ($@);
+    next unless ($msg);
+
+    syslog('debug', 'got request: %s', $msg->to_s()) if ($Tirex::DEBUG);
+
+    my $metatile = $msg->to_metatile();
+    my $filename = $metatile->filename();
+
+    # fixme make this configurable
+    my $command = 'tar -C/ -cf - %f | ssh %h -Tq "tar -C/ -xf -"';
+    $command =~ s/%h/$host/g;
+    $command =~ s/%f/$filename/g;
+
+    syslog('debug', "executing $command") if ($Tirex::DEBUG);
+    system "$command" unless($dryrun);
+}
+
+
+__END__
+
+=head1 NAME
+
+tirex-syncd - sync rendered tiles to backup host
+
+=head1 SYNOPSIS
+
+tirex-syncd [OPTIONS]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<-n>, B<--dry-run>
+
+Do not actually copy anything.
+
+=back
+
+=head1 DESCRIPTION
+
+If you have several tile servers that you want to keep in sync (for instance as
+backup when one fails), you can use the tirex-syncd. The syncd will be notified
+by the master when a tile has been renderd and copy it to another server.
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+
+#-- THE END ------------------------------------------------------------------

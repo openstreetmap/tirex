@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  munin/tirex-tilecount-relative.pl
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex::Munin::Tiledir::Tilecount;
+
+#-----------------------------------------------------------------------------
+
+my $config_file = $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $map = 'stylesheet_tile';
+my @z   = (10 .. 17);
+
+Tirex::Munin::Tiledir::Tilecount->new( map => $map, z => \@z, relative => 1 )->do();
+
+
+#-- THE END ------------------------------------------------------------------

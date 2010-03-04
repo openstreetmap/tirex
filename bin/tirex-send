@@ -1,0 +1,271 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-send
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Socket;
+use Socket;
+use Pod::Usage;
+use Errno;
+
+use Tirex;
+
+#-----------------------------------------------------------------------------
+# Reading command line and config
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'to|t=s', 'wait|w=i' ) or exit(2);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-send - send messages to a tirex daemon\n",
+        -exitval => 0
+    );
+}
+
+$Tirex::DEBUG = 1 if ($opts{'debug'});
+
+my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my %ports = (
+    'master'  => $Tirex::MASTER_UDP_PORT,
+    'syncd'   => $Tirex::SYNCD_UDP_PORT,
+    'renderd' => $Tirex::RENDERD_UDP_PORT,
+);
+
+$opts{'to'} ||= 'master';
+my $port = $ports{$opts{'to'}};
+
+if (!$port)
+{
+    print STDERR "Unknown destination for --to option: $opts{'to'}\n";
+    exit(4);
+}
+
+my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
+$socket->connect( Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost')) );
+
+#-----------------------------------------------------------------------------
+
+my $DEFAULT_TIMEOUT = 5;
+my $timeout = defined $opts{'wait'} ? $opts{'wait'} :
+                    ($opts{'to'} eq 'syncd' ? 0 : $DEFAULT_TIMEOUT);
+
+#-----------------------------------------------------------------------------
+
+my $type = shift;
+
+if (! $type)
+{
+    print STDERR "missing message type\n";
+    exit(4);
+}
+
+my %msg  = ( type => $type );
+
+# don't add id if we are not waiting for response
+$msg{'id'} = "tirex-send.$$" unless ($timeout == 0);
+
+foreach my $field (@ARGV)
+{
+    my ($k, $v) = split(/=/, $field, 2);
+    $msg{$k} = $v;
+}
+
+#-----------------------------------------------------------------------------
+
+my $request = Tirex::Message->new(%msg);
+print STDERR "sending: ", $request->to_s(), "\n" if ($Tirex::DEBUG);
+$request->send($socket);
+
+exit(0) if ($timeout == 0);
+
+local $SIG{ALRM} = sub { print STDERR "timeout waiting for answer\n"; exit(3) };
+alarm($timeout);
+
+my $reply = Tirex::Message->new_from_socket($socket);
+if (! defined $reply)
+{
+    if ($!{'ECONNREFUSED'})
+    {
+        print STDERR "Could not send request to server. Is it running?\n";
+    }
+    else
+    {
+        print STDERR "Error reading answer: $!\n";
+    }
+    exit(3);
+}
+
+print STDERR "got answer: ", $reply->to_s(), "\n" if ($Tirex::DEBUG);
+
+if ($reply->unknown_message_type())
+{
+    print STDERR "unknown message type: $type\n";
+    exit(2);
+}
+
+exit($reply->ok() ? 0 : 1);
+
+
+__END__
+
+=head1 NAME
+
+tirex-send - send messages to a tirex daemon
+
+=head1 SYNOPSIS
+
+tirex-send [OPTIONS] TYPE [KEY=VALUE ...]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode. You'll see the actual messages sent and received.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<-t>, B<--to=DESTINATION>
+
+Talk to DESTINATION, which can be 'master' (default), 'syncd', or 'renderd'.
+
+=item B<-w>, B<--wait=SECONDS>
+
+Wait SECONDS for the answer after sending the message. Default is 5 seconds.
+If set to 0, don't wait for an answer at all. This is the default when the
+destination is set to syncd.
+
+=back
+
+=head1 DESCRIPTION
+
+tirex-send sends a message through a UDP socket to a tirex daemon running on
+the local machine and waits for the answer. It can be used to check whether a
+daemon is running, activate debugging in the daemon, send a render request,
+etc.
+
+Messages are normally send to the tirex-master daemon, but you can also send
+them to the render or sync daemon.
+
+You have to give the TYPE of the message on the command line and optionally
+some fields in the format KEY=VALUE.
+
+=head1 MESSAGES
+
+=over 8
+
+=item ping
+
+Check whether server is alive.
+
+=item debug
+
+Activate debugging in the daemon.
+
+=item nodebug
+
+Deactivate debugging in the daemon.
+
+=item quit
+
+Quit server now (unclean!).
+
+=item shutdown
+
+Clean shutdown (no yet implemented XXX)
+
+=item reset_max_queue_size
+
+Reset max queue size indicator.
+
+=item stop_rendering_bucket
+
+Stop feeding jobs from a bucket to the renderer. Currently rendering jobs are unaffected.
+Give the name of the bucket as "bucket=NAME".
+
+=item continue_rendering_bucket
+
+Continue rendering jobs from this bucket.
+Give the name of the bucket as "bucket=NAME".
+
+=back
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+tirex-send returns
+
+=over 8
+
+=item 0 if the message was answered with 'ok',
+
+=item 1 if the message was answered with an error,
+
+=item 2 if the error was 'unknown_message_type',
+
+=item 3 if the message could not be sent or if there was a timeout waiting for the answer,
+
+=item 4 if there was an error parsing the command line.
+
+=back
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+#-- THE END ----------------------------------------------------------------------------

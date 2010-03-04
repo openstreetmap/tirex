@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  munin/tirex-tileage.pl
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex::Munin::Tiledir::Tileage;
+
+#-----------------------------------------------------------------------------
+
+my $config_file = $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $map = 'stylesheet_tile';
+my @z   = ('0-9', '10-14', '15-17');
+
+Tirex::Munin::Tiledir::Tileage->new( map => $map, z => \@z )->do();
+
+
+#-- THE END ------------------------------------------------------------------

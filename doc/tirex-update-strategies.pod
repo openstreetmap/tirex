@@ -1,0 +1,97 @@
+
+=head1 TIREX UPDATE STRATEGIES
+
+If you had unlimited rendering capacity and/or unlimited storage, running a
+tile server would be easy. Just render each tile as the request comes in. And
+you can store tiles basically forever. But in reality you probably don't have
+the rendering capacity to render every tile just as it is needed and you don't
+have the multi-terabyte storage to store every tile on every zoom level.
+
+This document describes some update strategies, to keep your tile server
+reasonably up to date. First, we'll describe some different strategies and
+later, we'll talk about how to combine them.
+
+=head2 RENDER ON ACCESS
+
+Ideally all tiles would be rendered on access. The moment a tile requests comes
+in, the tile gets rendered. This way the tile is always current and you don't need
+to think about caching. In general this does not work, because rendering is too
+slow and the user is sitting in front of his screen waiting for the tile. But
+especially for tiles on higher zoom levels that a) are not accessed that frequently
+and b) do not take as long to render as tiles on lower zoom levels, this is
+a viable option.
+
+=head2 RENDER WHEN CHANGED
+
+On the other extreme you can (re-)render all tiles that you know have changed.
+If you can get some kind of indication when the database contents have changed
+and can figure out which tiles are affected by this change, you can render
+those tiles. Generally it is not easy to figure out which tiles need
+re-rendering based on database contents or change logs without actually doing
+the rendering. But heuristics can be used.
+
+Osm2pgsql gives you such an indication, but it is not perfect, ie. you'll
+rerender tiles that didn't need rendering and not render some tiles that would
+need rerendering.
+
+=head2 ANTICIPATING THE FUTURE
+
+If you know or expect some tiles to be accessed in the near future, it might
+make sense to render them now. The simplest form is looking at access patterns:
+If a tile is accessed by one person, chances are some other person
+will look at the same tile soon. Mod_tile uses this strategy: When a tile
+is accessed, it delivers the old tile, but marks the tile for re-rendering
+when there is time.
+
+Another scenario would be a news agency: They are putting out a story about
+an accident somewhere and mark the location on their map. Chances are lots
+of people will look at this map in the next minutes, so it might make sense
+to (re-)render the tiles at and around this location. This could be manually
+triggered or be fully automatic.
+
+=head2 RENDERING OR REMOVING OLD TILES
+
+The simplest cache expiry strategy looks at the oldest objects in the cache and
+removes them. In our case you can look at the oldest tiles and re-render them
+or delete them. For tiles that you expect will probably be needed again soon
+and that are expensive to render, you might want to re-render.  For tiles that
+probably are not going to be looked at again and are cheap to render, you might
+want to delete them to keep the tile cache from overflowing.
+
+=head2 BULK RENDERING
+
+Sometimes the easiest form is bulk rendering of all tiles in a certain
+area. Especially for low zoom levels that take relatively long to render,
+don't change very often, and are looked at by almost anybody looking at a
+web map. Just rendering those tiles once a week could be ok.
+
+This might also make sense for areas that are in heavy demand right now,
+such as Haiti after the earth quake early in 2010. It is a small area with
+lots of changes and people need very current maps. You might not want to
+re-render for every change, but rendering all tiles every 10 minutes
+might be an option.
+
+=head2 CHOSING A STRATEGY
+
+To chose which strategy or strategies are best for your situation, you have to
+look at many different things:
+
+=over 8
+
+=item * How often is the database updated. It doesn't make sense to re-render tiles when the underlying database didn't change.
+
+=item * How often are tiles accessed. If they are accessed more often, maybe they should be more current.
+
+=item * How much rendering capacity do you have? How many CPUs? How fast is your database. The higher the rendering capacity, the more tiles you can render.
+
+=item * How much disk space do you have? It obvious that you can't store more tiles on disk than you have disk space. With current disk prices this is generally not such a big issue, but you have to keep it in mind.
+
+=item * The area and range of zoom levels your tile server delivers tiles for. If you have a tile server just for the street level map of your town, you might well be able to pre-render all tiles and update them every night. But if you are serving the whole world, this is not an option.
+
+=back
+
+All these issues might be different for different zoom levels and/or different
+map (map styles). There are far fewer tiles on low zoom levels and they are
+accessed more often than the many tiles on higher zoom levels.
+
+

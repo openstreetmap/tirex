@@ -1,0 +1,67 @@
+#-----------------------------------------------------------------------------
+#
+#  tirex.conf
+#
+#  Configuration file for the Tirex map tile rendering system.
+#
+#-----------------------------------------------------------------------------
+
+# The directory where metatiles are stored.
+# Below this will be a subdirectory for each map.
+metatile_dir=/var/lib/tirex/tiles
+
+# Directory where statistics are stored
+stats_dir=/var/lib/tirex/stats
+
+# How many rows and columns of tiles are there in a metatile.
+metatile_rows=8
+metatile_columns=8
+
+# This is the UDP port where the tirex-renderd waits for requests.
+renderd_udp_port=9320
+
+# This is the UDP port where the tirex-master waits for requests.
+master_udp_port=9322
+
+# The master writes its process ID into this file.
+master_pidfile=/var/run/tirex/tirex-master.pid
+
+# The syncd process writes its process ID into this file
+syncd_pidfile=/tmp/tirex-syncd.pid
+
+# Syslog facility used in master.
+master_syslog_facility=local0
+
+# Logfile where all rendered jobs are logged.
+master_logfile=/var/log/tirex/master.log
+
+# If the rendering of a metatile takes more than this many minutes the master
+# gives up on it and removes the job from the list of currently rendering tiles.
+# This must be larger than the timeout in tirex-renderd-starter and should be
+# larger than the rendering of any tile can need. Its only used to make sure
+# that a rendering process that is long gone doesn't take up ressources forever.
+master_rendering_timeout=10
+
+# The name of the UNIX domain socket for communicating with ModTile.
+modtile_socket_name=/var/run/tirex/modtile_sock
+
+# Buckets for different priorities.
+bucket name=live       minprio=1  maxproc=4 maxload=20
+bucket name=important  minprio=10 maxproc=3 maxload=8
+bucket name=background minprio=20 maxproc=2 maxload=4
+
+# If this is defined, the syncd will copy rendered tiles to this server.
+#sync_to_host=some.other.host
+
+# UDP port where the syncd listens for messages from master.
+syncd_udp_port=9323
+
+# number of renderd processes to start
+renderd_processes=5
+
+mapnik_fontdir=/usr/lib/mapnik/fonts
+mapnik_mapdir=/etc/mapnik-osm-data/
+mapnik_plugindir=/usr/lib/mapnik/input
+mapnik_fontdir_recurse=0
+
+#-- THE END ------------------------------------------------------------------

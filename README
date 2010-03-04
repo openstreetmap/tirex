@@ -1,0 +1,37 @@
+
+Tirex Tile Rendering System
+===========================
+
+
+
+PERL MODULES
+------------
+
+You'll need the following Perl modules:
+* IPC::ShareLite (Debian/Ubuntu/: libipc-sharelite-perl)
+* JSON (Debian/Ubuntu: libjson-perl)
+
+
+LOGGING
+-------
+
+Tirex-master has two logs:
+* General noticies, warnings, errors, debug messages and the like are
+  logged via syslog. You can configure the syslog facility that should
+  be used ('master_syslog_facility').
+* For each rendered metatile a line is written to a logfile. This can
+  be used for generating statistics. Failed renderings (when the
+  renderd didn't answer) are not logged here (but in the syslog). Use
+  the config variable 'master_logfile' to set the filename for this
+  log.
+
+
+TESTING
+-------
+
+Call 'prove' in the main directory to run Perl tests. You need Test::More
+(Debian/Ubuntu: libtest-simple-perl) and Test::Harness (Debian/Ubuntu:
+libtest-harness-perl) installed.
+
+Call 'perl t/tirex_queue_speed_test.pl' to run queue speed test.
+
