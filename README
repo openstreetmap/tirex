@@ -33,5 +33,5 @@ Call 'prove' in the main directory to run Perl tests. You need Test::More
 (Debian/Ubuntu: libtest-simple-perl) and Test::Harness (Debian/Ubuntu:
 libtest-harness-perl) installed.
 
-Call 'perl t/tirex_queue_speed_test.pl' to run queue speed test.
+Call 'perl test/queue_speed_test.pl' to run queue speed test.
 
