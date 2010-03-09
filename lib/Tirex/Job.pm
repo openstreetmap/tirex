@@ -56,8 +56,7 @@ sub new
     $self->{'notify'} = [];
     $self->{'success'} = 0;
     $self->{'request_time'} = time unless (defined $self->{'request_time'});
-    (my $ss = "$self") =~ s/.*\(0x(.*)\).*/$1/;
-    $self->{'id'} = $self->{'request_time'} . "_$ss";
+    $self->{'id'} = $self->{'request_time'} . "_" . ($self + 0);
 
     return $self;
 }
