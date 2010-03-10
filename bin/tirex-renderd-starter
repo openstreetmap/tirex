@@ -81,7 +81,6 @@ while (my $arg = shift)
     if ($arg eq '--debug')
     {
         $debug = 1;
-        push(@worker_args, $arg);
     }
     elsif ($arg eq '--dummy')
     {
