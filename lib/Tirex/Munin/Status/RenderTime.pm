@@ -1,6 +1,6 @@
 #-----------------------------------------------------------------------------
 #
-#  Tirex/Munin/Status/RequestsRendered.pm
+#  Tirex/Munin/Status/RenderTime.pm
 #
 #-----------------------------------------------------------------------------
 
@@ -11,12 +11,12 @@ use Tirex::Munin::Status;
 
 #-----------------------------------------------------------------------------
 
-package Tirex::Munin::Status::RequestsRendered;
+package Tirex::Munin::Status::RenderTime;
 use base qw( Tirex::Munin::Status );
 
 =head1 NAME
 
-Tirex::Munin::Status::RequestsRendered - Number of requests rendered
+Tirex::Munin::Status::RenderTime - Rendering time for requests
 
 =head1 SYNOPSIS
 
@@ -32,27 +32,22 @@ sub config
 {
     my $self = shift;
 
-    my $per = $self->{'per'} // 'second';
-
     my $config = <<EOF;
-graph_title Requests rendered
-graph_vlabel requests/$per
+graph_title Render time
+graph_vlabel millisecond/second
 graph_category tirex
 graph_args --lower-limit 0
 graph_scale no
-graph_period $per
-graph_info Number of metatile requests rendered per $per.
+graph_info Milliseconds each second spend rendering tiles
 EOF
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})
     {
         my $id   = $zoomrange->get_id();
-        my $type = $zoomrange eq $self->{'zoomranges'}->[0] ? 'AREA' : 'STACK';
-
-        $config .= sprintf("%s.info Zoomlevel %s\n", $id, $zoomrange->to_s());
+        $config .= sprintf("%s.info Time spend rendering per second for zoom levels %s\n", $id, $zoomrange->to_s());
         $config .= sprintf("%s.label %s\n",          $id, $zoomrange->get_name());
         $config .= sprintf("%s.type DERIVE\n",       $id);
-        $config .= sprintf("%s.draw %s\n",           $id, $type);
+        $config .= sprintf("%s.min 0\n",             $id);
     }
 
     return $config;
@@ -68,7 +63,7 @@ sub fetch
         my $sum = 0;
         foreach my $z ($zoomrange->get_min() .. $zoomrange->get_max())
         {
-            $sum += $self->{'status'}->{'rm'}->{'stats'}->{'count_rendered'}->{$self->{'map'}}->[$z];
+            $sum += $self->{'status'}->{'rm'}->{'stats'}->{'sum_render_time'}->{$self->{'map'}}->[$z];
         }
         $data .= sprintf("%s.value %d\n", $zoomrange->get_id(), $sum);
     }

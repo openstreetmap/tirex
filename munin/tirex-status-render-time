@@ -3,14 +3,14 @@
 #
 #  Tirex Tile Rendering System
 #
-#  munin/tirex-status-requests-rendered.pl
+#  munin/tirex-status-render-time.pl
 #
 #-----------------------------------------------------------------------------
 
 use strict;
 use warnings;
 
-use Tirex::Munin::Status::RequestsRendered;
+use Tirex::Munin::Status::RenderTime;
 
 #-----------------------------------------------------------------------------
 
@@ -22,7 +22,7 @@ Tirex::Config::init($config_file);
 my $map = 'stylesheet_tile';
 my @z   = ('0-9', '10-12', '13-15', '16-17');
 
-Tirex::Munin::Status::RequestsRendered->new( map => $map, z => \@z, per => 'minute' )->do();
+Tirex::Munin::Status::RenderTime->new( map => $map, z => \@z )->do();
 
 
 #-- THE END ------------------------------------------------------------------
