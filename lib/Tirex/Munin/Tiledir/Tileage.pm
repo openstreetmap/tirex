@@ -66,7 +66,7 @@ sub fetch
         my $max = 0;
         foreach my $z ($zoomrange->get_min() .. $zoomrange->get_max())
         {
-            $max = List::Util::max($max, $self->{'stats'}->{$self->{'map'}}->[$z]->{'maxage'});
+            $max = List::Util::max($max, $self->{'stats'}->{$self->{'map'}}->[$z]->{'maxage'} // 0);
         }
 
         $data .= sprintf("%s.value %d\n", $zoomrange->get_id(), int($max / 3600));

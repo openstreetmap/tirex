@@ -69,7 +69,7 @@ sub fetch
         my $sum = 0;
         foreach my $z ($zoomrange->get_min() .. $zoomrange->get_max())
         {
-            $sum += $self->{'stats'}->{$self->{'map'}}->[$z]->{'sumsize'};
+            $sum += ($self->{'stats'}->{$self->{'map'}}->[$z]->{'sumsize'} // 0);
         }
         $data .= sprintf("%s.value %d\n", $zoomrange->get_id(), $sum);
     }

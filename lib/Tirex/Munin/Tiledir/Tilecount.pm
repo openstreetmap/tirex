@@ -75,7 +75,7 @@ sub fetch
         my $total = 0;
         foreach my $z ($zoomrange->get_min() .. $zoomrange->get_max())
         {
-            $sum   += $self->{'stats'}->{$self->{'map'}}->[$z]->{'count'};
+            $sum   += ($self->{'stats'}->{$self->{'map'}}->[$z]->{'count'} // 0);
             $total += ($z < 4) ? 1 : 4 ** ($z - 3); # XXX metatile size
         }
 
