@@ -36,13 +36,15 @@ sub config
 {
     my $self = shift;
 
+    my $map = $self->{'map'};
+
     my $config = <<EOF;
-graph_title Tile disk usage (file size)
+graph_title Tile disk usage for map $map (file size)
 graph_vlabel bytes
 graph_category tirex
 graph_info bytes on disk
 graph_args --lower-limit 0 --base 1024
-graph_info Sum of bytes in all metatile files for a zoom level or zoom level ranges. Actual disk usage will be a bit higher because of file system blocks.
+graph_info Sum of bytes in all metatile files for map $map and specified zoom levels or zoom level ranges. Actual disk usage will be a bit higher because of file system blocks.
 EOF
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})

@@ -31,23 +31,24 @@ Tirex::Munin::Status::RenderTime - Rendering time for requests
 sub config
 {
     my $self = shift;
+    my $map = $self->{'map'};
 
     my $config = <<EOF;
-graph_title Render time
+graph_title Render time for map $map
 graph_vlabel millisecond/second
 graph_category tirex
 graph_args --lower-limit 0
 graph_scale no
-graph_info Milliseconds each second spend rendering tiles
+graph_info Milliseconds each second spend rendering tiles for map $map
 EOF
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})
     {
         my $id   = $zoomrange->get_id();
         $config .= sprintf("%s.info Time spend rendering per second for zoom levels %s\n", $id, $zoomrange->to_s());
-        $config .= sprintf("%s.label %s\n",          $id, $zoomrange->get_name());
-        $config .= sprintf("%s.type DERIVE\n",       $id);
-        $config .= sprintf("%s.min 0\n",             $id);
+        $config .= sprintf("%s.label %s\n",    $id, $zoomrange->get_name());
+        $config .= sprintf("%s.type DERIVE\n", $id);
+        $config .= sprintf("%s.min 0\n",       $id);
     }
 
     return $config;

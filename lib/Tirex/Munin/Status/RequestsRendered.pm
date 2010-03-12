@@ -32,16 +32,17 @@ sub config
 {
     my $self = shift;
 
+    my $map = $self->{'map'};
     my $per = $self->{'per'} // 'second';
 
     my $config = <<EOF;
-graph_title Requests rendered
+graph_title Requests rendered for map $map
 graph_vlabel requests/$per
 graph_category tirex
 graph_args --lower-limit 0
 graph_scale no
 graph_period $per
-graph_info Number of metatile requests rendered per $per.
+graph_info Number of metatile requests rendered per $per for map $map.
 EOF
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})
@@ -52,6 +53,7 @@ EOF
         $config .= sprintf("%s.info Zoomlevel %s\n", $id, $zoomrange->to_s());
         $config .= sprintf("%s.label %s\n",          $id, $zoomrange->get_name());
         $config .= sprintf("%s.type DERIVE\n",       $id);
+        $config .= sprintf("%s.min 0\n",             $id);
         $config .= sprintf("%s.draw %s\n",           $id, $type);
     }
 
