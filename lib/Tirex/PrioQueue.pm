@@ -274,7 +274,7 @@ sub reset_maxsize
 
 Return status of the priority queue.
 
-=cut1
+=cut
 
 sub status
 {
