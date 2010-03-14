@@ -41,8 +41,8 @@ sub new
     my $self = bless {} => $class;
 
     $self->{'min'}  = $min;
-    $self->{'max'}  = $max // $min;
-    $self->{'name'} = $name // ('z' . $self->to_s());
+    $self->{'max'}  = defined($max)  ? $max  : $min;
+    $self->{'name'} = defined($name) ? $name : ('z' . $self->to_s());
 
     return $self;
 }
