@@ -209,8 +209,14 @@ sub main_loop
         }
 
         # clean out closed handles
-        foreach my $handle ($want_read->handles() ) { $want_read->remove($handle)  if (! $handle->opened); }
-        foreach my $handle ($want_write->handles()) { $want_write->remove($handle) if (! $handle->opened); }
+        foreach my $handle ($want_read->handles()) {
+            my ($socket, $source) = @$handle;
+            $want_read->remove($handle) if (! $socket->opened());
+        }
+        foreach my $handle ($want_write->handles()) {
+            my ($socket, $source) = @$handle;
+            $want_write->remove($handle) if (! $socket->opened());
+        }
 
         my ($readable, $writable, $dummy) = IO::Select::select($want_read, $want_write, undef, $select_timeout);
 
