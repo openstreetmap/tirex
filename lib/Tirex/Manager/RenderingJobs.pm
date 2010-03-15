@@ -177,7 +177,9 @@ sub status
             age  => time() - $_->{'rendering_requested'},
         };
     } sort {
-        $a->get_prio() <=> $b->get_prio();
+        $a->get_prio() == $b->get_prio()
+            ? $a->{'rendering_requested'} <=> $b->{'rendering_requested'}
+            : $a->get_prio() <=> $b->get_prio();
     } values %{$self->{'requests_by_id'}};
 
     return \@status;
