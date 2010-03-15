@@ -135,6 +135,12 @@ sub process
         return;
     }
 
+    # ignore /planet-import-complete (used by mod_tile)
+    if ($path eq '/planet-import-complete')
+    {
+        return;
+    }
+
     # directories
     if (-d $_)
     {
