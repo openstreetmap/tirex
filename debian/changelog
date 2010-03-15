@@ -1,3 +1,9 @@
+tirex (0.1.7) jaunty; urgency=low
+
+  * bugfixes on zoom level 1+2
+
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 15 Mar 2010 21:48:44 +0100
+
 tirex (0.1.6) jaunty; urgency=low
 
   * munin plugin overhaul
