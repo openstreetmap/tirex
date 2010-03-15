@@ -128,6 +128,13 @@ sub process
 {
     (my $path = $_) =~ s/^$mtdir//;
 
+    # ignore lost+found directories
+    if ($path =~ /lost\+found/)
+    {
+        $File::Find::prune = 1;
+        return;
+    }
+
     # directories
     if (-d $_)
     {
