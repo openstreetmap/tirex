@@ -69,7 +69,7 @@ my $stats = JSON::from_json($json);
 
 print <<"EOF";
                            ------------------Tiles-------------------  ----------Age----------  ----------Size---------  ---------Blocks--------  Block
-Map                  Zoom       Count        Max  Empty Exist% Empty%     Min     Avg     Max      Min     Avg     Max      Min     Avg     Max  Eff %
+Map                  Zoom       Count        Max  Empty Exist% Empty%      Min     Avg     Max      Min     Avg     Max      Min     Avg     Max  Eff %
 -------------------------------------------------------------------------------------------------------------------------------------------------------
 EOF
 
