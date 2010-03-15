@@ -19,7 +19,7 @@ Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
-my $map = 'stylesheet_tile';
+my $map = 'default';
 my @z   = ('0-9', '10-14', '15-17');
 
 Tirex::Munin::Tiledir::Tileage->new( map => $map, z => \@z )->do();
