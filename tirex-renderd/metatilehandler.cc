@@ -130,15 +130,23 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
         std::ofstream outfile(tmpfilename, std::ios::out | std::ios::binary | std::ios::trunc);
         outfile.write((const char*) &m, sizeof(m));
 
-        for (unsigned int col = 0; col < mtc; col++)
+        for (unsigned int col = 0; col < mMetaTileColumns; col++)
         {
-            for (unsigned int row = 0; row < mtr; row++)
+            for (unsigned int row = 0; row < mMetaTileRows; row++)
             {
-                mapnik::image_view<mapnik::ImageData32> view(col * mTileWidth, 
-                    row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
-                rawpng[index] = mapnik::save_to_string(view, "png256");
-                offsets[index].offset = offset;
-                offset += offsets[index].size = rawpng[index].length();
+                if ((col < mtc) && (row < mtr))
+                {
+                    mapnik::image_view<mapnik::ImageData32> view(col * mTileWidth, 
+                        row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
+                    rawpng[index] = mapnik::save_to_string(view, "png256");
+                    offsets[index].offset = offset;
+                    offset += offsets[index].size = rawpng[index].length();
+                }
+                else
+                {
+                    offsets[index].offset = 0;
+                    offsets[index].size = 0;
+                }
                 index++;
             }
         }
