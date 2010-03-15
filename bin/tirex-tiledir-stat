@@ -61,7 +61,7 @@ my $BLOCKSIZE = 512;
 
 if (scalar(@ARGV) == 0)
 {
-    $ARGV[0] = '/var/lib/tirex/stats/tiles.stats';
+    $ARGV[0] = Tirex::Config::get('stats_dir', '/var/lib/tirex/stats') . '/tiles.stats';
 }
 my $json = join('', <>);
 
