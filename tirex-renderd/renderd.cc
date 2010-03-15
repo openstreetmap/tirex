@@ -50,7 +50,7 @@ bool RenderDaemon::loadMapnikWrappers(MetatileHandler *mth, const boost::filesys
             catch (mapnik::config_error cfgerr)
             {
                 warning("cannot add %s", boost::filesystem::basename(*itr).c_str());
-                debug("%s", cfgerr.what());
+                warning("%s", cfgerr.what());
             }
         }
     }
