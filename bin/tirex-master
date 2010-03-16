@@ -34,6 +34,7 @@ use Getopt::Long qw( :config gnu_getopt );
 use IO::Socket;
 use IO::Select;
 use Socket;
+use Fcntl;
 use Sys::Syslog;
 use POSIX 'setsid';
 use Pod::Usage;
@@ -211,11 +212,23 @@ sub main_loop
         # clean out closed handles
         foreach my $handle ($want_read->handles()) {
             my ($socket, $source) = @$handle;
-            $want_read->remove($handle) if (! $socket->opened());
+            my $fcn = $socket->fcntl(F_GETFD, 0);
+            if (!defined($fcn))
+            {
+                syslog('warning', "dropping closed fh %d from want_read (internal state: %s)",
+                   $socket->fileno(), $socket->opened() ? "opened" : "closed");
+                $want_read->remove($handle);
+            }
         }
         foreach my $handle ($want_write->handles()) {
             my ($socket, $source) = @$handle;
-            $want_write->remove($handle) if (! $socket->opened());
+            my $fcn = $socket->fcntl(F_GETFD, 0);
+            if (!defined($fcn))
+            {
+                syslog('warning', "dropping closed fh %d from want_write (internal state: %s)",
+                   $socket->fileno(), $socket->opened() ? "opened" : "closed");
+                $want_write->remove($handle);
+            }
         }
 
         my ($readable, $writable, $dummy) = IO::Select::select($want_read, $want_write, undef, $select_timeout);
