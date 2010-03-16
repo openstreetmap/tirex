@@ -343,8 +343,14 @@ sub main_loop
                         # give source a chance to re-insert itself into our write
                         # queue later. slightly inelegant, should rather hand over
                         # reference to self but we're not an object
-                        $source->set_request_write_callback(
-                            sub { if ($sock->opened) { $want_write->add([$sock, $source]); $source->set_timeout(time() + $write_timeout); }});
+                        $source->set_request_write_callback( sub {
+                            if ($sock->opened)
+                            {
+                                $want_read->remove([$sock, $source]);
+                                $want_write->add([$sock, $source]);
+                                $source->set_timeout(time() + $write_timeout);
+                            }
+                        });
                         # the following serves the sole purpose of keeping Perl from
                         # garbage-collecting our socket...
                         # fixme: respect timeout if specified in request 
