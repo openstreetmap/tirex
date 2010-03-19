@@ -3,8 +3,10 @@ usr/bin/tirex-send
 usr/bin/tirex-batch
 usr/bin/tirex-tiledir-check
 usr/bin/tirex-tiledir-stat
+usr/bin/tirex-rendering-control
 usr/share/man/man1/tirex-batch.1
 usr/share/man/man1/tirex-send.1
 usr/share/man/man1/tirex-status.1
 usr/share/man/man1/tirex-tiledir-stat.1
 usr/share/man/man1/tirex-tiledir-check.1
+usr/share/man/man1/tirex-rendering-control.1

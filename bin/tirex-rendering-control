@@ -1,0 +1,297 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-rendering-control
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Socket;
+use Socket;
+use Pod::Usage;
+use Errno;
+use JSON;
+
+use Tirex;
+use Tirex::Status;
+
+#-----------------------------------------------------------------------------
+# Reading command line and config
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'stop', 'continue' ) or exit(4);
+
+if ($opts{'help'})
+{
+    pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-rendering-control - send messages to control rendering\n",
+        -exitval => 0
+    );
+}
+
+if (! $opts{'stop'} && !$opts{'continue'})
+{
+    print STDERR "You need to have the --stop or --continue option!\n";
+    exit(4);
+}
+
+$Tirex::DEBUG = 1 if ($opts{'debug'});
+
+my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+my $status = eval { Tirex::Status->new() };
+if ($@)
+{
+    print STDERR "Can't open shared memory. Is the tirex-master running?\n";
+    exit(3);
+}
+my $s = eval { JSON::from_json($status->read()); };
+if ($@)
+{
+    print STDERR "Can't read shared memory. Is the tirex-master running?\n";
+    exit(3);
+}
+
+my $bucketlist = $s->{'rm'}->{'buckets'};
+
+my @cmd_buckets = @ARGV;
+my @all_buckets = map { $_->{'name'} } @$bucketlist;
+my @livebuckets = grep { $_->{'minprio'} == 1 } @$bucketlist;
+my $livebucket  = $livebuckets[0]->{'name'};
+
+my %all_buckets = map { $_ => 1 } @all_buckets;
+
+my @want_buckets;
+if (scalar(@cmd_buckets) == 1 && $cmd_buckets[0] eq 'ALL')
+{
+    @want_buckets = @all_buckets;
+}
+elsif (scalar(@cmd_buckets) == 0 && $opts{'stop'})
+{
+    @want_buckets = grep { $_ ne $livebucket } @all_buckets;
+}
+elsif (scalar(@cmd_buckets) == 0 && $opts{'continue'})
+{
+    @want_buckets = @all_buckets;
+}
+else
+{
+    foreach my $b (@cmd_buckets)
+    {
+        if (! $all_buckets{$b}) {
+            print STDERR "Unknown bucket: $b\n";
+            exit(4);
+        }
+    }
+    @want_buckets = @cmd_buckets;
+}
+
+printf STDERR "buckets cmdline: (%s), all: (%s), live: (%s), want: (%s)\n", join(', ', @cmd_buckets), join(', ', @all_buckets), $livebucket, join(', ', @want_buckets);
+
+#-----------------------------------------------------------------------------
+
+my $port = Tirex::Config::get('master_udp_port', $Tirex::MASTER_UDP_PORT);
+
+my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
+$socket->connect( Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost')) );
+
+#-----------------------------------------------------------------------------
+
+foreach my $bucket (@want_buckets)
+{
+    send_command($socket, $opts{'stop'} ? 'stop' : 'continue', $bucket);
+}
+
+if ($opts{'stop'})
+{
+    while (busy($status, $bucketlist, @want_buckets))
+    {
+        sleep(1);
+    }
+}
+
+exit 0;
+
+#-----------------------------------------------------------------------------
+
+sub busy
+{
+    my $status     = shift;
+    my $bucketlist = shift;
+    my %buckets    = map { $_ => 1 } @_;
+
+    my $s = eval { JSON::from_json($status->read()); };
+    if ($@) {
+        print STDERR "Can't read shared memory. Is the tirex-master running?\n";
+        exit(3);
+    }
+
+    my @rendering_prios = map { $_->{'prio'} } @{$s->{'rm'}->{'rendering'}};
+
+    foreach my $prio (@rendering_prios) {
+        foreach my $bucket (@$bucketlist) {
+            if ($bucket->{'minprio'} <= $prio && ($prio >= $bucket->{'maxprio'} || $bucket->{'maxprio'} == 0))
+            {
+                if ($buckets{$bucket->{'name'}})
+                {
+                    print STDERR "still rendering: prio=$prio bucket=$bucket->{'name'}\n" if ($Tirex::DEBUG);
+                    return 1;
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+sub send_command
+{
+    my ($socket, $command, $bucket) = @_;
+
+    my %msg = (
+        type   => "${command}_rendering_bucket",
+        id     => "tirex-rendering-control.$$",
+        bucket => $bucket,
+    );
+
+    my $request = Tirex::Message->new(%msg);
+    print STDERR "sending: ", $request->to_s(), "\n" if ($Tirex::DEBUG);
+    $request->send($socket);
+
+    my $reply = Tirex::Message->new_from_socket($socket);
+    if (! defined $reply)
+    {
+        if ($!{'ECONNREFUSED'})
+        {
+            print STDERR "Could not send request to server. Is it running?\n";
+        }
+        else
+        {
+            print STDERR "Error reading answer: $!\n";
+        }
+        exit(3);
+    }
+
+    print STDERR "got answer: ", $reply->to_s(), "\n" if ($Tirex::DEBUG);
+}
+
+
+__END__
+
+=head1 NAME
+
+tirex-rendering-control - send messages to control rendering
+
+=head1 SYNOPSIS
+
+tirex-rendering-control [OPTIONS] [BUCKET...]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode.
+
+=item B<-c>, B<--config=FILE>
+
+Use the config file FILE instead of /etc/tirex/tirex.conf.
+
+=item B<--stop>
+
+Send stop_rendering_bucket commands to tirex-master for each bucket given on
+the command line. If no bucket was specified, it is send for all buckets except
+the one containing the priority 1, which is usually the one getting live
+requests from the web server. You can specify the special bucket name 'ALL'
+to send the command for all buckets.
+
+=item B<--continue>
+
+Send continue_rendering_bucket commands to tirex-master for each bucket given
+on the command line. If no bucket was specified (or "ALL"), it is send for all
+buckets.
+
+=back
+
+=head1 DESCRIPTION
+
+Sometimes you want to stop rendering tiles temporarily for some reason. For
+instance because you want to update the database, re-start the rendering
+daemon or do some resource-intensive job on the machine that would conflict
+with rendering.
+
+This command sends the running tirex-master commands to stop (or continue)
+rendering for the specified buckets.
+
+When using --stop, this command will block and wait for currently rendering
+tiles to be finished. So when the command returns (with return code 0) you can
+be sure that you can do whatever you want to do without the rendering
+interfering.
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file. See tirex.conf(5) for further details.
+
+=back
+
+=head1 DIAGNOSTICS
+
+tirex-send returns
+
+=over 8
+
+=item 0 if everything was alright,
+
+=item 3 if the server couldn't be reached,
+
+=item 4 if there was an error parsing the command line.
+
+=back
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+#-- THE END ----------------------------------------------------------------------------
