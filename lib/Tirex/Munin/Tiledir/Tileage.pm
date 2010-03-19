@@ -41,7 +41,7 @@ sub config
     my $map = $self->{'map'};
 
     my $config = <<EOF;
-graph_title Max age of map tiles for map $map
+graph_title Max age of tiles for map $map
 graph_vlabel Max age (hours)
 graph_category tirex
 graph_info Max age of metatiles on disk for map $map and specified zoom levels or zoom level ranges.

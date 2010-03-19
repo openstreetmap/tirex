@@ -39,7 +39,7 @@ sub config
     my $map = $self->{'map'};
 
     my $config = <<EOF;
-graph_title Tile disk usage for map $map (file size)
+graph_title Disk usage for $map map tiles
 graph_vlabel bytes
 graph_category tirex
 graph_info bytes on disk

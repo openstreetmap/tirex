@@ -42,7 +42,7 @@ sub config
     my $label = $self->{'relative'} ? 'percentage of world covered' : 'number of meta tiles';
 
     my $config = <<EOF;
-graph_title Map tile count for map $map ($rel)
+graph_title Tile count for map $map ($rel)
 graph_vlabel $label
 graph_category tirex
 graph_info Number of meta tiles on disk for map $map and specified zoom levels or zoom level ranges.
