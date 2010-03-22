@@ -342,13 +342,29 @@ Filter Options:
 
 =over 8
 
-=item exists
+=item B<exists>
 
-=item not-exists
+Matches if the meta tile exists on disk.
 
-=item older(time)
+=item B<not-exists>
 
-=item multi(count,num)    only count=2,num=0 or num=1 allowed
+Matches if the meta tile does not exist on disk.
+
+=item B<older(time)>
+
+Matches if the meta tile's last modification time is before the given Unix
+time stamp (seconds since the Epoch). Also matches if the meta tile does
+not exist on disk. If you want to match only files older than the given
+date which do actually exist, add the I<exists> filter.
+
+=item B<multi(count,num)>
+
+A magic filter that divides all meta tiles up in I<count> classes, and
+matches only if the current meta tile is in class I<num> of these. Hence
+the allowed range for I<num> is always 0..I<count>-1. Currently only
+I<count>=2 is supported. This filter can be used to distribute rendering
+requests among different tile servers (which may or may not then use
+F<tirex-syncd> to share resulting tiles). 
 
 =back
 

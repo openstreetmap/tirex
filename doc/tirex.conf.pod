@@ -10,7 +10,7 @@ that can be set.
 
 =head2 GENERAL OPTIONS
 
-=over 2
+=over 3
 
 =item B<metatile_rows>, B<metatile_columns>
 
