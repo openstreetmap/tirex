@@ -261,7 +261,7 @@ Format is something like:
 
   metatile_dir  from the config file
   map           map
-  z             z
+  zoom          zoom level
   path          path with 4 directory elements and a filename
                 based on x and y coordinates
 

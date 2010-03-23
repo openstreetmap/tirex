@@ -561,6 +561,11 @@ terminal.
 
 The configuration file. See tirex.conf(5) for further details.
 
+=item F</var/log/tirex/master.log>
+
+Default location for master logfile. It contains one line for each
+metatile rendered.
+
 =back
 
 =head1 DIAGNOSTICS

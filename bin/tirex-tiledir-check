@@ -263,6 +263,11 @@ each tile and/or generates statistics, respectively. The list and stats are
 written to the filenames given, if you give '-' as the filename STDOUT is used.
 You can only use STDOUT for either the list file or the stats file.
 
+Caution: This command will go through all metatiles on your disk and stat each
+file. On a lightly loaded machine with lots of RAM this can go pretty quick,
+but under high IO loads it might take a long time. Take this into account if
+you want to run it regularly from cron or similar.
+
 =head1 LIST FILE FORMAT
 
 The list file is in CSV format with one line per metatile. The
@@ -322,6 +327,9 @@ each zoom level there is a nested hash containing the statistics:
 
 The sumage, sumblocks, and sumsize values can be divided by count to get
 the average.
+
+This file can be displayed on a human readable format with the Program
+tirex-tiledir-stat. It is also read by several Munin plugins.
 
 =head1 FILES
 

@@ -2,8 +2,8 @@
 =head1 TIREX TILE RENDERING SYSTEM
 
 The Tirex tile rendering system renders map tiles on the fly and caches them.
-It is very similar (and backwards compatible) to the mod_tile/renderd system,
-but improves on it in many respects.
+It is very similar (and mostly backwards compatible) to the mod_tile/renderd
+system, but improves on it in many respects.
 
 =head2 MAPS
 
@@ -19,6 +19,7 @@ always square and 256x256 pixels. At zoom level 0 the map of the whole world
 fits into one tile, at zoom level 1 there are four (two by two) tiles for the
 whole world. At zoom level 2 there are 16 tiles and so on. The highest zoom
 level depends on the detail you want. For OSM its normally about 18 to 20.
+Tirex does not check the max zoom level.
 
 Tiles are numbered x=0 (-180 degrees) to x=2^zoom-1 (+180 degrees) and from y=0
 (about 85 degrees) to y=2^zoom-1 (about -85 degrees).
@@ -33,10 +34,11 @@ filesystems. Also a directory with many files in it will be slower than with
 fewer files.
 
 This is solved by aggregating several tiles into a metatile. Typically 8x8
-tiles make up one metatile, but this is configurable (although not well tested)
-in Tirex. This is the same size as used in mod_tile/renderd systems. The tile
-server internally always "thinks" in metatiles. Access requests for tiles are
-converted into requests for metatiles. Metatiles are rendered and stored.
+tiles make up one metatile, but this is configurable (although sizes other than
+8x8 are not well tested) in Tirex. This is the same size as used in
+mod_tile/renderd systems. The tile server internally always "thinks" in
+metatiles. Access requests for tiles are converted into requests for metatiles.
+Metatiles are rendered and stored.
 
 Metatiles are numbered just like tiles, a metatile number is always the same as
 the number of the top-left tile, in other words to get the metatile number you
@@ -47,15 +49,6 @@ In the Tirex system metatiles are represented by Tirex::Metatile objects. In
 addition to the x- and y-coordinates and the zoom level, a metatile also needs
 the map name.
 
-=head3 Metatile file structure
-
-XXX
-
-=head3 Metatile directory structure
-
-XXX
-
-
 =head2 JOBS
 
 If a metatile should be rendered, a job must be created for it. The job
@@ -65,14 +58,14 @@ request and the time it took to render the job (once it is rendered).
 
 In the Tirex system jobs are represented by Tirex::Job objects.
 
-The master will keep track if where a job came from so that it can notify the
+The master will keep track on where a job came from so that it can notify the
 source when the job is done.
 
 =head2 THE QUEUE
 
-The master keeps a prioritized queue of requests (or jobs). Every job that
-comes in will be placed on the queue. When there are free renderers, the master
-will take the first job from the queue and sends it to the renderer.
+The master keeps a prioritized queue of jobs. Every job that comes in will be
+placed on the queue. When there are free renderers, the master will take the
+first job from the queue and sends it to the renderer.
 
 There is only one queue for all jobs, but it is prioritized. Priorities are
 positive integers, 1 is the highest priority. New jobs are added before the
@@ -83,11 +76,11 @@ and age.
 A job can have an expire time. If it comes up to be rendered and the expire
 time has passed, the job will not be rendered. This basically allows you to
 say: I have a metatile I want rendered because I might need it in the next few
-minutes. But if its not rendered in 10 minutes and I haven't needed it until
-then, you needn't bother rendering it.
+minutes. But if its not rendered in, say, 10 minutes, you needn't bother
+rendering it.
 
 When a new job comes in for a metatile that already has a job on the queue,
-those two requests will be merged. The old job will be taken from the queue and
+those two jobs will be merged. The old job will be taken from the queue and
 a new job will be added. The new job has the higher priority of both jobs. The
 expire time of the new job will be the larger of both times. No expire time is
 the same as "infinite expire time", so if at least one of the jobs has no
@@ -95,7 +88,7 @@ expire time, the new job will have no expire time. Both sources of the two jobs
 will be notified when the job is rendered.
 
 The queue is implemented in a way that its doesn't matter much how many jobs
-there are in the queue. If you want to stick a 1.000 or 10.000 jobs in the
+there are in the queue. If you want to stick 1000 or 10000 jobs in the
 queue, thats ok.
 
 It is your job as administrator of the system to decide which priorites to use
@@ -104,19 +97,32 @@ get a higher priority than batch requests to re-render old tiles. The Tirex
 system gives you the mechanisms needed, you have to decide which jobs get
 priority, how long they should stay on the queue etc.
 
-=head2 BUCKETS
+=head2 PRIORITY CLASSES (BUCKETS)
 
+Tirex allows an infinite number of priorities. To make configuration and
+handling easier, these priorities can be divided up into several priority
+classes (sometimes called buckets). Each priority class has a name and
+represents all priorities in a certain range. You define the name and range.
+Configuration and some other operations will use those priority classes instead
+of the priorities itself.
+
+A typical setup will have a priority class for live requests from the web (lets
+call it 'live') that works on priorities 1 to, say, 9. And then one or more
+priority classes for background requests for higher priorities.
 
 =head2 THE MANAGER
 
-
+The rendering manager is the heart of the Tirex system. Its job is to work
+throught the queue in order and to dispatch Jobs to be rendered when its
+their turn. The manager takes the configuration and the current system
+load into account when deciding which and how many tiles can be rendered.
 
 =head2 MESSAGES
 
 The Tirex system consists of several processes that work together. Requests for
 the rendering of metatiles and other messages are passed between those
 processes through UDP datagram sockets. Datagram sockets are used to make
-handling of many data source easier in a non-blocking environment. Because UDP
+handling of many data sources easier in a non-blocking environment. Because UDP
 sockets can not garantuee delivery of the data over the network but can if you
 used them locally, normal Tirex operation only works on a single host.
 
@@ -134,9 +140,16 @@ field.
 =head2 COMPONENTS
 
 The Tirex tile rendering system consists of three major parts:
-* Clients (tirex-batch, mod_tile, ...) want certain tiles rendered. They create rendering requests and send them to the master. If they want to know when a tile is finished rendering, they can wait for an answer, or they can just go on (for batch operations)
-* The master daemon (tirex-master) runs continuously. It takes requests for tiles from the clients and puts them into a prioritized queue. It works through this queue and sends requests on to the renderer making sure that there are not too many simultaneous rendering going on.
-* The renderer component (several tirex-renderds) do the actual rendering of the tile, write it to disk and tell the master when they are done.
+
+=over 2
+
+=item * Clients (tirex-batch, mod_tile, ...) want certain tiles rendered. They create rendering requests and send them to the master. If they want to know when a tile is finished rendering, they can wait for an answer, or they can just go on (for batch operations)
+
+=item * The master daemon (tirex-master) runs continuously. It takes requests for tiles from the clients and puts them into a prioritized queue. It works through this queue and sends requests on to the renderer making sure that there are not too many simultaneous renderings going on.
+
+=item * The renderer component (several tirex-renderds) do the actual rendering of the tile, write it to disk and tell the master when they are done.
+
+=back
 
 This gives you an overview of the system, of course the details are a bit more complicated.
 
