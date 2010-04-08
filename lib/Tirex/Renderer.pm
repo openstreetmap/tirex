@@ -155,7 +155,7 @@ sub to_s
 {
     my $self = shift;
 
-    my $s = sprintf("Renderer %s: type=%s port=%d procs=%d path=%s", $self->{'name'}, $self->{'type'}, $self->{'port'}, $self->{'procs'}, $self->{'path'});
+    my $s = sprintf("Renderer %s: type=%s port=%d procs=%d path=%s", $self->get_name(), $self->get_type(), $self->get_port(), $self->get_procs(), $self->get_path());
 
     foreach my $key (sort keys %$self) {
         $s .= " $key=$self->{$key}" unless ($key =~ /^(name|type|port|path|procs)$/);

@@ -9,9 +9,14 @@ use warnings;
 
 use Carp;
 
+use Tirex::Renderer;
+
 #-----------------------------------------------------------------------------
 
 package Tirex::Map;
+
+# a hash with all configured maps
+our %Maps;
 
 =head1 NAME
 
@@ -23,12 +28,53 @@ my $map = Tirex::Map->new();
 
 =head1 DESCRIPTION
 
+A Tirex map configuration. It always contains the name, renderer, tile
+directory and zoom range for this map. Depending on the renderer there
+can be more options.
 
 =head1 METHODS
+
+=head2 Tirex::Map->get('foo')
+
+Get map by name.
+
+=cut
+
+sub get
+{
+    my $class = shift;
+    my $name  = shift;
+
+    return $Maps{$name};
+}
+
+=head2 Tirex::Map->get_map_for_metatile($metatile)
+
+Get map for a metatile.
+
+Will croak if the map named in the metatile does not exist. Will also croak if
+the zoom given in the metatile is out of range.
+
+=cut
+
+sub get_map_for_metatile
+{
+    my $class    = shift;
+    my $metatile = shift;
+
+    my $map = $Maps{$metatile->get_map()};
+    Carp::croak("map with name '" . $metatile->get_map() . "' not found") unless (defined $map);
+    Carp::croak('zoom out of range') if ($metatile->get_z() < $map->get_minz());
+    Carp::croak('zoom out of range') if ($metatile->get_z() > $map->get_maxz());
+
+    return $map;
+}
 
 =head2 Tirex::Map->new( ... )
 
 Create new map configuration.
+
+Default values for minimum zoom (minz) is 0, for maximum zoom (maxz) it's 17.
 
 =cut
 
@@ -38,18 +84,120 @@ sub new
     my %args = @_;
     my $self = bless \%args => $class;
 
-    Carp::croak("missing name") unless (defined $self->{'name'});
+    Carp::croak("missing name"     ) unless (defined $self->{'name'    });
+    Carp::croak("missing renderer" ) unless (defined $self->{'renderer'});
+    Carp::croak("missing tiledir"  ) unless (defined $self->{'tiledir' });
+    Carp::croak("map with name $self->{'name'} exists") if ($Maps{$self->{'name'}});
+
+    $self->{'minz'} =  0 unless (defined $self->{'minz'});
+    $self->{'maxz'} = 17 unless (defined $self->{'maxz'});
+
+    $Maps{$self->{'name'}} = $self;
 
     return $self;
 }
 
-=head2 $job->get_name()
+=head2 Tirex::Map->new_from_configfile($filename)
+
+Create new map config from a file.
+
+Croaks if the file does not exist.
+
+=cut
+
+sub new_from_configfile
+{
+    my $class    = shift;
+    my $filename = shift;
+
+    my %config;
+    open(my $cfgfh, '<', $filename) or Carp::croak("Can't open map config file '$filename': $!");
+    while (<$cfgfh>)
+    {
+        s/#.*$//;
+        next if (/^\s*$/);
+        if (/^([a-z0-9_]+)\s*=\s*(\S*)\s*$/) {
+            $config{$1} = $2;
+        }
+    }
+    close($cfgfh);
+
+    $config{'renderer'} = Tirex::Renderer->get($config{'renderer'});
+
+    return $class->new(%config);
+}
+
+=head2 $map->get_name()
 
 Get name of this map.
 
 =cut
 
 sub get_name { return shift->{'name'}; }
+
+=head2 $map->get_renderer()
+
+Get renderer of this map.
+
+=cut
+
+sub get_renderer { return shift->{'renderer'}; }
+
+=head2 $map->get_tiledir()
+
+Get tile directory of this map.
+
+=cut
+
+sub get_tiledir { return shift->{'tiledir'}; }
+
+=head2 $map->get_minz()
+
+Get minimum zoom value of this map.
+
+=cut
+
+sub get_minz { return shift->{'minz'}; }
+
+=head2 $map->get_maxz()
+
+Get maximum zoom of this map.
+
+=cut
+
+sub get_maxz { return shift->{'maxz'}; }
+
+=head2 $map->to_s();
+
+Return human readable description of this map.
+
+=cut
+
+sub to_s
+{
+    my $self = shift;
+
+    my $s = sprintf("Map %s: renderer=%s tiledir=%s zoom=%d-%d", $self->get_name(), $self->get_renderer()->get_name(), $self->get_tiledir(), $self->get_minz(), $self->get_maxz());
+
+    foreach my $key (sort keys %$self) {
+        $s .= " $key=$self->{$key}" unless ($key =~ /^(name|renderer|tiledir|minz|maxz)$/);
+    }
+
+    return $s;
+}
+
+=head2 Tirex::Map->status();
+
+Return status of all configured maps.
+
+=cut
+
+sub status
+{
+    my $self = shift;
+
+    return \%Maps;
+}
 
 
 1;
