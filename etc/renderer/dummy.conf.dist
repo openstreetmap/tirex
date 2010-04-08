@@ -1,0 +1,33 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for dummy renderer
+#
+#  /etc/tirex/renderer/dummy.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  general configuration
+#-----------------------------------------------------------------------------
+
+# symbolic name
+name=dummy
+
+# type of renderer
+type=dummy
+
+# path to executable of renderer
+path=/usr/bin/tirex-renderd-dummy
+
+# UDP port where the master can contact this renderer
+port=9330
+
+# number of processes that should be started
+procs=2
+
+#-----------------------------------------------------------------------------
+#  renderer specific configuration
+#-----------------------------------------------------------------------------
+
+
+#-- THE END ------------------------------------------------------------------

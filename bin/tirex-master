@@ -46,6 +46,8 @@ use Tirex::Queue;
 use Tirex::Manager;
 use Tirex::Source;
 use Tirex::Status;
+use Tirex::Renderer;
+use Tirex::Map;
 
 #-----------------------------------------------------------------------------
 

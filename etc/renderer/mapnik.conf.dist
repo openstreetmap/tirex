@@ -1,0 +1,42 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for Mapnik renderer
+#
+#  /etc/tirex/renderer/mapnik.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  general configuration
+#-----------------------------------------------------------------------------
+
+# symbolic name
+name=mapnik
+
+# type of renderer
+type=mapnik
+
+# path to executable of renderer
+path=/usr/bin/tirex-renderd-mapnik
+
+# UDP port where the master can contact this renderer
+port=9331
+
+# number of processes that should be started
+procs=3
+
+#-----------------------------------------------------------------------------
+#  renderer specific configuration
+#-----------------------------------------------------------------------------
+
+# directory with input plugins for mapnik
+plugindir=/usr/lib/mapnik/input
+
+# directory with fonts for mapnik
+fontdir=/usr/lib/mapnik/fonts
+
+# should we use recursion (1) or not (0) when searching for fonts
+fontdir_recurse=0
+
+
+#-- THE END ------------------------------------------------------------------
