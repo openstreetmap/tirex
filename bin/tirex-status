@@ -59,14 +59,6 @@ $opts{'once'} = 1 if ($opts{'raw'});
 
 #-----------------------------------------------------------------------------
 
-my $html = 0;
-
-if ($ENV{'SERVER_SOFTWARE'}) # runs as CGI
-{
-    $html = 1;
-    $opts{'once'} = 1;
-}
-
 my $status = eval { Tirex::Status->new(); };
 die("Can't connect to shared memory. Is the tirex-master running?\n") if ($@);
 
@@ -79,16 +71,8 @@ while (1)
     my $s = $status->read();
     if (defined $s)
     {
-        if ($html)
-        {
-            print "Content-Type: text/html\n\n";
-            print html_status(JSON::from_json($s));
-        }
-        else
-        {
-            $s = format_status(JSON::from_json($s)) unless ($opts{'raw'});
-            print $clear, $s;
-        }
+        $s = format_status(JSON::from_json($s)) unless ($opts{'raw'});
+        print $clear, $s;
     }
     else
     {
@@ -139,34 +123,6 @@ sub format_status
                  . format_rendering($d->{'rm'});
 }
 
-sub html_status
-{
-    my $d = shift;
-    my $updated = prettydate($d->{'updated'});
-
-    my $text = <<"EOF";
-<html>
-    <head>
-        <title>Tirex Status</title>
-    </head>
-    <body>
-
-<h1>Tirex Master Status</h1>
-<p>updated=$updated</p>
-EOF
-    $text .= html_master_server($d);
-#           . html_stats($d->{'rm'}->{'stats'})
-#           . html_queue($d->{'queue'})
-#           . html_buckets($d->{'rm'}, $d->{'queue'})
-#           . html_rendering($d->{'rm'});
-    $text .= <<"EOF";
-
-    </body>
-</html>
-EOF
-    return $text;
-}
-
 sub format_master_server
 {
     my $data = shift;
@@ -175,14 +131,6 @@ sub format_master_server
                                . " pid="     . BOLD . $data->{'pid'}                 . RESET "\n";
 
     return "$text\n";
-}
-
-sub html_master_server
-{
-    my $data = shift;
-
-    my $started = prettydate($data->{'started'});
-    return "<h2>Master server</h2>\n<p>started=$started</p>\n";
 }
 
 sub format_stats
@@ -311,9 +259,9 @@ tirex-status [OPTIONS]
 
 Display help message.
 
-=item B<-c>, B<--config=FILE>
+=item B<-c>, B<--config=DIR>
 
-Use the config file FILE instead of /etc/tirex/tirex.conf.
+Use the config directory DIR instead of /etc/tirex.
 
 =item B<-o>, B<--once>
 
