@@ -76,7 +76,7 @@ if ($opts{'debug'})
     $Tirex::DEBUG = $opts{'debug'};
 }
 
-my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+my $config_file = ($opts{'config'} || $Tirex::TIREX_CONFIGDIR) . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
@@ -90,7 +90,20 @@ syslog('info', 'Tirex master started');
 Tirex::Config::dump_to_syslog();
 
 #-----------------------------------------------------------------------------
-# prepare sockets
+# Read renderer and map config
+#-----------------------------------------------------------------------------
+read_renderer_and_map_config();
+
+foreach my $renderer (Tirex::Renderer->all()) {
+    syslog('info', $renderer->to_s());
+}
+
+foreach my $map (Tirex::Map->all()) {
+    syslog('info', $map->to_s());
+}
+
+#-----------------------------------------------------------------------------
+# Prepare sockets
 #-----------------------------------------------------------------------------
 
 my $want_read  = IO::Select->new();
@@ -130,7 +143,7 @@ if (Tirex::Config::get('sync_to_host')) {
 }
 
 #-----------------------------------------------------------------------------
-# daemonize and create pidfile
+# Daemonize and create pidfile
 #-----------------------------------------------------------------------------
 if (!$Tirex::DEBUG)
 {
@@ -168,7 +181,7 @@ $want_read->add([$renderd_return_socket, undef]);
 syslog('info', 'Listening for renderd responses');
 
 #-----------------------------------------------------------------------------
-# set signal handler
+# Set signal handler
 #-----------------------------------------------------------------------------
 
 $SIG{TERM} = \&sigterm_handler;  
@@ -186,7 +199,7 @@ if ($@)
 }
 
 #-----------------------------------------------------------------------------
-# the big loop
+# The big loop
 #-----------------------------------------------------------------------------
 
 sub main_loop
@@ -207,7 +220,7 @@ sub main_loop
         # keep status in shared memory updated once per second
         if ($last_status_update < $now)
         {
-            $status->update(started => $started, queue => $queue->status(), rm => $rendering_manager->status());
+            $status->update(started => $started, queue => $queue->status(), rm => $rendering_manager->status(), renderers => Tirex::Renderer->status(), maps => Tirex::Map->status());
             $last_status_update = $now;
         }
 
@@ -486,6 +499,23 @@ sub log_job
 }
 
 #-----------------------------------------------------------------------------
+sub read_renderer_and_map_config
+{
+    my $dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+
+    foreach my $file (glob("$dir/renderer/*"))
+    {
+        Tirex::Renderer->new_from_configfile($file);
+    }
+
+    foreach my $file (glob("$dir/maps/*"))
+    {
+        Tirex::Map->new_from_configfile($file);
+    }
+}
+
+
+#-----------------------------------------------------------------------------
 
 # clean up sockets, files, shm
 sub cleanup
@@ -539,9 +569,9 @@ Display help message.
 
 Run in debug mode. You'll see the actual messages sent and received.
 
-=item B<-c>, B<--config=FILE>
+=item B<-c>, B<--config=DIR>
 
-Use the config file FILE instead of /etc/tirex/tirex.conf.
+Use the config directory DIR instead of /etc/tirex.
 
 =back
 
@@ -562,6 +592,14 @@ terminal.
 =item F</etc/tirex/tirex.conf>
 
 The configuration file. See tirex.conf(5) for further details.
+
+=item F</etc/tirex/renderer/*>
+
+The renderer configuration files.
+
+=item F</etc/tirex/maps/*>
+
+The map configuration files.
 
 =item F</var/log/tirex/master.log>
 

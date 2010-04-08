@@ -48,6 +48,17 @@ sub get
     return $Maps{$name};
 }
 
+=head2 Tirex::Map->all();
+
+Return sorted (by name) list of all configured maps.
+
+=cut
+
+sub all
+{
+    return sort { $a->get_name() cmp $b->get_name() } values %Maps;
+}
+
 =head2 Tirex::Map->get_map_for_metatile($metatile)
 
 Get map for a metatile.
@@ -186,6 +197,24 @@ sub to_s
     return $s;
 }
 
+=head2 $map->to_hash();
+
+Return parameters of this map as hash.
+
+=cut
+
+sub to_hash
+{
+    my $self = shift;
+
+    my %hash = %$self;
+    $hash{'minz'}     = 0 + $self->get_minz(); # force integer (so that it works in JSON)
+    $hash{'maxz'}     = 0 + $self->get_maxz();
+    $hash{'renderer'} = $self->get_renderer()->get_name();
+
+    return \%hash;
+}
+
 =head2 Tirex::Map->status();
 
 Return status of all configured maps.
@@ -196,7 +225,13 @@ sub status
 {
     my $self = shift;
 
-    return \%Maps;
+    my @status = ();
+    foreach my $map (sort { $a->get_name() cmp $b->get_name() } values %Maps)
+    {
+        push(@status, $map->to_hash());
+    }
+
+    return \@status;
 }
 
 

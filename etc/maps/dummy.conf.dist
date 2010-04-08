@@ -1,0 +1,36 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for dummy map
+#
+#  /etc/tirex/maps/dummy.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  general configuration
+#-----------------------------------------------------------------------------
+
+# symbolic name of this map
+name=dummy
+
+# symbolic name of renderer used
+renderer=dummy
+
+# tile directory
+tiledir=/var/lib/tirex/tiles/dummy
+
+# minimum zoom level allowed
+minz=0
+
+# maximum zoom level allowed
+maxz=5
+
+#-----------------------------------------------------------------------------
+#  renderer specific configuration
+#-----------------------------------------------------------------------------
+
+# time the renderer should sleep to simulate rendering time
+sleep=10
+
+
+#-- THE END ------------------------------------------------------------------

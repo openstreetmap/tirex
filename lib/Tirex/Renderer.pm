@@ -46,6 +46,17 @@ sub get
     return $Renderers{$name};
 }
 
+=head2 Tirex::Renderer->all();
+
+Return sorted (by name) list of all configured renderers.
+
+=cut
+
+sub all
+{
+    return sort { $a->get_name() cmp $b->get_name() } values %Renderers;
+}
+
 =head2 Tirex::Renderer->new( name => 'foo', type => 'type', path => '/path/to/exec', port => 1234, procs => 3, ... )
 
 Create new renderer config.
@@ -111,7 +122,7 @@ Get name of this renderer.
 
 =cut
 
-sub get_name  { return shift->{'name' }; }
+sub get_name { return shift->{'name' }; }
 
 =head2 $rend->get_type();
 
@@ -119,7 +130,7 @@ Get type of this renderer.
 
 =cut
 
-sub get_type  { return shift->{'type' }; }
+sub get_type { return shift->{'type' }; }
 
 =head2 $rend->get_path();
 
@@ -127,7 +138,7 @@ Get path of this renderer.
 
 =cut
 
-sub get_path  { return shift->{'path' }; }
+sub get_path { return shift->{'path' }; }
 
 =head2 $rend->get_port();
 
@@ -135,7 +146,7 @@ Get port of this renderer.
 
 =cut
 
-sub get_port  { return shift->{'port' }; }
+sub get_port { return shift->{'port' }; }
 
 =head2 $rend->get_procs();
 
@@ -164,6 +175,23 @@ sub to_s
     return $s;
 }
 
+=head2 $rend->to_hash();
+
+Return parameters of this renderer as hash.
+
+=cut
+
+sub to_hash
+{
+    my $self = shift;
+
+    my %hash = %$self;
+    $hash{'port'}  = 0 + $self->get_port(); # force integer (so that it works in JSON)
+    $hash{'procs'} = 0 + $self->get_procs();
+
+    return \%hash;
+}
+
 =head2 Tirex::Renderer->status();
 
 Return status of all configured renderers.
@@ -174,7 +202,13 @@ sub status
 {
     my $self = shift;
 
-    return \%Renderers;
+    my @status = ();
+    foreach my $renderer (sort { $a->get_name() cmp $b->get_name() } values %Renderers)
+    {
+        push(@status, $renderer->to_hash());
+    }
+
+    return \@status;
 }
 
 

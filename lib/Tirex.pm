@@ -58,7 +58,9 @@ our $MASTER_PIDFILE           = '/var/run/tirex/tirex-master.pid';
 our $SYNCD_PIDFILE            = '/var/run/tirex/tirex-syncd.pid';
 our $RENDERD_PIDFILE          = '/var/run/tirex/tirex-renderd-starter.pid';
 our $MASTER_LOGFILE           = '/var/log/tirex/jobs.log';
-our $TIREX_CONFIGFILE         = '/etc/tirex/tirex.conf';
+our $TIREX_CONFIGDIR          = '/etc/tirex';
+our $TIREX_CONFIGFILENAME     = 'tirex.conf';
+our $TIREX_CONFIGFILE         = $TIREX_CONFIGDIR . '/' . $TIREX_CONFIGFILENAME;
 our $MASTER_RENDERING_TIMEOUT = 10; # minutes
 our $RENDERD_ALIVE_TIMEOUT    = 8; # minutes - make this a tad smaller than the above
 

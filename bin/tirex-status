@@ -120,7 +120,9 @@ sub format_status
                  . format_stats($d->{'rm'}->{'stats'})
                  . format_queue($d->{'queue'})
                  . format_buckets($d->{'rm'}, $d->{'queue'})
-                 . format_rendering($d->{'rm'});
+                 . format_rendering($d->{'rm'})
+                 . format_renderers($d->{'renderers'})
+                 . format_maps($d->{'maps'});
 }
 
 sub format_master_server
@@ -240,6 +242,43 @@ sub format_rendering
 
     return "$text\n"; 
 }
+
+sub format_renderers
+{
+    my $renderers = shift;
+
+    my $text = " Renderers:\n  " . UNDERLINE . "Name                 Type        Port  Procs  Path                               \n" . RESET;
+
+    foreach my $r (@$renderers) {
+        $text .= '  ' . field("%-20s", $r->{'name'}) . ' '
+                      . field("%-10s", $r->{'type'}) . ' '
+                      . field("%5d",   $r->{'port'}) . ' '
+                      . field("    %2d",   $r->{'procs'}) . ' '
+                      . field(" %-30s", $r->{'path'}) . ' '
+                      . "\n";
+    }
+
+    return "$text\n"; 
+}
+
+sub format_maps
+{
+    my $maps = shift;
+
+    my $text = " Maps:\n  " . UNDERLINE . "Name                 Renderer              Zoom  Tiledir                               \n" . RESET;
+
+    foreach my $r (@$maps) {
+        $text .= '  ' . field("%-20s", $r->{'name'}) . ' '
+                      . field("%-20s", $r->{'renderer'}) . ' '
+                      . field("%2d",   $r->{'minz'})
+                      . field("-%2d",   $r->{'maxz'}) . ' '
+                      . field(" %-30s", $r->{'tiledir'}) . ' '
+                      . "\n";
+    }
+
+    return "$text\n"; 
+}
+
 
 __END__
 
