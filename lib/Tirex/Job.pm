@@ -189,6 +189,19 @@ sub set_prio
     return;
 }
 
+=head2 $job->get_metatile()
+
+Get metatile of this job.
+
+=cut
+
+sub get_metatile
+{
+    my $self = shift;
+    
+    return $self->{'metatile'};
+}
+
 sub get_x   { my $self = shift; return $self->{'metatile'}->get_x();   }
 sub get_y   { my $self = shift; return $self->{'metatile'}->get_y();   }
 sub get_z   { my $self = shift; return $self->{'metatile'}->get_z();   }

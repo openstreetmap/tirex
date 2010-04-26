@@ -147,7 +147,7 @@ sub check_timeout
             my $bucket = $job->get_bucket();
             $bucket->remove_job($job) if (defined $bucket);
             $self->remove($job);
-            ::syslog('err', 'Job with id=%s timed out on rendering list', $job->get_id());
+            ::syslog('err', 'Job with id=%s timed out on rendering list (%s)', $job->get_id(), $job->get_metatile()->to_s());
             $count++;
             $job->notify();
         }

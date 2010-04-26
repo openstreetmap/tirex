@@ -15,7 +15,9 @@ use Tirex;
 
 #-----------------------------------------------------------------------------
 
-my $j1 = Tirex::Job->new( metatile => Tirex::Metatile->new(map => 'test', x => 1, y => 1, z => 9), prio => 1 );
+my $mt1 = Tirex::Metatile->new(map => 'test', x => 1, y => 1, z => 9);
+
+my $j1 = Tirex::Job->new( metatile => $mt1, prio => 1 );
 my $j2 = Tirex::Job->new( metatile => Tirex::Metatile->new(map => 'test', x => 1, y => 1, z => 9), prio => 1 );
 my $j3 = Tirex::Job->new( metatile => Tirex::Metatile->new(map => 'test', x => 8, y => 1, z => 9), prio => 1 );
 
@@ -23,6 +25,7 @@ isa_ok($j1, 'Tirex::Job', 'class');
 is($j1->get_prio(), 1, 'prio');
 $j1->set_prio(3);
 is($j1->get_prio(), 3, 'prio');
+is($j1->get_metatile(), $mt1, 'metatile');
 
 isnt($j1, $j2, 'not identical jobs');
 ok($j1->same_tile($j2), 'but same tile');
