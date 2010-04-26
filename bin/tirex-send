@@ -68,7 +68,7 @@ my %ports = (
 );
 
 $opts{'to'} ||= 'master';
-my $port = $ports{$opts{'to'}};
+my $port = ($opts{'to'} =~ /^[0-9]+$/) ? $opts{'to'} : $ports{$opts{'to'}};
 
 if (!$port)
 {
@@ -170,7 +170,8 @@ Use the config file FILE instead of /etc/tirex/tirex.conf.
 
 =item B<-t>, B<--to=DESTINATION>
 
-Talk to DESTINATION, which can be 'master' (default), 'syncd', or 'renderd'.
+Talk to DESTINATION, which can be 'master' (default), 'syncd', 'renderd'
+or a port number.
 
 =item B<-w>, B<--wait=SECONDS>
 
@@ -188,12 +189,14 @@ daemon is running, activate debugging in the daemon, send a render request,
 etc.
 
 Messages are normally send to the tirex-master daemon, but you can also send
-them to the render or sync daemon.
+them to a renderd or sync daemon.
 
 You have to give the TYPE of the message on the command line and optionally
 some fields in the format KEY=VALUE.
 
-=head1 MESSAGES
+=head1 MESSAGES FOR MASTER
+
+The following messages can be send to a master server:
 
 =over 8
 
@@ -230,6 +233,30 @@ Give the name of the bucket as "bucket=NAME".
 
 Continue rendering jobs from this bucket.
 Give the name of the bucket as "bucket=NAME".
+
+=back
+
+=head1 MESSAGES FOR RENDERD
+
+The following messages can be send to a renderd server:
+
+=over 8
+
+=item metatile_render_request
+
+Renders the metatile requested.
+
+=back
+
+=head1 MESSAGES FOR SYNCD
+
+The following messages can be send to a syncd server:
+
+=over 8
+
+=item metatile_render_request
+
+Syncs the metatile file.
 
 =back
 
