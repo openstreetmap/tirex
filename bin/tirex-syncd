@@ -73,7 +73,7 @@ if (! defined($host) || $host eq '') {
 #-----------------------------------------------------------------------------
 if (!$Tirex::DEBUG)
 {
-    chdir('/')                     or die("Can't chdir to /: $!");
+    chdir('/')                     or die("Cannot chdir to /: $!");
     open(STDIN,  '<', '/dev/null') or die("Cannot read /dev/null: $!");
     open(STDOUT, '>', '/dev/null') or die("Cannot write to /dev/null: $!");
     defined(my $pid = fork)        or die("Cannot fork: $!");
