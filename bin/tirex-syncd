@@ -53,6 +53,7 @@ if ($opts{'help'})
 }
 
 $Tirex::DEBUG = $opts{'debug'};
+
 my $dryrun = $opts{'dry-run'};
 
 my $config_file = $opts{'config'} || '/etc/tirex/tirex.conf';
@@ -72,13 +73,13 @@ if (! defined($host) || $host eq '') {
 #-----------------------------------------------------------------------------
 if (!$Tirex::DEBUG)
 {
-    chdir '/' or die "Can't chdir to /: $!";
-    open(STDIN, '<', '/dev/null') or die "Cannot read /dev/null: $!";
-    open(STDOUT, '>', '/dev/null') or die "Cannot write to /dev/null: $!";
-    defined(my $pid = fork) or die "Cannot fork: $!";
+    chdir('/')                     or die("Can't chdir to /: $!");
+    open(STDIN,  '<', '/dev/null') or die("Cannot read /dev/null: $!");
+    open(STDOUT, '>', '/dev/null') or die("Cannot write to /dev/null: $!");
+    defined(my $pid = fork)        or die("Cannot fork: $!");
     exit(0) if $pid;
-    setsid() or die "Cannot start a new session: $!";
-    open(STDERR, '>&STDOUT') or die "Cannot dup stdout: $!";
+    setsid()                       or die("Cannot start a new session: $!");
+    open(STDERR, '>&STDOUT')       or die("Cannot dup stdout: $!");
 }
 
 my $pidfile = Tirex::Config::get('syncd_pidfile', $Tirex::SYNCD_PIDFILE);
