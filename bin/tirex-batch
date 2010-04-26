@@ -70,7 +70,7 @@ my @filters;
 
 foreach my $filter (@filters)
 {
-    if ($filter !~ qr{^exists|not-exists|older\(([^)]+)\)|multi\(2,[01]\)$})
+    if ($filter !~ qr{^(exists|not-exists|older\(([^)]+)\)|multi\(2,[01]\))$})
     {
         print STDERR "unknown filter: $filter\n";
         exit(2);
@@ -81,7 +81,7 @@ if ($Tirex::DEBUG)
 {
     print STDERR "Using prio: $prio\n";
     print STDERR "Using expire: $opts{'expire'}\n" if (exists $opts{'expire'});
-    print STDERR "Using filters: ", join(', ', @filters) ,"\n";
+    print STDERR "Using filters: ", join('; ', @filters) ,"\n";
 }
 
 my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
