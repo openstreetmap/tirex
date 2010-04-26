@@ -25,6 +25,9 @@ port=9330
 # number of processes that should be started
 procs=2
 
+# syslog facility
+syslog_facility=local0
+
 #-----------------------------------------------------------------------------
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
