@@ -134,6 +134,7 @@ sub new_from_configfile
     close($cfgfh);
 
     $config{'renderer'} = Tirex::Renderer->get($config{'renderer'});
+    $config{'filename'} = $filename;
 
     return $class->new(%config);
 }
@@ -153,6 +154,15 @@ Get renderer of this map.
 =cut
 
 sub get_renderer { return shift->{'renderer'}; }
+
+=head2 $map->get_filename()
+
+Get filename of config file for this map. This only works if the map was
+created from a config file. Otherwise it will return undef.
+
+=cut
+
+sub get_filename { return shift->{'filename'}; }
 
 =head2 $map->get_tiledir()
 

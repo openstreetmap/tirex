@@ -102,7 +102,7 @@ sub new_from_socket
 =head2 $msg->reply([RESULT[, ERRMSG]])
 
 Create new message with reply to old one. If RESULT is not given
-it defaults to 'ok'. If ERRMSG is givenm, it is attached to the
+it defaults to 'ok'. If ERRMSG is given, it is attached to the
 message.
 
 You can't send a reply to a reply, so if the original message
