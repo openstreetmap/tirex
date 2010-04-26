@@ -271,6 +271,14 @@ sub filename
 {
     my $self = shift;
 
+    return (Tirex::Config::get('metatile_dir') || '') . '/' . $self->{'map'} . '/' . $self->get_filename();
+}
+
+
+sub get_filename
+{
+    my $self = shift;
+
     my @path_components;
     my $x = $self->{'x'};
     my $y = $self->{'y'};
@@ -286,8 +294,6 @@ sub filename
     }
 
     unshift(@path_components, $self->{'z'});
-    unshift(@path_components, $self->{'map'});
-    unshift(@path_components, Tirex::Config::get('metatile_dir') || '');
 
     return join('/', @path_components) . '.meta';
 }
