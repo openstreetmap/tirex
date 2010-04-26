@@ -38,14 +38,15 @@ is($m1->to_s(), 'Map foo: renderer=mapnik tiledir=/var/lib/tirex/tiles/foo zoom=
 is(Tirex::Map->get('foo'), $m1, 'get');
 is(Tirex::Map->get('bar'), undef, 'get');
 
-is_deeply(Tirex::Map->status(), { 'foo' => {
+is_deeply(Tirex::Map->status(), [
+    {
         name => 'foo',
         tiledir => '/var/lib/tirex/tiles/foo',
         minz => 2,
         maxz => 10,
-        renderer => $r,
+        renderer => $r->get_name(),
     }
-});
+]);
 
 eval { Tirex::Map->new( name => 'foo', renderer => $r, tiledir => '/var/lib/tirex/tiles/foo' ); };
 ($@ =~ qr{exists}) ? pass() : fail();

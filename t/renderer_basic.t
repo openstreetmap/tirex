@@ -38,7 +38,8 @@ is($r1->to_s(), 'Renderer mapnik1: type=mapnik port=1234 procs=3 path=/usr/bin/t
 is(Tirex::Renderer->get('mapnik1'), $r1, 'get');
 is(Tirex::Renderer->get('foo'), undef, 'get');
 
-is_deeply(Tirex::Renderer->status(), { 'mapnik1' => {
+is_deeply(Tirex::Renderer->status(), [
+    {
         name => 'mapnik1',
         type => 'mapnik',
         path => '/usr/bin/tirex-renderer-mapnik',
@@ -48,7 +49,7 @@ is_deeply(Tirex::Renderer->status(), { 'mapnik1' => {
         fontdir_recurse => 0,
         plugindir => '/usr/lib/mapnik/input',
     },
-}, 'status');
+], 'status');
 
 eval { Tirex::Renderer->new( name => 'mapnik1', type => 'mapnik', path => '/usr/bin/tirex-renderer-mapnik', port => 1234, procs => 3, fontdir => '/usr/lib/mapnik/fonts', fontdir_recurse => 0, plugindir => '/usr/lib/mapnik/input' ); };
 ($@ =~ qr{exists}) ? pass() : fail();
