@@ -347,7 +347,7 @@ sub _stat
 {
     my $self = shift;
 
-    $self->{'stat'} = stat($self->filename()) unless (defined $self->{'stat'});
+    $self->{'stat'} = File::stat::stat($self->filename()) unless (defined $self->{'stat'});
 
     return $self->{'stat'};
 }
