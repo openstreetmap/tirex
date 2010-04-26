@@ -156,6 +156,14 @@ Get procs of this renderer.
 
 sub get_procs { return shift->{'procs'}; }
 
+=head2 $rend->get_syslog_facility();
+
+Get syslog facility of this renderer.
+
+=cut
+
+sub get_syslog_facility { return shift->{'syslog_facility'}; }
+
 =head2 $rend->to_s();
 
 Return human readable description of this renderer.
