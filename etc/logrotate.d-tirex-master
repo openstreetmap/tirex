@@ -1,0 +1,9 @@
+# /etc/logrotate.d/tirex-master
+/var/log/tirex/master.log {
+  daily
+  rotate 35
+  dateext
+  compress
+  missingok
+  notifempty
+}
