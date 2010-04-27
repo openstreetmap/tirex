@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------
 #
-#  Konfiguration for dummy map
+#  Konfiguration for dummy renderer
 #
-#  /etc/tirex/maps/dummy.conf
+#  /etc/tirex/renderer/test.conf
 #
 #-----------------------------------------------------------------------------
 
@@ -10,27 +10,27 @@
 #  general configuration
 #-----------------------------------------------------------------------------
 
-# symbolic name of this map
-name=dummy
+# symbolic name
+name=test
 
-# symbolic name of renderer used
-renderer=dummy
+# type of renderer
+type=test
 
-# tile directory
-tiledir=/var/lib/tirex/tiles/dummy
+# path to executable of renderer
+path=/usr/bin/tirex-renderd-dummy
 
-# minimum zoom level allowed
-minz=0
+# UDP port where the master can contact this renderer
+port=9330
 
-# maximum zoom level allowed
-maxz=5
+# number of processes that should be started
+procs=2
+
+# syslog facility
+syslog_facility=local0
 
 #-----------------------------------------------------------------------------
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
-
-# time the renderer should sleep to simulate rendering time
-sleep=5
 
 
 #-- THE END ------------------------------------------------------------------
