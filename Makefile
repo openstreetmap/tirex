@@ -29,6 +29,7 @@ install: build
 	install -m 644 -g root -o root etc/tirex.conf.dist          $(DESTDIR)/etc/tirex/tirex.conf
 	install -m 755 -g root -o root -d                           $(DESTDIR)/etc/tirex/maps
 	install -m 755 -g root -o root -d                           $(DESTDIR)/etc/tirex/renderer
+	install -m 755 -g root -o root -d                           $(DESTDIR)/etc/logrotate.d
 	install -m 644 -g root -o root etc/logrotate.d-tirex-master $(DESTDIR)/etc/logrotate.d/tirex-master
 	install -m 755 -g root -o root -d                           $(DESTDIR)/usr/share/man/man1/
 	install -m 644 -g root -o root man-generated/*.1            $(DESTDIR)/usr/share/man/man1/
