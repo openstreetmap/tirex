@@ -67,5 +67,13 @@ is($r3->get_path(), '/usr/bin/tirex-renderer-mapnik', 'path');
 is($r3->get_port(), 1234, 'port');
 is($r3->get_procs(), 3, 'procs');
 
+is($r3->num_workers(), 0, 'num workers 0');
+$r3->add_worker(123);
+is($r3->num_workers(), 1, 'num workers 1');
+$r3->add_worker(345);
+is($r3->num_workers(), 2, 'num workers 2');
+$r3->remove_worker(123);
+is($r3->num_workers(), 1, 'num workers 1');
+
 
 #-- THE END ------------------------------------------------------------------

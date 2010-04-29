@@ -219,6 +219,47 @@ sub status
     return \@status;
 }
 
+=head2 $rend->add_worker($pid);
+
+Add process id to list of currently running workers.
+
+=cut
+
+sub add_worker
+{
+    my $self = shift;
+    my $pid  = shift;
+
+    $self->{'workers'}->{$pid} = 1;
+}
+
+=head2 $rend->remove_worker($pid);
+
+Remove process id from list of currently running workers.
+
+=cut
+
+sub remove_worker
+{
+    my $self = shift;
+    my $pid  = shift;
+
+    delete $self->{'workers'}->{$pid};
+}
+
+=head2 $rend->num_workers();
+
+Return number of currently running workers.
+
+=cut
+
+sub num_workers
+{
+    my $self = shift;
+
+    return scalar(keys %{$self->{'workers'}});
+}
+
 
 1;
 

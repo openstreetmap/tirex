@@ -17,7 +17,7 @@ name=test
 type=test
 
 # path to executable of renderer
-path=/usr/bin/tirex-renderd-dummy
+path=/usr/bin/tirex-renderd-test
 
 # UDP port where the master can contact this renderer
 port=9330
