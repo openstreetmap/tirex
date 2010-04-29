@@ -4,3 +4,4 @@ usr/share/man/man1/tirex-master.1
 usr/share/man/man3
 usr/share/man/man5
 etc/tirex
+etc/logrotate.d/tirex-master
