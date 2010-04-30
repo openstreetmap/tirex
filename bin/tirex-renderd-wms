@@ -1,0 +1,91 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-renderd-wms
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex;
+use Tirex::Backend::WMS;
+
+#-----------------------------------------------------------------------------
+
+my $backend = Tirex::Backend::WMS->new($0);
+$backend->main();
+
+#-----------------------------------------------------------------------------
+
+__END__
+
+=head1 NAME
+
+tirex-renderd-wms - WMS renderer
+
+=head1 SYNOPSIS
+
+tirex-renderd-wms
+
+=head1 DESCRIPTION
+
+Simple "renderer" that gets the map image from a WMS server. The WMS server
+must support the right SRS (EPSG:3785 or the informal EPSG:900913).
+
+Config parameters for the map file:
+
+=over 8
+
+=item url url prefix
+
+=item layers list of comma-separated layers
+
+=item srs spatial reference system, 'EPSG:3785' etc.
+
+=back
+
+=head1 FILES
+
+=over 4
+
+=item F</etc/tirex/renderer/wms.conf>
+
+The configuration file.
+
+=back
+
+=head1 DIAGNOSTICS
+
+Exits with exit code 1 if something went wrong.
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+#-- THE END ------------------------------------------------------------------

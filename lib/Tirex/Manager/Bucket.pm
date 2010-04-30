@@ -101,7 +101,7 @@ sub get_name
 
 =head2 $bucket->get_numproc()
 
-Returns the number of rendering processes currently working on this jobs in this bucket.
+Returns the number of rendering processes currently working on jobs in this bucket.
 
 =cut
 

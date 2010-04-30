@@ -46,6 +46,7 @@ our $MAX_ZOOM = 30;
 # defaults for config variables (these can also be set in the config file, see there for documentation)
 our $METATILE_COLUMNS = 8;
 our $METATILE_ROWS    = 8;
+our $PIXEL_PER_TILE   = 256;
 our $RENDERD_UDP_PORT = 9320;
 our $SYNCD_UDP_PORT   = 9323;
 
