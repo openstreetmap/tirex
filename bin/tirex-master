@@ -503,12 +503,12 @@ sub read_renderer_and_map_config
 {
     my $dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 
-    foreach my $file (glob("$dir/renderer/*"))
+    foreach my $file (glob("$dir/renderer/*.conf"))
     {
         Tirex::Renderer->new_from_configfile($file);
     }
 
-    foreach my $file (glob("$dir/maps/*"))
+    foreach my $file (glob("$dir/maps/*.conf"))
     {
         Tirex::Map->new_from_configfile($file);
     }
