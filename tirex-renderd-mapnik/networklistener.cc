@@ -145,7 +145,7 @@ void NetworkListener::run()
             }
             else
             {
-                std::map<std::string, RequestHandler *>::const_iterator h = mpRequestHandlers->find(req->getType());
+                std::map<std::string, RequestHandler *>::const_iterator h = mpRequestHandlers->find(req->getParam("map", ""));
                 install_sighup_handler(true);
 
                 if (h != mpRequestHandlers->end())
@@ -154,14 +154,14 @@ void NetworkListener::run()
                     {
                         error("handler returned null");
                         resp = NetworkResponse::makeErrorResponse(req, 
-                            "Handler for request type '%s' encountered an error", req->getType().c_str());
+                            "Handler for map '%s' encountered an error", req->getParam("map", "").c_str());
                     }
                 }
                 else
                 {
-                    error("no handler found for %s", req->getType().c_str());
+                    error("no handler found for map style '%s'", req->getParam("map", "").c_str());
                     resp = NetworkResponse::makeErrorResponse(req,
-                        "No request handler defined for request type '%s'", req->getType().c_str());
+                        "map style '%s' is not known", req->getParam("map", "").c_str());
                 }
                 install_sighup_handler(false);
             }

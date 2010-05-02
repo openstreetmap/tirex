@@ -18,11 +18,13 @@
 #define metatilehandler_included
 
 #include <string>
+#include <mapnik/map.hpp>
 
 #include "requesthandler.h"
 #include "networkrequest.h"
 #include "networkresponse.h"
-#include "mapnikwrapper.h"
+#include "renderrequest.h"
+#include "renderresponse.h"
 
 #define MAXZOOM 25
 
@@ -42,26 +44,25 @@ class MetatileHandler : public RequestHandler
 {
     public:
 
-    MetatileHandler(const std::string& tiledir);
+    MetatileHandler(const std::string& tiledir, const std::string& stylefile);
     ~MetatileHandler();
-    const std::string getRequestType() const { return std::string("metatile_render_request"); }
-    const NetworkResponse *handleRequest(const NetworkRequest *request) const;
-    void xyz_to_meta(char *path, size_t len, const char *tile_dir, const char *map, int x, int y, int z) const;
-    bool mkdirp(const char *tile_dir, const char *map, int x, int y, int z) const;
-    void addMapnikWrapper(const std::string& map, MapnikWrapper *w) { mMapnikWrappers[map] = w; }
+    const NetworkResponse *handleRequest(const NetworkRequest *request);
+    void xyz_to_meta(char *path, size_t len, const char *tile_dir, int x, int y, int z) const;
+    bool mkdirp(const char *tile_dir, int x, int y, int z) const;
+    const std::string getRequestType() const { return "metatile_request"; }
 
     private:
 
     long long fourpow[MAXZOOM];
     long long twopow[MAXZOOM];
+    const RenderResponse *render(const RenderRequest *rr);
 
     unsigned int mTileWidth;
     unsigned int mTileHeight;
     unsigned int mMetaTileRows;
     unsigned int mMetaTileColumns;
     std::string mTileDir;
-
-    std::map<std::string, MapnikWrapper *> mMapnikWrappers;
+    mapnik::Map mMap;
 };
 
 #endif

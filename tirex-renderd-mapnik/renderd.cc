@@ -30,29 +30,78 @@ bool RenderDaemon::loadFonts(const boost::filesystem::path &dir, bool recurse)
     return true;
 }
 
-bool RenderDaemon::loadMapnikWrappers(MetatileHandler *mth, const boost::filesystem::path &dir)
+bool RenderDaemon::loadMapnikWrapper(const char *configfile)
 {
     // create mapnik instances
-    if (!boost::filesystem::exists(dir)) return false;
-    boost::filesystem::directory_iterator end_itr;
     bool rv = false;
-    for (boost::filesystem::directory_iterator itr(dir); itr != end_itr; ++itr)
+    FILE *f = fopen(configfile, "r");
+    if (!f)
     {
-        if (boost::filesystem::extension(*itr) == ".xml")
+        warning("cannot open '%s'", configfile);
+        return rv;
+    }
+
+    char linebuf[255];
+    std::string tiledir;
+    std::string mapfile;
+    std::string stylename;
+    
+    while (char *line = fgets(linebuf, sizeof(linebuf), f))
+    {
+        while (isspace(*line)) line++;
+        if (*line == '#') continue;
+        char *eq = strchr(line, '=');
+        if (eq)
         {
-            try
+            *eq++ = 0;
+            char *last = eq + strlen(eq) - 1;
+            while (last > eq && isspace(*last)) *last-- = 0;
+            printf("_%s_%s_\n", line, eq);
+            if (!strcmp(line, "tiledir"))
             {
-                MapnikWrapper *w = new MapnikWrapper(itr->string());
-                mth->addMapnikWrapper(boost::filesystem::basename(*itr), w);
-                debug("added map %s", boost::filesystem::basename(*itr).c_str());
-                rv = true;
+                tiledir.assign(eq);
             }
-            catch (mapnik::config_error cfgerr)
+            else if (!strcmp(line, "mapfile"))
             {
-                warning("cannot add %s", boost::filesystem::basename(*itr).c_str());
-                warning("%s", cfgerr.what());
+                mapfile.assign(eq);
+            }
+            else if (!strcmp(line, "name"))
+            {
+                stylename.assign(eq);
             }
         }
+    }
+    fclose(f);
+
+    if (mapfile.empty())
+    {
+        warning("cannot add %s: missing mapfile option", configfile);
+        return rv;
+    }
+
+    if (tiledir.empty())
+    {
+        warning("cannot add %s: missing tiledir option", configfile);
+        return rv;
+    }
+
+    if (stylename.empty())
+    {
+        warning("cannot add %s: missing name option", configfile);
+        return rv;
+    }
+
+    try
+    {
+        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile);
+        mHandlerMap[stylename]->addStatusReceiver(this);
+        debug("added style %d from map %s", stylename.c_str(), configfile);
+        rv = true;
+    }
+    catch (mapnik::config_error cfgerr)
+    {
+        warning("cannot add %s", configfile);
+        warning("%s", cfgerr.what());
     }
     return rv;
 }
@@ -68,26 +117,10 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     desc.add_options()
         ("help", 
             "produce help message")
-        ("port", po::value<int>()->default_value(9320), 
-            "UDP port to listen on")
-        ("sockfd", po::value<int>()->default_value(-1), 
-            "file descriptor of an already-opened UDP socket (supersedes --port)")
-        ("parentfd", po::value<int>()->default_value(-1), 
-            "file descriptor to send alive messages to")
-        ("mapdir", po::value<std::string>()->default_value("/etc/mapnik-osm-data/"),
-            "directory where to find Mapnik map files")
-        ("plugindir", po::value<std::string>()->default_value("/usr/lib/mapnik/input"), 
-            "directory where to find Mapnik datasource plugins")
-        ("fontdir", po::value<std::string>()->default_value("/usr/lib/mapnik/fonts"),
-            "directory to load fonts from")
-        ("fontdir-recurse", po::value<bool>()->default_value(false), 
-            "for recursing font directory")
-        ("tiledir", po::value<std::string>()->default_value("/var/lib/tirex/tiles"), 
-            "directory where to store meta tiles")
-        ("syslog", po::value<std::string>()->default_value("daemon"), 
-            "syslog facility for logging")
         ("debug", 
             "activate debug logging")
+        ("syslog", po::value<std::string>()->default_value("daemon"), 
+            "syslog facility for logging")
     ;
 
     po::variables_map vm;
@@ -123,21 +156,38 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     }
     openlog("tirex-renderd-mapnik", Debuggable::msDebugLogging ? LOG_PERROR|LOG_PID : LOG_PID, fac);
 
-    mSocketFd = vm["sockfd"].as<int>();
-    mParentFd = vm["parentfd"].as<int>();
-    mPort = vm["port"].as<int>();
+    char *tmp = getenv("TIREX_RENDERD_SOCKET_FILENO");
+    mSocketFd = tmp ? atoi(tmp) : -1;
 
-    mapnik::datasource_cache::instance()->register_datasources(vm["plugindir"].as<std::string>());
-    loadFonts(vm["fontdir"].as<std::string>(), vm["fontdir-recurse"].as<bool>());
+    tmp = getenv("TIREX_RENDERD_PIPE_FILENO");
+    mParentFd = tmp ? atoi(tmp) : -1;
 
-    // create handlers for requests
-    MetatileHandler *mth = new MetatileHandler(vm["tiledir"].as<std::string>());
-    if (!loadMapnikWrappers(mth, vm["mapdir"].as<std::string>()))
+    tmp = getenv("TIREX_RENDERD_PORT");
+    mPort = tmp ? atoi(tmp) : 9320;
+
+    tmp = getenv("TIREX_RENDERD_CFG_plugindir");
+    if (tmp) mapnik::datasource_cache::instance()->register_datasources(tmp);
+
+    tmp = getenv("TIREX_RENDERD_CFG_fondir_recurse");
+    bool fr = tmp ? atoi(tmp) : false;
+    tmp = getenv("TIREX_RENDERD_CFG_fondir");
+    if (tmp) loadFonts(tmp, fr);
+
+    tmp = getenv("TIREX_RENDERD_MAPFILES");
+    if (tmp)
     {
-        die("Cannot load any Mapnik styles (*.xml) from %s", vm["mapdir"].as<std::string>().c_str());
+        char *dup = strdup(tmp);
+        char *tkn = strtok(dup, " ");
+        while (tkn)
+        {
+            loadMapnikWrapper(tkn);
+            tkn = strtok(NULL, " ");
+        }
     }
-    mHandlerMap[mth->getRequestType()] = mth;
-    mth->addStatusReceiver(this);
+
+    if (mHandlerMap.empty())
+        die("Cannot load any Mapnik styles");
+
 }
 
 RenderDaemon::~RenderDaemon() 

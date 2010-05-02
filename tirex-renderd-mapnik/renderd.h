@@ -15,7 +15,7 @@ class RenderDaemon : public Mortal, public Debuggable, public StatusReceiver
     private:
 
     bool loadFonts(const boost::filesystem::path &dir, bool recurse);
-    bool loadMapnikWrappers(MetatileHandler *mth, const boost::filesystem::path &dir);
+    bool loadMapnikWrapper(const char *file);
     int mPort;
     int mSocketFd;
     int mParentFd;
