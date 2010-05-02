@@ -1,0 +1,35 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for mapnik map
+#
+#  /etc/tirex/maps/mapnik.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  general configuration
+#-----------------------------------------------------------------------------
+
+# symbolic name of this map
+name=default
+
+# symbolic name of renderer used
+renderer=mapnik
+
+# tile directory
+tiledir=/var/lib/tirex/tiles/default
+
+# minimum zoom level allowed
+minz=0
+
+# maximum zoom level allowed
+maxz=10
+
+#-----------------------------------------------------------------------------
+#  renderer specific configuration
+#-----------------------------------------------------------------------------
+
+mapfile=/etc/mapnik-osm-data/default.xml
+
+
+#-- THE END ------------------------------------------------------------------
