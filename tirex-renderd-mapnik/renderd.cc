@@ -146,9 +146,9 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     tmp = getenv("TIREX_RENDERD_CFG_plugindir");
     if (tmp) mapnik::datasource_cache::instance()->register_datasources(tmp);
 
-    tmp = getenv("TIREX_RENDERD_CFG_fondir_recurse");
+    tmp = getenv("TIREX_RENDERD_CFG_fontdir_recurse");
     bool fr = tmp ? atoi(tmp) : false;
-    tmp = getenv("TIREX_RENDERD_CFG_fondir");
+    tmp = getenv("TIREX_RENDERD_CFG_fontdir");
     if (tmp) loadFonts(tmp, fr);
 
     tmp = getenv("TIREX_RENDERD_MAPFILES");
