@@ -54,10 +54,11 @@ our $MODTILE_SOCK = "/var/lib/tirex/modtile.sock";
 our $MODTILE_PERM = 0666;
 
 our $MASTER_UDP_PORT          = 9322;
-our $MASTER_SYSLOG_FACILITY   = 'local0';
+our $MASTER_SYSLOG_FACILITY   = 'daemon';
+our $RENDERD_SYSLOG_FACILITY  = 'daemon';
 our $MASTER_PIDFILE           = '/var/run/tirex/tirex-master.pid';
 our $SYNCD_PIDFILE            = '/var/run/tirex/tirex-syncd.pid';
-our $RENDERD_PIDFILE          = '/var/run/tirex/tirex-renderd-starter.pid';
+our $RENDERD_PIDFILE          = '/var/run/tirex/tirex-renderd-manager.pid';
 our $MASTER_LOGFILE           = '/var/log/tirex/jobs.log';
 our $TIREX_CONFIGDIR          = '/etc/tirex';
 our $TIREX_CONFIGFILENAME     = 'tirex.conf';
@@ -65,7 +66,11 @@ our $TIREX_CONFIGFILE         = $TIREX_CONFIGDIR . '/' . $TIREX_CONFIGFILENAME;
 our $MASTER_RENDERING_TIMEOUT = 10; # minutes
 our $RENDERD_ALIVE_TIMEOUT    = 8; # minutes - make this a tad smaller than the above
 
+our $EXIT_CODE_RESTART = 1;
+our $EXIT_CODE_DISABLE = 10;
+
 # set dummy to enable built-in dummy renderer
+# XXX THIS SHOULD BE REMOVED SOON
 our $RENDERD_DUMMY            = 0;
 our $RENDERD_DUMMY_SLEEPTIME  = 2;
 our $RENDERD_PROCESSES        = 5;

@@ -32,6 +32,23 @@ This class defines methods to configure renderers.
 
 =head1 METHODS
 
+=head2 Tirex::Renderer->read_config_dir($dir)
+
+Read all renderer configs in given config directory.
+
+=cut
+
+sub read_config_dir
+{
+    my $class = shift;
+    my $dir   = shift;
+
+    foreach my $file (glob("$dir/renderer/*.conf"))
+    {
+        $class->new_from_configfile($file);
+    }
+}
+
 =head2 Tirex::Renderer->get('foo')
 
 Get renderer by name.

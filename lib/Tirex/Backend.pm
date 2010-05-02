@@ -71,13 +71,13 @@ sub main
 {
     my $self = shift;
 
-    my $renderer_name   = $ENV{'TIREX_RENDERD_NAME'}            or die("missing TIREX_RENDERD_NAME\n");
-    my $port            = $ENV{'TIREX_RENDERD_PORT'}            or die("missing TIREX_RENDERD_PORT\n");
-    my $syslog_facility = $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} or die("missing TIREX_RENDERD_SYSLOG_FACILITY\n");
-    my $mapfiles        = $ENV{'TIREX_RENDERD_MAPFILES'}        or die("missing TIREX_RENDERD_MAPFILES\n");
-    my $debug           = $ENV{'TIREX_RENDERD_DEBUG'}           or die("missing TIREX_RENDERD_DEBUG\n");
-    my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or die("missing TIREX_RENDERD_PIPE_FILENO\n");
-    my $alive_timeout   = $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   or die("missing TIREX_RENDERD_ALIVE_TIMEOUT\n");
+    my $renderer_name   = $ENV{'TIREX_RENDERD_NAME'}            or $self->error_disable('missing TIREX_RENDERD_NAME');
+    my $port            = $ENV{'TIREX_RENDERD_PORT'}            or $self->error_disable('missing TIREX_RENDERD_PORT');
+    my $syslog_facility = $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} or $self->error_disable('missing TIREX_RENDERD_SYSLOG_FACILITY');
+    my $mapfiles        = $ENV{'TIREX_RENDERD_MAPFILES'}        or $self->error_disable('missing TIREX_RENDERD_MAPFILES');
+    my $debug           = $ENV{'TIREX_RENDERD_DEBUG'}           or $self->error_disable('missing TIREX_RENDERD_DEBUG');
+    my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or $self->error_disable('missing TIREX_RENDERD_PIPE_FILENO');
+    my $alive_timeout   = $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_RENDERD_ALIVE_TIMEOUT');
 
     my @mapfiles = split(' ', $mapfiles);
 
@@ -105,7 +105,7 @@ sub main
         LocalPort => $port, 
         Proto     => 'udp', 
         ReuseAddr => 1,
-    ) or die("Cannot open UDP socket: :$!\n");
+    ) or $self->error_disable("Cannot open UDP socket: :$!");
 
     $SIG{'HUP'}  = \&Tirex::Backend::signal_handler;
     $SIG{'TERM'} = \&Tirex::Backend::signal_handler;
@@ -127,8 +127,7 @@ sub main
         if (! $msg)
         {
             next if ($!{'EINTR'});
-            ::syslog('err', "error reading from socket: $!");
-            exit(1);
+            $self->error_restart("error reading from socket: $!");
         }
 
         alarm(0);
@@ -157,7 +156,7 @@ sub main
             ::syslog('err', 'unknown map: %s', $msg->{'map'});
             $msg = $msg->reply('ERROR_UNKNOWN_MAP', "The map " . $msg->{'map'} . " is unknown to renderer " . $renderer_name);
         }
-        $msg->send($socket) or die("error when sending: $!\n");
+        $msg->send($socket) or $self->error_restart("error when sending: $!");
 
         ::syslog('debug', 'done with request');
     }
@@ -231,10 +230,10 @@ sub write_metatile
     (my $dirname = $filename) =~ s{/[^/]*$}{};
     if (! -d $dirname)
     {
-        File::Path::mkpath($dirname) or die("Can't create path $dirname: $!\n");
+        File::Path::mkpath($dirname) or $self->error_disable("Can't create path $dirname: $!");
     }
 
-    open(METATILE, '>', $filename) or die("Can't open $filename: $!\n");
+    open(METATILE, '>', $filename) or $self->error_disable("Can't open $filename: $!");
     binmode(METATILE);
     print METATILE $meta;
     close(METATILE);
@@ -276,6 +275,24 @@ sub create_error_image
     }
 
     return $image;
+}
+
+sub error_restart
+{
+    my $self = shift;
+
+    ::syslog('err', @_);
+
+    exit($Tirex::EXIT_CODE_RESTART);
+}
+
+sub error_disable
+{
+    my $self = shift;
+
+    ::syslog('err', @_);
+
+    exit($Tirex::EXIT_CODE_DISABLE);
 }
 
 #-----------------------------------------------------------------------------

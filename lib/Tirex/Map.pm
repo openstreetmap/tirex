@@ -34,6 +34,24 @@ can be more options.
 
 =head1 METHODS
 
+=head2 Tirex::Map->read_config_dir($dir)
+
+Read all map configs in given config directory.
+
+=cut
+
+sub read_config_dir
+{
+    my $class = shift;
+    my $dir   = shift;
+
+    foreach my $file (glob("$dir/maps/*.conf"))
+    {
+        $class->new_from_configfile($file);
+    }
+}
+
+
 =head2 Tirex::Map->get('foo')
 
 Get map by name.

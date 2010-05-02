@@ -29,18 +29,29 @@ master_pidfile=/var/run/tirex/tirex-master.pid
 # The syncd process writes its process ID into this file
 syncd_pidfile=/tmp/tirex-syncd.pid
 
+# The renderd-manager writes its process ID into this file
+renderd_pidfile=/var/run/tirex/tirex-renderd-manager.pid
+
 # Syslog facility used in master.
 master_syslog_facility=local0
+
+# Syslog facility used by renderd-manager
+renderd_syslog_facility=local0
 
 # Logfile where all rendered jobs are logged.
 master_logfile=/var/log/tirex/master.log
 
 # If the rendering of a metatile takes more than this many minutes the master
 # gives up on it and removes the job from the list of currently rendering tiles.
-# This must be larger than the timeout in tirex-renderd-starter and should be
-# larger than the rendering of any tile can need. Its only used to make sure
-# that a rendering process that is long gone doesn't take up ressources forever.
+# This must be larger than renderd_alive_timeout and should be larger than
+# the rendering of any tile can need. Its only used to make sure that a
+# rendering process that is long gone doesn't take up resources forever.
 master_rendering_timeout=10
+
+# If a rendering process doesn't send an alive message in this many minutes
+# to the renderd-manager, it will be killed by the manager. Make this smaller
+# than master_rendering_timeout.
+renderd_alive_timeout=8
 
 # The name of the UNIX domain socket for communicating with ModTile.
 modtile_socket_name=/var/run/tirex/modtile_sock

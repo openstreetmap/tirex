@@ -6,14 +6,6 @@
 #  tirex-renderd-manager
 #
 #-----------------------------------------------------------------------------
-#
-#  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#
-#  ALPHA version of new renderd starter. not usable yet!
-#
-#  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-#
-#-----------------------------------------------------------------------------
 #  See end of this file for documentation.
 #-----------------------------------------------------------------------------
 #
@@ -71,43 +63,27 @@ if ($opts{'help'})
     );
 }
 
-if ($opts{'debug'})
-{
-    $Tirex::DEBUG = $opts{'debug'};
-}
+$Tirex::DEBUG = $opts{'debug'} if ($opts{'debug'});
 
-my $config_file = ($opts{'config'} || $Tirex::TIREX_CONFIGDIR) . '/' . $Tirex::TIREX_CONFIGFILENAME;
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
-read_renderer_and_map_config();
-
+#-----------------------------------------------------------------------------
+# Initialize logging
 #-----------------------------------------------------------------------------
 
-my $port = Tirex::Config::get('renderd_udp_port', $Tirex::RENDERD_UDP_PORT, qr{^[1-9][0-9]{0,4}$});
-my $pidfile = $Tirex::RENDERD_PIDFILE;
+openlog('tirex-renderd-manager', $Tirex::DEBUG ? 'pid|perror' : 'pid',
+    Tirex::Config::get('renderd_syslog_facility', $Tirex::RENDERD_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
 
-# children must check in every so often; note they will not check
-# in during tile rendering so allow ample time.
-my $alive_timeout = $Tirex::RENDERD_ALIVE_TIMEOUT * 60;
+syslog('info', 'tirex-renderd-manager started');
 
-# a child that has been sent a signal must react this quickly
-my $hangup_timeout = 15;
-my $term_timeout = 2;
+Tirex::Config::dump_to_syslog();
 
 #-----------------------------------------------------------------------------
-# create socket for children to send heartbeat to
+# Daemonize unless in debug mode
 #-----------------------------------------------------------------------------
-my $socket = IO::Socket::INET->new(
-    LocalAddr => 'localhost', 
-    LocalPort => $port, 
-    Proto     => 'udp', 
-    ReuseAddr => 1) or die("Cannot open UDP socket: :$!\n");
-$socket->fcntl(F_SETFD, 0); # unset close-on-exec
-# XXX push(@worker_args, "--sockfd", $socket->fileno());
 
-#-----------------------------------------------------------------------------
-# daemonize and create pidfile
-#-----------------------------------------------------------------------------
 if (! $Tirex::DEBUG)
 {
     chdir('/')                     or die("Cannot chdir to /: $!");
@@ -119,29 +95,53 @@ if (! $Tirex::DEBUG)
     open(STDERR, '>&STDOUT')       or die("Cannot dup stdout: $!");
 }
 
-# open pidfile, ignore if this fails
-# we'd rather go on without a pidfile than stopping the show
+#-----------------------------------------------------------------------------
+# Write pid to pidfile
+#-----------------------------------------------------------------------------
+my $pidfile = Tirex::Config::get('renderd_pidfile', $Tirex::RENDERD_PIDFILE);
+
 if (open(my $pidfh, '>', $pidfile)) 
 {
     print $pidfh "$$\n";
     close($pidfh);
 }
+else
+{
+    syslog('err', "Can't open pidfile '$pidfile' for writing: $!\n");
+    # keep going, we'd rather go on without a pidfile than stopping the show
+}
 
 #-----------------------------------------------------------------------------
+# Set signal handler
 #-----------------------------------------------------------------------------
+
 $SIG{CHLD} = \&sigchld_handler;
 $SIG{HUP}  = \&sighup_handler;
 $SIG{TERM} = \&sigterm_handler;
 $SIG{INT}  = \&sigterm_handler;
 
-openlog('tirex-renderd-manager', $Tirex::DEBUG ? 'pid|perror' : 'pid', 'daemon');
-syslog('info', 'tirex-renderd-manager started');
+#-----------------------------------------------------------------------------
+# Read renderer and map config
+#-----------------------------------------------------------------------------
+
+Tirex::Renderer->read_config_dir($config_dir);
+Tirex::Map->read_config_dir($config_dir);
 
 my @renderers = Tirex::Renderer->all();
-syslog('info', 'found config for renderers: %s', join(' ', map { $_->get_name(); } @renderers));
+syslog('info', 'Found config for renderers: %s', join(' ', map { $_->get_name(); } @renderers));
+
+#-----------------------------------------------------------------------------
 
 my $workers = {};
 my @closed_children = ();
+
+# children must check in every so often; note they will not check
+# in during tile rendering so allow ample time.
+my $alive_timeout = Tirex::Config::get('renderd_alive_timeout', $Tirex::RENDERD_ALIVE_TIMEOUT) * 60; # minutes -> seconds
+
+# a child that has been sent a signal must react this quickly
+my $hangup_timeout = 15;
+my $term_timeout = 5;
 
 while (1)
 {
@@ -164,10 +164,9 @@ while (1)
 
                 execute_renderer($renderer, $pipe->fileno());
 
-                # if we are here the execute failed, send the parent a notice so that he can disable the renderer
-                $pipe->write('X', 1);
-
-                exit(0);
+                # if we are here the execute failed
+                ::syslog('err', "Cannot execute renderer %s (%s)", $renderer->get_name(), $renderer->get_path());
+                exit($Tirex::EXIT_CODE_DISABLE);
             }
             elsif ($pid > 0) # parent
             {
@@ -205,18 +204,6 @@ while (1)
         if (length($buf) > 0)
         {
             $worker->{'last_contact'} = $now;
-        }
-        if ($buf =~ /X/)
-        {
-            my $renderer = $worker->{'renderer'};
-            syslog('crit', 'cannot execute renderer %s (%s). disabled.', $renderer->get_name(), $renderer->get_path());
-            @renderers = grep { $_ ne $renderer } @renderers;
-        }
-        if ($buf =~ /C/)
-        {
-            my $renderer = $worker->{'renderer'};
-            syslog('crit', 'cannot configure renderer %s (%s). disabled.', $renderer->get_name());
-            @renderers = grep { $_ ne $renderer } @renderers;
         }
     }
 
@@ -286,15 +273,25 @@ sub sigchld_handler
 {
     while ((my $child = waitpid(-1, WNOHANG)) > 0) 
     {
-        syslog('warning', 'child %d terminated (%d)', $child, $?);
+        my $status = $?;
+        syslog('warning', 'child %d terminated (%d)', $child, $status);
         push(@closed_children, $child);
+
+        # if the return code of the child is 10, the renderer is disabled
+        if ($status == 10)
+        {
+            my $renderer = $workers->{$child}->{'renderer'};
+            @renderers = grep { $_ ne $renderer } @renderers;
+        }
     }
+
     $SIG{'CHLD'} = \&sigchld_handler;
 }
 
 sub sighup_handler 
 {
     syslog('info', 'hangup received, forwarding to children: %s', join(' ', keys %$workers));
+#XXX we should re-read the config files here
     foreach my $pid (keys %$workers)
     {
         kill('HUP', $pid);
@@ -312,22 +309,6 @@ sub sigterm_handler
     exit(0);
 }
 
-
-#-----------------------------------------------------------------------------
-sub read_renderer_and_map_config
-{
-    my $dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
-
-    foreach my $file (glob("$dir/renderer/*.conf"))
-    {
-        Tirex::Renderer->new_from_configfile($file);
-    }
-
-    foreach my $file (glob("$dir/maps/*.conf"))
-    {
-        Tirex::Map->new_from_configfile($file);
-    }
-}
 
 __END__
 
@@ -351,68 +332,32 @@ Display help message.
 
 Run in debug mode, and pass on the debug flag to spawned processes
 
-=item B<--config=FILE>
+=item B<--config=DIR>
 
-Use the config file FILE instead of /etc/tirex/tirex.conf.
-
-=item B<--dummy>
-
-Start a dummy rendering process instead of the real thing.
-
-=item B<--dummy-sleeptime=I<seconds>>
-
-Instruct the dummy renderer to wait for I<seconds> seconds before answering
-a request.
-
-=item further command line options
-
-All other command line options are passed on verbatim to the renderer process
-being started.
+Use the DIR config directory instead of /etc/tirex.
 
 =back
 
 =head1 DESCRIPTION
 
-tirex-renderd-starter runs the renderd starter. This is usually done
-from within an /etc/init.d script. The renderd starter spawns as many
-tirex-renderd processes as given in the configuration, and monitors
-them.
+tirex-renderd-manager starts as many tirex-renderd processes as given in the
+configuration, and monitors them.
 
-The renderd starter does not handle render requests in any way; these
+The renderd manager does not handle render requests in any way; these
 are read directly from a local UDP socket by the individual tirex-ren-
 derd processes.
 
-The renderd starter expects each tirex-renderd process to send an
+The renderd manager expects each tirex-renderd process to send an
 "alive" message in regular intervals, and will kill the process if it
 does not do so in time.
 
-In addition, if the starter receives a HANGUP signal, it will relay
+In addition, if the manager receives a HANGUP signal, it will relay
 this signal to all tirex-renderd children, causing them to exit after
 completing their current request.
-
-If the starter receives a KILL signal, it will send a HANGUP signal to
-all tirex-renderd children and then exit.
-
-opens a socket and binds it to the proper port (usually 9320),
-then starts a number of /usr/bin/tirex-renderd processes
-(the number can be configured using the renderd_processes option).
-These children are all options received by this script, plus
-an additional "--sockfd" option with the file descriptor of the 
-socket opened, and a "--parentfd" with the file descriptor of 
-a pipe that the child can use to send messages to the starter.
-
-When children die, they are restarted.
-
-If children freeze (and stop sending "alive" messages) they are
-killed.
 
 If this process receives a HUP or TERM signal, it sends a HUP signal 
 to all children and continues (if the signal received was HUP) or
 terminates (if TERM).
-
-For debugging you can set the config option renderd_dummy to 1. This
-still forks but instead of rendering just waits for a number of
-seconds (specified in the config option renderd_dummy_sleeptime).
 
 =head1 FILES
 
@@ -427,7 +372,7 @@ The configuration file. See tirex.conf(5) for further details.
 =head1 DIAGNOSTICS
 
 The renderd starter logs to the I<daemon> syslog facility unless configured
-otherwise. In debug mode, logging is also copied to stdout.
+otherwise. In debug mode, logging is also copied to stderr.
 
 =head1 AUTHORS
 

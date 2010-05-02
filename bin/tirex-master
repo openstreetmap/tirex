@@ -53,8 +53,6 @@ use Tirex::Map;
 
 die('refusing to run as root') if ($< == 0);
 
-my $started = time();
-
 #-----------------------------------------------------------------------------
 # Reading command line and config
 #-----------------------------------------------------------------------------
@@ -71,12 +69,10 @@ if ($opts{'help'})
     );
 }
 
-if ($opts{'debug'})
-{
-    $Tirex::DEBUG = $opts{'debug'};
-}
+$Tirex::DEBUG = $opts{'debug'} if ($opts{'debug'});
 
-my $config_file = ($opts{'config'} || $Tirex::TIREX_CONFIGDIR) . '/' . $Tirex::TIREX_CONFIGFILENAME;
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
@@ -86,13 +82,16 @@ Tirex::Config::init($config_file);
 openlog('tirex-master', $Tirex::DEBUG ? 'pid|perror' : 'pid', 
     Tirex::Config::get('master_syslog_facility', $Tirex::MASTER_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
 
-syslog('info', 'Tirex master started');
+syslog('info', 'tirex-master started');
+
 Tirex::Config::dump_to_syslog();
 
 #-----------------------------------------------------------------------------
 # Read renderer and map config
 #-----------------------------------------------------------------------------
-read_renderer_and_map_config();
+
+Tirex::Renderer->read_config_dir($config_dir);
+Tirex::Map->read_config_dir($config_dir);
 
 foreach my $renderer (Tirex::Renderer->all()) {
     syslog('info', $renderer->to_s());
@@ -143,23 +142,34 @@ if (Tirex::Config::get('sync_to_host')) {
 }
 
 #-----------------------------------------------------------------------------
-# Daemonize and create pidfile
+# Daemonize unless in debug mode
 #-----------------------------------------------------------------------------
 if (!$Tirex::DEBUG)
 {
-    chdir '/' or die "Can't chdir to /: $!";
-    open(STDIN, '<', '/dev/null') or die "Cannot read /dev/null: $!";
-    open(STDOUT, '>', '/dev/null') or die "Cannot write to /dev/null: $!";
-    defined(my $pid = fork) or die "Cannot fork: $!";
-    exit(0) if $pid;
-    setsid() or die "Cannot start a new session: $!";
-    open(STDERR, '>&STDOUT') or die "Cannot dup stdout: $!";
+    chdir('/')                     or die("Cannot chdir to /: $!");
+    open(STDIN,  '<', '/dev/null') or die("Cannot read from /dev/null: $!");
+    open(STDOUT, '>', '/dev/null') or die("Cannot write to /dev/null: $!");
+    defined(my $pid = fork)        or die("Cannot fork: $!");
+    exit(0) if ($pid);
+    setsid()                       or die("Cannot start a new session: $!");
+    open(STDERR, '>&STDOUT')       or die("Cannot dup stdout: $!");
 }
 
+#-----------------------------------------------------------------------------
+# Write pid to pidfile
+#-----------------------------------------------------------------------------
 my $pidfile = Tirex::Config::get('master_pidfile', $Tirex::MASTER_PIDFILE);
-open(my $pidfh, '>', $pidfile) or syslog('err', "Can't open pidfile '$pidfile' for writing: $!\n");
-print $pidfh "$$\n";
-close($pidfh);
+
+if (open(my $pidfh, '>', $pidfile)) 
+{
+    print $pidfh "$$\n";
+    close($pidfh);
+}
+else
+{
+    syslog('err', "Can't open pidfile '$pidfile' for writing: $!\n");
+    # keep going, we'd rather go on without a pidfile than stopping the show
+}
 
 #-----------------------------------------------------------------------------
 # Initialize status, queue, and rendering manager
@@ -190,6 +200,8 @@ $SIG{HUP}  = \&sighup_handler;
 
 # run main loop in eval() since Perl socket operations are notorious for
 # calling croak() when unhappy; if they do, we want to know what happened.
+
+my $started = time();
 
 eval { main_loop() };
 if ($@)
@@ -495,22 +507,6 @@ sub log_job
     else
     {
         syslog('err', "Can't write to logfile '$logfile': $!");
-    }
-}
-
-#-----------------------------------------------------------------------------
-sub read_renderer_and_map_config
-{
-    my $dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
-
-    foreach my $file (glob("$dir/renderer/*.conf"))
-    {
-        Tirex::Renderer->new_from_configfile($file);
-    }
-
-    foreach my $file (glob("$dir/maps/*.conf"))
-    {
-        Tirex::Map->new_from_configfile($file);
     }
 }
 
