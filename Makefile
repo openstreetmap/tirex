@@ -54,3 +54,15 @@ clean: Makefile.perl
 	rm -f configure-stamp
 	rm -rf blib man-generated
 
+htmldoc:
+	rm -fr htmldoc
+	mkdir -p htmldoc
+	for pod in `find bin -type f | grep -v '\.'`; do \
+        mkdir -p htmldoc/`dirname $$pod` ;\
+	    pod2html --css=foo.css --htmldir=htmldoc --podpath=lib:bin:doc --infile=$$pod --outfile=htmldoc/$$pod.html; \
+	done
+	for pod in `find lib -name \*.pm`; do \
+        mkdir -p htmldoc/`dirname $$pod` ;\
+	    pod2html --htmldir=htmldoc --podpath=lib:bin:doc --infile=$$pod --outfile=htmldoc/$${pod%.pm}.html; \
+	done
+
