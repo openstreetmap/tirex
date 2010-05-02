@@ -84,7 +84,8 @@ if ($Tirex::DEBUG)
     print STDERR "Using filters: ", join('; ', @filters) ,"\n";
 }
 
-my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
@@ -285,9 +286,9 @@ Display help message.
 
 Run in debug mode. You'll see the actual messages sent and received.
 
-=item B<-c>, B<--config=FILE>
+=item B<-c>, B<--config=DIR>
 
-Use the config file FILE instead of /etc/tirex/tirex.conf.
+Use the config directory DIR instead of /etc/tirex.
 
 =item B<-n>, B<--num=NUM>
 

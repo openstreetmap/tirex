@@ -40,11 +40,11 @@ use Tirex;
 use Tirex::Status;
 
 #-----------------------------------------------------------------------------
-# Reading command line and config
+# Reading command line
 #-----------------------------------------------------------------------------
 
 my %opts = ( raw => 0, once => 0 );
-GetOptions( \%opts, 'help|h', 'config|c=s', 'once|o', 'raw|r' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'once|o', 'raw|r' ) or exit(2);
 
 if ($opts{'help'})
 {
@@ -298,10 +298,6 @@ tirex-status [OPTIONS]
 
 Display help message.
 
-=item B<-c>, B<--config=DIR>
-
-Use the config directory DIR instead of /etc/tirex.
-
 =item B<-o>, B<--once>
 
 Show status only once, default is to show it once per second.
@@ -321,13 +317,6 @@ and uses ANSI control codes for colour, unless you specify the --raw option.
 
 =head1 FILES
 
-=over 8
-
-=item F</etc/tirex/tirex.conf>
-
-The configuration file. See tirex.conf(5) for further details.
-
-=back
 
 =head1 DIAGNOSTICS
 

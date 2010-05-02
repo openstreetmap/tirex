@@ -56,8 +56,8 @@ $Tirex::DEBUG = $opts{'debug'};
 
 my $dryrun = $opts{'dry-run'};
 
-my $config_file = $opts{'config'} || '/etc/tirex/tirex.conf';
-
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
 my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', LocalPort => $Tirex::SYNCD_UDP_PORT, Proto => 'udp', ReuseAddr => 1 ) or die("Can't open UDP socket: :$!\n");
@@ -132,9 +132,9 @@ Display help message.
 
 Run in debug mode.
 
-=item B<-c>, B<--config=FILE>
+=item B<-c>, B<--config=DIR>
 
-Use the config file FILE instead of /etc/tirex/tirex.conf.
+Use the config directory DIR instead of /etc/tirex.
 
 =item B<-n>, B<--dry-run>
 

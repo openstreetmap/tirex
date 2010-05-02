@@ -82,7 +82,8 @@ elsif ($opts{'stats'})
     $fh_stats = IO::File->new($opts{'stats'}, 'w') or die("Can't open stats file '$opts{'stats'}': $!\n");
 }
 
-my $config_file = $opts{'config'} || $Tirex::TIREX_CONFIGFILE;
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
@@ -238,9 +239,9 @@ tirex-tiledir-check [OPTIONS]
 
 Display help message.
 
-=item B<-c>, B<--config=FILE>
+=item B<-c>, B<--config=DIR>
 
-Use the config file FILE instead of /etc/tirex/tirex.conf.
+Use the config directory DIR instead of /etc/tirex.
 
 =item B<-l>, B<--list=FILE>
 
