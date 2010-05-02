@@ -118,7 +118,7 @@ sub new_from_configfile
 
 =head2 $rend->get_config()
 
-Return hash with renderer specific configuration.
+Return hash with renderer-specific configuration.
 
 =cut
 
@@ -128,7 +128,7 @@ sub get_config
 
     my $cfg = {};
 
-    foreach my $key (%$self)
+    foreach my $key (keys %$self)
     {
         next if ($key =~ /^(name|type|path|port|procs|syslog_facility)$/);
         $cfg->{$key} = $self->{$key};

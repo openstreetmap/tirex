@@ -32,6 +32,11 @@ is($r1->get_type(), 'mapnik', 'type');
 is($r1->get_path(), '/usr/bin/tirex-renderer-mapnik', 'path');
 is($r1->get_port(), 1234, 'port');
 is($r1->get_procs(), 3, 'procs');
+is_deeply($r1->get_config(), {
+    fontdir => '/usr/lib/mapnik/fonts',
+    fontdir_recurse => 0,
+    plugindir => '/usr/lib/mapnik/input'
+}, 'config');
 
 is($r1->to_s(), 'Renderer mapnik1: type=mapnik port=1234 procs=3 path=/usr/bin/tirex-renderer-mapnik fontdir=/usr/lib/mapnik/fonts fontdir_recurse=0 plugindir=/usr/lib/mapnik/input', 'to_s');
 
