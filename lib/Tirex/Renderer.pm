@@ -116,6 +116,27 @@ sub new_from_configfile
     return $class->new(%config);
 }
 
+=head2 $rend->get_config()
+
+Return hash with renderer specific configuration.
+
+=cut
+
+sub get_config
+{
+    my $self = shift;
+
+    my $cfg = {};
+
+    foreach my $key (%$self)
+    {
+        next if ($key =~ /^(name|type|path|port|procs|syslog_facility)$/);
+        $cfg->{$key} = $self->{$key};
+    }
+    
+    return $cfg;
+}
+
 =head2 $rend->get_name();
 
 Get name of this renderer.

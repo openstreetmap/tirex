@@ -270,6 +270,11 @@ sub execute_renderer
     $ENV{'TIREX_RENDERD_PIPE_FILENO'}     = $pipe_fileno;
     $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
 
+    foreach my $key (%{$renderer->get_config()})
+    {
+        $ENV{"TIREX_RENDERD_CFG_$key"} = $renderer->{$key};
+    }
+
     exec($renderer->get_path());
 }
 
