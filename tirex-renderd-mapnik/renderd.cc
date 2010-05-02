@@ -3,14 +3,10 @@
 #include <iostream>
 #include <syslog.h>
 
-#include <boost/program_options.hpp>
-
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 
 #include "networklistener.h"
-
-namespace po = boost::program_options;
 
 bool RenderDaemon::loadFonts(const boost::filesystem::path &dir, bool recurse)
 {
@@ -95,7 +91,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     {
         mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile);
         mHandlerMap[stylename]->addStatusReceiver(this);
-        debug("added style %d from map %s", stylename.c_str(), configfile);
+        debug("added style %s from map %s", stylename.c_str(), configfile);
         rv = true;
     }
     catch (mapnik::config_error cfgerr)
@@ -113,35 +109,17 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     mArgv = argv;
     if (argc) mProgramName.assign(argv[0]);
 
-    po::options_description desc("Allowed options");
-    desc.add_options()
-        ("help", 
-            "produce help message")
-        ("debug", 
-            "activate debug logging")
-        ("syslog", po::value<std::string>()->default_value("daemon"), 
-            "syslog facility for logging")
-    ;
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);    
-
     setStatus("initializing");
 
-    if (vm.count("help")) 
-    {
-        std::cout << desc << std::endl;
-        exit(1);
-    }
-    if (vm.count("debug")) 
-    {
-        Debuggable::msDebugLogging = true;
-    }
+    char *tmp = getenv("TIREX_RENDERD_DEBUG");
+    Debuggable::msDebugLogging = tmp ? true : false;
 
-    std::string strfac = vm["syslog"].as<std::string>();
+    std::string strfac;
+    tmp = getenv("TIREX_RENDERD_SYSLOG");
+    if (tmp) strfac = tmp;
     int fac = LOG_DAEMON;
-    if (strfac == "local0") fac = LOG_LOCAL0;
+    if (strfac.empty()) fac = LOG_DAEMON;
+    else if (strfac == "local0") fac = LOG_LOCAL0;
     else if (strfac == "local1") fac = LOG_LOCAL1;
     else if (strfac == "local2") fac = LOG_LOCAL2;
     else if (strfac == "local3") fac = LOG_LOCAL3;
@@ -156,7 +134,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     }
     openlog("tirex-renderd-mapnik", Debuggable::msDebugLogging ? LOG_PERROR|LOG_PID : LOG_PID, fac);
 
-    char *tmp = getenv("TIREX_RENDERD_SOCKET_FILENO");
+    tmp = getenv("TIREX_RENDERD_SOCKET_FILENO");
     mSocketFd = tmp ? atoi(tmp) : -1;
 
     tmp = getenv("TIREX_RENDERD_PIPE_FILENO");
