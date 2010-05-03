@@ -65,7 +65,6 @@ sub new
     $self->{'rendering_jobs'} = Tirex::Manager::RenderingJobs->new( timeout => $self->{'rendering_timeout'} );
 
     $self->{'socket'} = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp') or Carp::croak("Can't open renderd return UDP socket: $!\n");
-    $self->{'to'}     = Socket::pack_sockaddr_in($Tirex::RENDERD_UDP_PORT, Socket::inet_aton('localhost'));
 
     $self->{'buckets'} = [];
 
@@ -255,7 +254,13 @@ sub send
     my $self = shift;
     my $job  = shift;
 
-    return $self->{'socket'}->send( $job->to_s( type => 'metatile_render_request' ), undef, $self->{'to'} );
+    my $map  = Tirex::Map->get($job->get_map());
+    my $port = $map->get_renderer()->get_port();
+    my $sock = Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost'));
+
+    ::syslog('debug', 'sending request to port %d id=%s prio=%s map=%s x=%d y=%d z=%d', $port, $job->get_id(), $job->get_prio(), $job->get_map(), $job->get_x(), $job->get_y(), $job->get_z()) if ($Tirex::DEBUG);
+
+    return $self->{'socket'}->send( $job->to_s( type => 'metatile_render_request' ), undef, $sock );
 }
 
 =head2 $rm->done($msg)

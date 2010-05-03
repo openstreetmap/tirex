@@ -75,9 +75,9 @@ sub main
     my $port            = $ENV{'TIREX_RENDERD_PORT'}            or $self->error_disable('missing TIREX_RENDERD_PORT');
     my $syslog_facility = $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} or $self->error_disable('missing TIREX_RENDERD_SYSLOG_FACILITY');
     my $mapfiles        = $ENV{'TIREX_RENDERD_MAPFILES'}        or $self->error_disable('missing TIREX_RENDERD_MAPFILES');
-    my $debug           = $ENV{'TIREX_RENDERD_DEBUG'}           or $self->error_disable('missing TIREX_RENDERD_DEBUG');
     my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or $self->error_disable('missing TIREX_RENDERD_PIPE_FILENO');
     my $alive_timeout   = $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_RENDERD_ALIVE_TIMEOUT');
+    my $debug           = 1 if (defined $ENV{'TIREX_RENDERD_DEBUG'});
 
     my @mapfiles = split(' ', $mapfiles);
 

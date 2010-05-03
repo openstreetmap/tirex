@@ -165,7 +165,7 @@ Tirex provides the following programs:
 
 =item tirex-status
 
-=item tirex-renderd-starter
+=item tirex-renderd-manager
 
 =back
 

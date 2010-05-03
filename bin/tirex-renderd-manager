@@ -45,7 +45,7 @@ use Tirex::Map;
 
 #-----------------------------------------------------------------------------
 
-die('refusing to run as root') if ($< == 0);
+die("refusing to run as root\n") if ($< == 0);
 
 #-----------------------------------------------------------------------------
 # Reading command line and config
@@ -253,7 +253,7 @@ sub execute_renderer
     $ENV{'TIREX_RENDERD_PORT'}            = $renderer->get_port();
     $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
     $ENV{'TIREX_RENDERD_MAPFILES'}        = join(' ', map { $_->get_filename() } grep { $_->get_renderer() eq $renderer } Tirex::Map->all());
-    $ENV{'TIREX_RENDERD_DEBUG'}           = $Tirex::DEBUG;
+    $ENV{'TIREX_RENDERD_DEBUG'}           = $Tirex::DEBUG || $renderer->get_debug();
     $ENV{'TIREX_RENDERD_PIPE_FILENO'}     = $pipe_fileno;
     $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
 
@@ -273,15 +273,17 @@ sub sigchld_handler
 {
     while ((my $child = waitpid(-1, WNOHANG)) > 0) 
     {
-        my $status = $?;
-        syslog('warning', 'child %d terminated (%d)', $child, $status);
+        my $exit_code = $? >> 8;
+        my $signal    = $? & 127;
+        syslog('warning', 'child %d terminated (exit_code=%d, signal=%d)', $child, $exit_code, $signal);
         push(@closed_children, $child);
 
         # if the return code of the child is 10, the renderer is disabled
-        if ($status == 10)
+        if ($exit_code == 10)
         {
             my $renderer = $workers->{$child}->{'renderer'};
             @renderers = grep { $_ ne $renderer } @renderers;
+            syslog('err', 'disabled renderer %s', $renderer->get_name());
         }
     }
 

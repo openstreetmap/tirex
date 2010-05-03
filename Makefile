@@ -1,5 +1,5 @@
 build: Makefile.perl
-	cd tirex-renderd; $(MAKE) $(MFLAGS)
+	cd tirex-renderd-mapnik; $(MAKE) $(MFLAGS)
 	$(MAKE) -f Makefile.perl
 
 Makefile.perl: Makefile.PL
@@ -13,7 +13,6 @@ install: build
 	install -m 755 -g root -o root bin/tirex-batch             $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-send              $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-master            $(DESTDIR)/usr/bin/
-	install -m 755 -g root -o root bin/tirex-renderd-starter   $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-renderd-manager   $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-renderd-test      $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-renderd-wms       $(DESTDIR)/usr/bin/
@@ -42,12 +41,12 @@ install: build
 	install -m 755 -g root -o root -d                            $(DESTDIR)/usr/share/man/man5/
 	install -m 644 -g root -o root man-generated/*.5             $(DESTDIR)/usr/share/man/man5/
 
-	cd tirex-renderd; $(MAKE) DESTDIR=$(DESTDIR) install
+	cd tirex-renderd-mapnik; $(MAKE) DESTDIR=$(DESTDIR) install
 	$(MAKE) -f Makefile.perl install
 
 clean: Makefile.perl
 	$(MAKE) -f Makefile.perl clean
-	cd tirex-renderd; $(MAKE) DESTDIR=$(DESTDIR) clean
+	cd tirex-renderd-mapnik; $(MAKE) DESTDIR=$(DESTDIR) clean
 	rm -f Makefile.perl
 	rm -f Makefile.perl.old
 	rm -f build-stamp

@@ -28,6 +28,9 @@ procs=3
 # syslog facility
 syslog_facility=local0
 
+# activate this to see debug messages from renderer
+#debug=1
+
 #-----------------------------------------------------------------------------
 #  renderer specific configuration
 #-----------------------------------------------------------------------------

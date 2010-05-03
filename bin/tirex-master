@@ -51,7 +51,7 @@ use Tirex::Map;
 
 #-----------------------------------------------------------------------------
 
-die('refusing to run as root') if ($< == 0);
+die("refusing to run as root\n") if ($< == 0);
 
 #-----------------------------------------------------------------------------
 # Reading command line and config

@@ -8,7 +8,9 @@ fi
 
 [ -d /var/run/tirex ] || mkdir -p /var/run/tirex && chown tirex:tirex /var/run/tirex
 [ -d /var/log/tirex ] || mkdir -p /var/log/tirex && chown tirex:tirex /var/log/tirex
-[ -d /var/lib/tirex/tiles ] || mkdir -p /var/lib/tirex/tiles && chown -R tirex:tirex /var/lib/tirex
+[ -d /var/lib/tirex ] || mkdir -p /var/lib/tirex && chown tirex:tirex /var/lib/tirex
+[ -d /var/lib/tirex/tiles ] || mkdir -p /var/lib/tirex/tiles && chown tirex:tirex /var/lib/tirex/tiles
+[ -d /var/lib/tirex/stats ] || mkdir -p /var/lib/tirex/stats && chown tirex:tirex /var/lib/tirex/stats
 
 dpkg-statoverride --list /var/log/tirex >/dev/null || \
    dpkg-statoverride --update --add tirex adm 0750 /var/log/tirex

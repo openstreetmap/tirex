@@ -27,7 +27,7 @@ my $r = Tirex::Renderer->new( ... );
 =head1 DESCRIPTION
 
 Tirex can work with several rendering backends. For each one several processes
-are started by tirex-renderd-starter and they are sent requests my tirex-master.
+are started by tirex-renderd-manager and they are sent requests my tirex-master.
 This class defines methods to configure renderers.
 
 =head1 METHODS
@@ -161,6 +161,14 @@ Get name of this renderer.
 =cut
 
 sub get_name { return shift->{'name' }; }
+
+=head2 $rend->get_debug();
+
+Get debug flag of this renderer.
+
+=cut
+
+sub get_debug { return shift->{'debug' }; }
 
 =head2 $rend->get_type();
 

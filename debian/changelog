@@ -1,3 +1,10 @@
+tirex (0.2.0) jaunty; urgency=low
+
+  * new renderd architecture allows several different renderers at the same time
+  * lots of other small improvements
+
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 3 May 2010 10:30:44 +0100
+
 tirex (0.1.7) jaunty; urgency=low
 
   * bugfixes on zoom level 1+2

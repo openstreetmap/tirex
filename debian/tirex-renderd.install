@@ -1,7 +1,5 @@
-usr/bin/tirex-renderd
-usr/bin/tirex-renderd-starter
 usr/bin/tirex-renderd-manager
 usr/bin/tirex-renderd-test
 usr/bin/tirex-renderd-wms
-usr/share/man/man1/tirex-renderd-starter.1
-#usr/share/man/man1/tirex-renderd.1
+usr/bin/tirex-renderd-mapnik
+usr/share/man/man1/tirex-renderd-manager.1

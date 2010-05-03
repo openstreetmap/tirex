@@ -67,12 +67,4 @@ bucket name=background minprio=20 maxproc=2 maxload=4
 # UDP port where the syncd listens for messages from master.
 syncd_udp_port=9323
 
-# number of renderd processes to start
-renderd_processes=5
-
-mapnik_fontdir=/usr/lib/mapnik/fonts
-mapnik_mapdir=/etc/mapnik-osm-data/
-mapnik_plugindir=/usr/lib/mapnik/input
-mapnik_fontdir_recurse=0
-
 #-- THE END ------------------------------------------------------------------

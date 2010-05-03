@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------
 #
-#  Konfiguration for test renderer
+#  Konfiguration for WMS renderer
 #
-#  /etc/tirex/renderer/test.conf
+#  /etc/tirex/renderer/wms.conf
 #
 #-----------------------------------------------------------------------------
 
@@ -11,16 +11,16 @@
 #-----------------------------------------------------------------------------
 
 # symbolic name
-name=test
+name=wms
 
 # type of renderer
-type=test
+type=wms
 
 # path to executable of renderer
-path=/usr/bin/tirex-renderd-test
+path=/usr/bin/tirex-renderd-wms
 
 # UDP port where the master can contact this renderer
-port=9330
+port=9333
 
 # number of processes that should be started
 procs=2

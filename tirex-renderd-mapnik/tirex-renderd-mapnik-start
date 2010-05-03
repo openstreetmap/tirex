@@ -1,8 +1,0 @@
-#!/bin/sh
-#
-#  tirex-renderd-mapnik-start
-#
-
-exec /usr/bin/tirex-renderd-mapnik --debug --port=$TIREX_RENDERD_PORT --parentfd=$TIREX_RENDERD_PIPE_FILENO --syslog=$TIREX_RENDERD_SYSLOG_FACILITY \
-    --plugindir=$TIREX_RENDERD_CFG_plugindir --fontdir=$TIREX_RENDERD_CFG_fontdir --fontdir-recurse=$TIREX_RENDERD_CFG_fontdir_recurse
-
