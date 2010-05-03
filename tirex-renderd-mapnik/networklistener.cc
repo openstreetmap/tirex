@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <errno.h>
@@ -55,7 +56,7 @@ NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<st
         length = sizeof(server);
         bzero(&server, length);
         server.sin_family = AF_INET;
-        server.sin_addr.s_addr = INADDR_ANY;
+        server.sin_addr.s_addr = inet_addr("127.0.0.1");
         server.sin_port = htons(port);
         if (bind(mSocket,(struct sockaddr *) &server, length) < 0) die("cannot bind to port %d: %s", port, strerror(errno));
         info("bound to port %d", port);
