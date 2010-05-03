@@ -75,8 +75,9 @@ sub main
     my $port            = $ENV{'TIREX_RENDERD_PORT'}            or $self->error_disable('missing TIREX_RENDERD_PORT');
     my $syslog_facility = $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} or $self->error_disable('missing TIREX_RENDERD_SYSLOG_FACILITY');
     my $mapfiles        = $ENV{'TIREX_RENDERD_MAPFILES'}        or $self->error_disable('missing TIREX_RENDERD_MAPFILES');
-    my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or $self->error_disable('missing TIREX_RENDERD_PIPE_FILENO');
     my $alive_timeout   = $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_RENDERD_ALIVE_TIMEOUT');
+    my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or $self->error_disable('missing TIREX_RENDERD_PIPE_FILENO');
+    my $socket_fileno   = $ENV{'TIREX_RENDERD_SOCKET_FILENO'};
     my $debug           = 1 if (defined $ENV{'TIREX_RENDERD_DEBUG'});
 
     my @mapfiles = split(' ', $mapfiles);
@@ -100,12 +101,20 @@ sub main
 
     #-----------------------------------------------------------------------------
 
-    my $socket = IO::Socket::INET->new(
-        LocalAddr => 'localhost', 
-        LocalPort => $port, 
-        Proto     => 'udp', 
-        ReuseAddr => 1,
-    ) or $self->error_disable("Cannot open UDP socket: :$!");
+    my $socket;
+    if ($socket_fileno)
+    {
+        $socket = IO::Handle->new()->fdopen($socket_fileno);
+    }
+    else
+    {
+        $socket = IO::Socket::INET->new(
+            LocalAddr => 'localhost', 
+            LocalPort => $port, 
+            Proto     => 'udp', 
+            ReuseAddr => 1,
+        ) or $self->error_disable("Cannot open UDP socket: :$!");
+    }
 
     $SIG{'HUP'}  = \&Tirex::Backend::signal_handler;
     $SIG{'TERM'} = \&Tirex::Backend::signal_handler;

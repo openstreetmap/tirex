@@ -134,6 +134,7 @@ syslog('info', 'Found config for renderers: %s', join(' ', map { $_->get_name();
 
 my $workers = {};
 my @closed_children = ();
+my $udp_sockets = {};
 
 # children must check in every so often; note they will not check
 # in during tile rendering so allow ample time.
@@ -147,6 +148,17 @@ while (1)
 {
     foreach my $renderer (@renderers)
     {
+        if (! defined $udp_sockets->{$renderer})
+        {
+            my $port = $renderer->get_port();
+            $udp_sockets->{$renderer} = IO::Socket::INET->new(
+                LocalAddr => 'localhost', 
+                LocalPort => $port, 
+                Proto     => 'udp', 
+                ReuseAddr => 1,
+            ) or die("Cannot open UDP socket on port $port: :$!");
+        }
+
         while ($renderer->num_workers() < $renderer->get_procs())
         {
             my $reader = IO::Pipe::End->new();
@@ -162,7 +174,7 @@ while (1)
             {
                 $pipe->writer();
 
-                execute_renderer($renderer, $pipe->fileno());
+                execute_renderer($renderer, $pipe->fileno(), $udp_sockets->{$renderer}->fileno());
 
                 # if we are here the execute failed
                 ::syslog('err', "Cannot execute renderer %s (%s)", $renderer->get_name(), $renderer->get_path());
@@ -246,16 +258,18 @@ while (1)
 
 sub execute_renderer
 {
-    my $renderer    = shift;
-    my $pipe_fileno = shift;
+    my $renderer      = shift;
+    my $pipe_fileno   = shift;
+    my $socket_fileno = shift;
 
     $ENV{'TIREX_RENDERD_NAME'}            = $renderer->get_name();
     $ENV{'TIREX_RENDERD_PORT'}            = $renderer->get_port();
     $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
     $ENV{'TIREX_RENDERD_MAPFILES'}        = join(' ', map { $_->get_filename() } grep { $_->get_renderer() eq $renderer } Tirex::Map->all());
     $ENV{'TIREX_RENDERD_DEBUG'}           = $Tirex::DEBUG || $renderer->get_debug();
-    $ENV{'TIREX_RENDERD_PIPE_FILENO'}     = $pipe_fileno;
     $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
+    $ENV{'TIREX_RENDERD_PIPE_FILENO'}     = $pipe_fileno;
+    $ENV{'TIREX_RENDERD_SOCKET_FILENO'}   = $socket_fileno;
 
     foreach my $key (%{$renderer->get_config()})
     {
