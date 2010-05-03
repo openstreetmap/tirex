@@ -27,7 +27,7 @@ class RequestHandler : public Debuggable
 {
     private:
 
-    std::vector<StatusReceiver *> mStatusReceivers;
+    StatusReceiver *mpStatusReceiver;
 
     protected:
 
@@ -35,7 +35,8 @@ class RequestHandler : public Debuggable
 
     public:
 
-    void addStatusReceiver(StatusReceiver *sr) { mStatusReceivers.push_back(sr); }
+    RequestHandler();
+    void setStatusReceiver(StatusReceiver *sr) { mpStatusReceiver = sr; }
     virtual const std::string getRequestType() const = 0;
     virtual const NetworkResponse *handleRequest(const NetworkRequest *request) = 0;
 };
