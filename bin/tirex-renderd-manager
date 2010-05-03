@@ -281,9 +281,10 @@ sub execute_renderer
     $ENV{'TIREX_RENDERD_SOCKET_FILENO'}   = $socket_fileno;
     $ENV{'TIREX_RENDERD_DEBUG'}           = 1 if ($Tirex::DEBUG || $renderer->get_debug());
 
-    foreach my $key (%{$renderer->get_config()})
+    my $cfg = $renderer->get_config();
+    foreach my $key (keys %$cfg)
     {
-        $ENV{"TIREX_RENDERD_CFG_$key"} = $renderer->{$key};
+        $ENV{"TIREX_RENDERD_CFG_$key"} = $cfg->{$key};
     }
 
     exec($renderer->get_path());
