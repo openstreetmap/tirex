@@ -147,7 +147,7 @@ sub get_config
 
     foreach my $key (keys %$self)
     {
-        next if ($key =~ /^(name|type|path|port|procs|syslog_facility)$/);
+        next if ($key =~ /^(name|type|path|port|procs|syslog_facility|workers)$/);
         $cfg->{$key} = $self->{$key};
     }
     

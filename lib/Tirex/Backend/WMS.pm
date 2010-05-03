@@ -107,19 +107,16 @@ sub create_metatile
 
     my $response = $self->{'ua'}->request(HTTP::Request->new(GET => $request));
 
-    my $image;
     if ($response->is_success() && $response->header('Content-type') eq 'image/png')
     {
-        ::syslog('debug', 'WMS request was successful');
-        $image = GD::Image->new($response->content());
+        if (my $image = GD::Image->newFromPngData($response->content()))
+        {
+            ::syslog('debug', 'WMS request was successful');
+            return $image;
+        }
     }
-    else
-    {
-        ::syslog('err', 'Error on WMS request: status=%d (%s) content-type=%s', $response->code(), $response->message(), $response->header('Content-type'));
-        $image = $self->create_error_image($map, $metatile);
-    }
-
-    return $image;
+    ::syslog('err', 'Error on WMS request: status=%d (%s) content-type=%s', $response->code(), $response->message(), $response->header('Content-type'));
+    return $self->create_error_image($map, $metatile);
 }
 
 

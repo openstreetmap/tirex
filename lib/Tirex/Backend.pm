@@ -88,7 +88,7 @@ sub main
     ::syslog('info', 'Renderer started (name=%s)', $renderer_name);
 
     my $pipe = IO::Handle->new();
-    $pipe->fdopen($pipe_fileno, 'w');
+    $pipe->fdopen($pipe_fileno, 'w') or $self->error_disable("Cannot access open pipe: $!");
     $pipe->autoflush(1);
 
     my $renderer = Tirex::Renderer->new( type => $self->type(), name => $renderer_name, port => $port, path => $0, procs => 0 );
@@ -104,10 +104,12 @@ sub main
     my $socket;
     if ($socket_fileno)
     {
-        $socket = IO::Handle->new()->fdopen($socket_fileno);
+        ::syslog('debug', 'using existing socket %d', $socket_fileno);
+        $socket = IO::Socket->new()->fdopen($socket_fileno, 'r+') or $self->error_disable("Cannot access open socket $socket_fileno: $!");
     }
     else
     {
+        ::syslog('debug', 'opening socket on port %d', $port);
         $socket = IO::Socket::INET->new(
             LocalAddr => 'localhost', 
             LocalPort => $port, 
