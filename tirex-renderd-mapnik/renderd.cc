@@ -91,7 +91,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     {
         mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile);
         mHandlerMap[stylename]->addStatusReceiver(this);
-        debug("added style %s from map %s", stylename.c_str(), configfile);
+        debug("added style '%s' from map %s", stylename.c_str(), configfile);
         rv = true;
     }
     catch (mapnik::config_error cfgerr)
