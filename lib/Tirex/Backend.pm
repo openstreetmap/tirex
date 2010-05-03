@@ -78,13 +78,14 @@ sub main
     my $alive_timeout   = $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_RENDERD_ALIVE_TIMEOUT');
     my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or $self->error_disable('missing TIREX_RENDERD_PIPE_FILENO');
     my $socket_fileno   = $ENV{'TIREX_RENDERD_SOCKET_FILENO'};
-    my $debug           = 1 if (defined $ENV{'TIREX_RENDERD_DEBUG'});
+
+    $Tirex::DEBUG = 1 if (defined $ENV{'TIREX_RENDERD_DEBUG'});
 
     my @mapfiles = split(' ', $mapfiles);
 
     #-----------------------------------------------------------------------------
 
-    ::openlog($self->{'name'}, $debug ? 'pid|perror' : 'pid', $syslog_facility);
+    ::openlog($self->{'name'}, $Tirex::DEBUG ? 'pid|perror' : 'pid', $syslog_facility);
     ::syslog('info', 'Renderer started (name=%s)', $renderer_name);
 
     my $pipe = IO::Handle->new();
@@ -104,12 +105,12 @@ sub main
     my $socket;
     if ($socket_fileno)
     {
-        ::syslog('debug', 'using existing socket %d', $socket_fileno);
+        ::syslog('debug', 'using existing socket %d', $socket_fileno) if ($Tirex::DEBUG);
         $socket = IO::Socket->new()->fdopen($socket_fileno, 'r+') or $self->error_disable("Cannot access open socket $socket_fileno: $!");
     }
     else
     {
-        ::syslog('debug', 'opening socket on port %d', $port);
+        ::syslog('debug', 'opening socket on port %d', $port) if ($Tirex::DEBUG);
         $socket = IO::Socket::INET->new(
             LocalAddr => 'localhost', 
             LocalPort => $port, 
@@ -143,7 +144,7 @@ sub main
 
         alarm(0);
 
-        ::syslog('debug', 'got request: %s', $msg->to_s());
+        ::syslog('debug', 'got request: %s', $msg->to_s()) if ($Tirex::DEBUG);
 
         my $map = Tirex::Map->get($msg->{'map'});
 
@@ -152,7 +153,7 @@ sub main
             my $metatile  = $msg->to_metatile();
             my $filename  = $map->get_tiledir() . '/' . $metatile->get_filename();
 
-            ::syslog('debug', 'doing rendering (filename=%s)', $filename);
+            ::syslog('debug', 'doing rendering (filename=%s)', $filename) if ($Tirex::DEBUG);
             my $t0 = [Time::HiRes::gettimeofday];
             my $image = $self->create_metatile($map, $metatile);
             $self->write_metatile($image, $filename, $metatile);
@@ -160,7 +161,7 @@ sub main
             $msg = $msg->reply();
             $msg->{'render_time'} = int(Time::HiRes::tv_interval($t0) * 1000); # in milliseconds
 
-            ::syslog('debug', 'sending response: %s', $msg->to_s());
+            ::syslog('debug', 'sending response: %s', $msg->to_s()) if ($Tirex::DEBUG);
         }
         else
         {
@@ -169,7 +170,7 @@ sub main
         }
         $msg->send($socket) or $self->error_restart("error when sending: $!");
 
-        ::syslog('debug', 'done with request');
+        ::syslog('debug', 'done with request') if ($Tirex::DEBUG);
     }
 
     ::syslog('info', 'shutting down %s', $self->{'name'});

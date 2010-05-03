@@ -103,7 +103,7 @@ sub create_metatile
     );
 
     my $request = $map->{'url'} . join('&', map { $_ . '=' . $wms_request{$_} } sort keys %wms_request);
-    ::syslog('debug', 'WMS request: %s', $request);
+    ::syslog('debug', 'WMS request: %s', $request) if ($Tirex::DEBUG);
 
     my $response = $self->{'ua'}->request(HTTP::Request->new(GET => $request));
 
@@ -111,7 +111,7 @@ sub create_metatile
     {
         if (my $image = GD::Image->newFromPngData($response->content()))
         {
-            ::syslog('debug', 'WMS request was successful');
+            ::syslog('debug', 'WMS request was successful') if ($Tirex::DEBUG);
             return $image;
         }
     }

@@ -91,14 +91,28 @@ sub new
 {
     my $class = shift;
     my %args = @_;
-    my $self = bless \%args => $class;
 
-    Carp::croak("missing name")  unless (defined $self->{'name'} );
-    Carp::croak("missing type")  unless (defined $self->{'type'} );
-    Carp::croak("missing path")  unless (defined $self->{'path'} );
-    Carp::croak("missing port")  unless (defined $self->{'port'} );
-    Carp::croak("missing procs") unless (defined $self->{'procs'});
-    Carp::croak("renderer with name $self->{'name'} exists") if ($Renderers{$self->{'name'}});
+    my $self = bless {} => $class;
+
+    Carp::croak("missing name")  unless (defined $args{'name'} );
+    Carp::croak("missing type")  unless (defined $args{'type'} );
+    Carp::croak("missing path")  unless (defined $args{'path'} );
+    Carp::croak("missing port")  unless (defined $args{'port'} );
+    Carp::croak("missing procs") unless (defined $args{'procs'} );
+
+    Carp::croak("renderer with name $args{'name'} already exists") if ($Renderers{$args{'name'}});
+
+    foreach my $cfg ( qw( name type path port procs syslog_facility debug ) )
+    {
+        $self->{$cfg} = $args{$cfg};
+        delete $args{$cfg};
+    }
+
+    # set default values
+    $self->{'syslog_facility'} = $Tirex::RENDERD_SYSLOG_FACILITY unless ($self->{'syslog_facility'});
+    $self->{'debug'} = 0                                         unless ($self->{'debug'});
+
+    $self->{'config'} = \%args;
 
     $Renderers{$self->{'name'}} = $self;
 
@@ -143,15 +157,7 @@ sub get_config
 {
     my $self = shift;
 
-    my $cfg = {};
-
-    foreach my $key (keys %$self)
-    {
-        next if ($key =~ /^(name|type|path|port|procs|syslog_facility|workers)$/);
-        $cfg->{$key} = $self->{$key};
-    }
-    
-    return $cfg;
+    return $self->{'config'};
 }
 
 =head2 $rend->get_name();
@@ -220,10 +226,13 @@ sub to_s
 {
     my $self = shift;
 
-    my $s = sprintf("Renderer %s: type=%s port=%d procs=%d path=%s", $self->get_name(), $self->get_type(), $self->get_port(), $self->get_procs(), $self->get_path());
+    my $s = sprintf("Renderer %s:", $self->get_name());
 
-    foreach my $key (sort keys %$self) {
-        $s .= " $key=$self->{$key}" unless ($key =~ /^(name|type|port|path|procs)$/);
+    foreach my $key ( qw( type port procs path syslog_facility debug ) ) {
+        $s .= " $key=$self->{$key}";
+    }
+    foreach my $key ( sort keys %{$self->{'config'}}) {
+        $s .= " $key=$self->{'config'}->{$key}";
     }
 
     return $s;
@@ -239,9 +248,14 @@ sub to_hash
 {
     my $self = shift;
 
-    my %hash = %$self;
-    $hash{'port'}  = 0 + $self->get_port(); # force integer (so that it works in JSON)
-    $hash{'procs'} = 0 + $self->get_procs();
+    my %hash = %{$self->{'config'}};
+    $hash{'name'}            =     $self->get_name();
+    $hash{'type'}            =     $self->get_type();
+    $hash{'path'}            =     $self->get_path();
+    $hash{'syslog_facility'} =     $self->get_syslog_facility();
+    $hash{'debug'}           = 0 + $self->get_debug(); # force integer (so that it works in JSON)
+    $hash{'port'}            = 0 + $self->get_port();
+    $hash{'procs'}           = 0 + $self->get_procs();
 
     return \%hash;
 }
