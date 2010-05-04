@@ -9,6 +9,8 @@ use warnings;
 
 use LWP;
 
+use Tirex::Backend;
+
 #-----------------------------------------------------------------------------
 
 package Tirex::Backend::WMS;
@@ -19,6 +21,21 @@ use base qw( Tirex::Backend );
 Tirex::Backend::WMS - WMS backend for Tirex
 
 =head1 DESCRIPTION
+
+Simple "renderer" that gets the map image from a WMS server. The WMS server
+must support the right SRS (EPSG:3785 or the informal EPSG:900913).
+
+Config parameters for the map file:
+
+=over 8
+
+=item url url prefix
+
+=item layers list of comma-separated layers
+
+=item srs spatial reference system, 'EPSG:3785' etc.
+
+=back
 
 =head1 METHODS
 
@@ -44,7 +61,7 @@ sub init
     my $self = shift;
 
     $self->{'ua'} = LWP::UserAgent->new();
-    $self->{'ua'}->agent('tirex-renderd-wms/0.1');
+    $self->{'ua'}->agent('tirex-backend-wms/' . $Tirex::VERSION);
 }
 
 =head2 $backend->create_metatile()

@@ -17,43 +17,31 @@ stats_dir=/var/lib/tirex/stats
 metatile_rows=8
 metatile_columns=8
 
+# The name of the UNIX domain socket for communicating with ModTile.
+modtile_socket_name=/var/run/tirex/modtile_sock
+
+#-----------------------------------------------------------------------------
+#  MASTER
+#-----------------------------------------------------------------------------
+
 # This is the UDP port where the tirex-master waits for requests.
 master_udp_port=9322
 
 # The master writes its process ID into this file.
 master_pidfile=/var/run/tirex/tirex-master.pid
 
-# The renderd-manager writes its process ID into this file
-renderd_pidfile=/var/run/tirex/tirex-renderd-manager.pid
-
-# The syncd process writes its process ID into this file
-syncd_pidfile=/tmp/tirex-syncd.pid
-
 # Syslog facility used in tirex-master.
 master_syslog_facility=local0
-
-# Syslog facility used by tirex-renderd-manager
-renderd_syslog_facility=local0
 
 # Logfile where all rendered jobs are logged.
 master_logfile=/var/log/tirex/master.log
 
 # If the rendering of a metatile takes more than this many minutes the master
 # gives up on it and removes the job from the list of currently rendering tiles.
-# This must be larger than renderd_alive_timeout and should be larger than
+# This must be larger than backend_manager_alive_timeout and should be larger than
 # the rendering of any tile can need. Its only used to make sure that a
 # rendering process that is long gone doesn't take up resources forever.
 master_rendering_timeout=10
-
-# If a rendering process doesn't send an alive message in this many minutes
-# to the renderd-manager, it will be killed by the manager. Make this smaller
-# than master_rendering_timeout.
-renderd_alive_timeout=8
-
-# The name of the UNIX domain socket for communicating with ModTile.
-modtile_socket_name=/var/run/tirex/modtile_sock
-
-#-----------------------------------------------------------------------------
 
 # Buckets for different priorities.
 bucket name=live       minprio=1  maxproc=4 maxload=20
@@ -61,11 +49,32 @@ bucket name=important  minprio=10 maxproc=3 maxload=8
 bucket name=background minprio=20 maxproc=2 maxload=4
 
 #-----------------------------------------------------------------------------
+#  BACKEND-MANAGER
+#-----------------------------------------------------------------------------
+
+# The tirex-backend-manager writes its process ID into this file
+backend_manager_pidfile=/var/run/tirex/tirex-backend-manager.pid
+
+# Syslog facility used by tirex-backend-manager
+backend_manager_syslog_facility=local0
+
+# If a rendering process doesn't send an alive message in this many minutes
+# to the backend-manager, it will be killed by the manager. Make this smaller
+# than master_rendering_timeout.
+backend_manager_alive_timeout=8
+
+#-----------------------------------------------------------------------------
+#  SYNCD
+#-----------------------------------------------------------------------------
+
+# The syncd process writes its process ID into this file
+syncd_pidfile=/var/run/tirex/tirex-syncd.pid
 
 # If this is defined, the syncd will copy rendered tiles to this server.
 #sync_to_host=some.other.host
 
 # UDP port where the syncd listens for messages from master.
 syncd_udp_port=9323
+
 
 #-- THE END ------------------------------------------------------------------

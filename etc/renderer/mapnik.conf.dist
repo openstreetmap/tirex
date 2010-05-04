@@ -17,7 +17,7 @@ name=mapnik
 type=mapnik
 
 # path to executable of renderer
-path=/usr/bin/tirex-renderd-mapnik
+path=/usr/lib/tirex/backends/mapnik
 
 # UDP port where the master can contact this renderer
 port=9331
@@ -35,13 +35,16 @@ syslog_facility=local0
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
-# directory with input plugins for mapnik
+# Directory with input plugins for mapnik. Defaults to /usr/lib/mapnik/input.
 plugindir=/usr/lib/mapnik/input
 
-# directory with fonts for mapnik
+# The directory where the Mapnik rendering engine loads its TrueType fonts from.
+# If the style sheet references fonts that are not present here, the renderer will 
+# throw an exception. Defaults to /usr/lib/mapnik/fonts.
 fontdir=/usr/lib/mapnik/fonts
 
-# should we use recursion (1) or not (0) when searching for fonts
+# Set this to I<1> if you want fonts loaded recursively from directories
+# inside the I<mapnik_fontdir> directory. Defaults to 0.
 fontdir_recurse=0
 
 

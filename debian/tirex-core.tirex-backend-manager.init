@@ -1,6 +1,6 @@
 #! /bin/sh
 ### BEGIN INIT INFO
-# Provides:          tirex-renderd
+# Provides:          tirex-backend-manager
 # Required-Start:    
 # Required-Stop:     
 # Default-Start:     2 3 4 5
@@ -14,7 +14,7 @@
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Mapnik rendering daemon for Tirex"
-NAME=tirex-renderd-manager
+NAME=tirex-backend-manager
 DAEMON=/usr/bin/$NAME
 PIDFILE=/var/run/tirex/$NAME.pid
 DAEMON_ARGS=""

@@ -27,7 +27,7 @@ my $r = Tirex::Renderer->new( ... );
 =head1 DESCRIPTION
 
 Tirex can work with several rendering backends. For each one several processes
-are started by tirex-renderd-manager and they are sent requests my tirex-master.
+are started by tirex-backend-manager and they are sent requests my tirex-master.
 This class defines methods to configure renderers.
 
 =head1 METHODS
@@ -109,8 +109,8 @@ sub new
     }
 
     # set default values
-    $self->{'syslog_facility'} = $Tirex::RENDERD_SYSLOG_FACILITY unless ($self->{'syslog_facility'});
-    $self->{'debug'} = 0                                         unless ($self->{'debug'});
+    $self->{'syslog_facility'} = $Tirex::BACKEND_MANAGER_SYSLOG_FACILITY unless ($self->{'syslog_facility'});
+    $self->{'debug'} = 0                                                 unless ($self->{'debug'});
 
     $self->{'config'} = \%args;
 

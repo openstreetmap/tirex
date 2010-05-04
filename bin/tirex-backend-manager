@@ -3,7 +3,7 @@
 #
 #  Tirex Tile Rendering System
 #
-#  tirex-renderd-manager
+#  tirex-backend-manager
 #
 #-----------------------------------------------------------------------------
 #  See end of this file for documentation.
@@ -58,7 +58,7 @@ if ($opts{'help'})
 {
     pod2usage(
         -verbose => 1,
-        -msg     => "tirex-renderd-manager - tirex rendering manager\n",
+        -msg     => "tirex-backend-manager - tirex backend manager\n",
         -exitval => 0
     );
 }
@@ -73,10 +73,10 @@ Tirex::Config::init($config_file);
 # Initialize logging
 #-----------------------------------------------------------------------------
 
-openlog('tirex-renderd-manager', $Tirex::DEBUG ? 'pid|perror' : 'pid',
-    Tirex::Config::get('renderd_syslog_facility', $Tirex::RENDERD_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
+openlog('tirex-backend-manager', $Tirex::DEBUG ? 'pid|perror' : 'pid',
+    Tirex::Config::get('backend_manager_syslog_facility', $Tirex::BACKEND_MANAGER_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
 
-syslog('info', 'tirex-renderd-manager started');
+syslog('info', 'tirex-backend-manager started');
 
 Tirex::Config::dump_to_syslog();
 
@@ -98,7 +98,7 @@ if (! $Tirex::DEBUG)
 #-----------------------------------------------------------------------------
 # Write pid to pidfile
 #-----------------------------------------------------------------------------
-my $pidfile = Tirex::Config::get('renderd_pidfile', $Tirex::RENDERD_PIDFILE);
+my $pidfile = Tirex::Config::get('backend_manager_pidfile', $Tirex::BACKEND_MANAGER_PIDFILE);
 
 if (open(my $pidfh, '>', $pidfile)) 
 {
@@ -138,7 +138,7 @@ my $udp_sockets = {};
 
 # children must check in every so often; note they will not check
 # in during tile rendering so allow ample time.
-my $alive_timeout = Tirex::Config::get('renderd_alive_timeout', $Tirex::RENDERD_ALIVE_TIMEOUT) * 60; # minutes -> seconds
+my $alive_timeout = Tirex::Config::get('backend_manager_alive_timeout', $Tirex::BACKEND_MANAGER_ALIVE_TIMEOUT) * 60; # minutes -> seconds
 
 # a child that has been sent a signal must react this quickly
 my $hangup_timeout = 15;
@@ -194,7 +194,7 @@ while (1)
             {
                 $pipe->reader();
 
-                syslog('info', 'renderd %s started with pid %d', $renderer->get_name(), $pid);
+                syslog('info', 'renderer %s started with pid %d', $renderer->get_name(), $pid);
 
                 $workers->{$pid} = { 
                     pid          => $pid,
@@ -272,19 +272,19 @@ sub execute_renderer
     my $pipe_fileno   = shift;
     my $socket_fileno = shift;
 
-    $ENV{'TIREX_RENDERD_NAME'}            = $renderer->get_name();
-    $ENV{'TIREX_RENDERD_PORT'}            = $renderer->get_port();
-    $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
-    $ENV{'TIREX_RENDERD_MAPFILES'}        = join(' ', map { $_->get_filename() } grep { $_->get_renderer() eq $renderer } Tirex::Map->all());
-    $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
-    $ENV{'TIREX_RENDERD_PIPE_FILENO'}     = $pipe_fileno;
-    $ENV{'TIREX_RENDERD_SOCKET_FILENO'}   = $socket_fileno;
-    $ENV{'TIREX_RENDERD_DEBUG'}           = 1 if ($Tirex::DEBUG || $renderer->get_debug());
+    $ENV{'TIREX_BACKEND_NAME'}            = $renderer->get_name();
+    $ENV{'TIREX_BACKEND_PORT'}            = $renderer->get_port();
+    $ENV{'TIREX_BACKEND_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
+    $ENV{'TIREX_BACKEND_MAPFILES'}        = join(' ', map { $_->get_filename() } grep { $_->get_renderer() eq $renderer } Tirex::Map->all());
+    $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
+    $ENV{'TIREX_BACKEND_PIPE_FILENO'}     = $pipe_fileno;
+    $ENV{'TIREX_BACKEND_SOCKET_FILENO'}   = $socket_fileno;
+    $ENV{'TIREX_BACKEND_DEBUG'}           = 1 if ($Tirex::DEBUG || $renderer->get_debug());
 
     my $cfg = $renderer->get_config();
     foreach my $key (keys %$cfg)
     {
-        $ENV{"TIREX_RENDERD_CFG_$key"} = $cfg->{$key};
+        $ENV{"TIREX_BACKEND_CFG_$key"} = $cfg->{$key};
     }
 
     exec($renderer->get_path());
@@ -341,11 +341,11 @@ __END__
 
 =head1 NAME
 
-tirex-renderd-manager - program that spawns tirex-renderd processes
+tirex-backend-manager - manages Tirex backend renderers
 
 =head1 SYNOPSIS
 
-tirex-renderd-manager [OPTIONS] 
+tirex-backend-manager [OPTIONS] 
 
 =head1 OPTIONS
 
@@ -367,24 +367,17 @@ Use the DIR config directory instead of /etc/tirex.
 
 =head1 DESCRIPTION
 
-tirex-renderd-manager starts as many tirex-renderd processes as given in the
-configuration, and monitors them.
+The backend manager starts and monitors as many backend processes as given in
+the configuration. The backend processes do the actual rendering of tiles.
 
-The renderd manager does not handle render requests in any way; these
-are read directly from a local UDP socket by the individual tirex-ren-
-derd processes.
+The backend manager expects each backend process to send an "alive" message in
+regular intervals, and will kill the process if it does not do so in time.
 
-The renderd manager expects each tirex-renderd process to send an
-"alive" message in regular intervals, and will kill the process if it
-does not do so in time.
+In addition, if the manager receives a HANGUP signal, it will relay this signal
+to all backends, causing them to exit after completing their current request.
 
-In addition, if the manager receives a HANGUP signal, it will relay
-this signal to all tirex-renderd children, causing them to exit after
-completing their current request.
-
-If this process receives a HUP or TERM signal, it sends a HUP signal 
-to all children and continues (if the signal received was HUP) or
-terminates (if TERM).
+The backend manager does not handle render requests in any way; these are read
+directly from a local UDP socket by the individual backend processes.
 
 =head1 FILES
 
@@ -398,7 +391,7 @@ The configuration file. See tirex.conf(5) for further details.
 
 =head1 DIAGNOSTICS
 
-The renderd starter logs to the I<daemon> syslog facility unless configured
+The backend manager logs to the I<daemon> syslog facility unless configured
 otherwise. In debug mode, logging is also copied to stderr.
 
 =head1 AUTHORS

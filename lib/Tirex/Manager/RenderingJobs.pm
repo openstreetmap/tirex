@@ -128,7 +128,7 @@ sub find_by_metatile
 =head2 $rj->check_timeout()
 
 Check if there are any jobs older than the timeout and remove them. They will have been killed
-by tirex-renderd-manager in the mean time.
+by tirex-backend-manager in the mean time.
 
 Returns the number of jobs removed.
 

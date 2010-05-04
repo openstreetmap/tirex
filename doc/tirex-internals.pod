@@ -19,7 +19,7 @@ The metatile file structure from mod_tile/render has been used:
         // The index offsets are measured from the start of the file
     };
 
-See tirex-renderd/metatilehandler.h/cc for the code.
+See backend-mapnik/metatilehandler.h/cc for the code.
 
 =head2 Metatile directory structure
 

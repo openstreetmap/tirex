@@ -1,6 +1,6 @@
 CFLAGS += -g -O2 -Wall -Wextra -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I /usr/include/freetype2/ 
 CXXFLAGS = $(CFLAGS) 
-LDFLAGS=-lmapnik -lboost_program_options-mt
+LDFLAGS=-lmapnik
 
 backend-mapnik: renderd.o metatilehandler.o networklistener.o networkmessage.o networkrequest.o networkresponse.o debuggable.o requesthandler.o
 	$(CXX) -o $@ $^ $(LDFLAGS) 

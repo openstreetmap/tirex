@@ -1,0 +1,5 @@
+usr/lib/tirex/backends/wms
+usr/share/perl5/Tirex/Backend/WMS.pm
+usr/share/man/man3/Tirex::Backend::WMS.3pm
+etc/tirex/renderer/wms.conf
+etc/tirex/renderer/wms/wms-example.conf

@@ -64,7 +64,7 @@ sub new
     $self->{'next_timeout_check'} = time() + $self->{'rendering_timeout'};
     $self->{'rendering_jobs'} = Tirex::Manager::RenderingJobs->new( timeout => $self->{'rendering_timeout'} );
 
-    $self->{'socket'} = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp') or Carp::croak("Can't open renderd return UDP socket: $!\n");
+    $self->{'socket'} = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp') or Carp::croak("Can't open backend return UDP socket: $!\n");
 
     $self->{'buckets'} = [];
 
@@ -133,7 +133,8 @@ sub set_active_flag_on_bucket
 
 =head2 $rm->get_socket()
 
-Return socket where the rendering manager expects responses from renderd. This should be added to select calls in main loop.
+Return socket where the rendering manager expects responses from the rendering
+backends. This should be added to select calls in main loop.
 
 =cut
 
@@ -265,7 +266,7 @@ sub send
 
 =head2 $rm->done($msg)
 
-This is called when a message comes back from the renderd that a job was rendered.
+This is called when a message comes back from the backend that a job was rendered.
 
 Returns the job or undef if the job was not found.
 
@@ -309,9 +310,9 @@ sub done
         $job->get_bucket()->remove_job($job);
     }
     # if the job is not found, our records are confused and we log a warning but ignore the job
-    # this can happen if there was a timeout waiting for the renderd, but later the renderd came
+    # this can happen if there was a timeout waiting for the backend, but later the backend came
     # through and send the answer or if the master was restarted and gets a response for a tile from
-    # the renderd that was requested by an earlier master process.
+    # the backend that was requested by an earlier master process.
     else
     {
         ::syslog('warning', 'Job for id %s not found (timeout? restart of master?)', $msg->{'id'});

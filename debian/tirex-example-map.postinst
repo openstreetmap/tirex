@@ -1,0 +1,6 @@
+#! /bin/sh
+
+set -e
+
+[ -d /var/lib/tirex/tiles/example ] || mkdir -p /var/lib/tirex/tiles/example && chown tirex:tirex /var/lib/tirex/tiles/example
+

@@ -11,7 +11,7 @@
         <StyleName>ocean</StyleName>
         <Datasource>
             <Parameter name="type">shape</Parameter>
-            <Parameter name="file">/usr/share/tirex/example_map/ocean</Parameter>
+            <Parameter name="file">/usr/share/tirex/example-map/ocean</Parameter>
         </Datasource>
     </Layer>
 </Map>

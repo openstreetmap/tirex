@@ -8,8 +8,11 @@ PERL MODULES
 ------------
 
 You'll need the following Perl modules:
-* IPC::ShareLite (Debian/Ubuntu/: libipc-sharelite-perl)
-* JSON (Debian/Ubuntu: libjson-perl)
+
+* IPC::ShareLite (Debian/Ubuntu: libipc-sharelite-perl)
+* JSON           (Debian/Ubuntu: libjson-perl)
+* GD             (Debian/Ubuntu: libgd-gd2-perl)
+* LWP            (Debian/Ubuntu: libwww-perl)
 
 
 LOGGING
@@ -21,8 +24,8 @@ Tirex-master has two logs:
   be used ('master_syslog_facility').
 * For each rendered metatile a line is written to a logfile. This can
   be used for generating statistics. Failed renderings (when the
-  renderd didn't answer) are not logged here (but in the syslog). Use
-  the config variable 'master_logfile' to set the filename for this
+  rendering backend didn't answer) are not logged here (but in the syslog).
+  Use the config variable 'master_logfile' to set the filename for this
   log.
 
 

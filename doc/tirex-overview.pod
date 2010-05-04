@@ -5,6 +5,12 @@ The Tirex tile rendering system renders map tiles on the fly and caches them.
 It is very similar (and mostly backwards compatible) to the mod_tile/renderd
 system, but improves on it in many respects.
 
+=head2 RENDERING BACKENDS
+
+Tirex can work with several different rendering backends at the same time.
+Normally Mapnik is used for this, but a test backend (to test the system
+setup) and a WMS backend is also provided.
+
 =head2 MAPS
 
 Tirex can handle several maps. Maps can have different styles and potentially
@@ -65,7 +71,7 @@ source when the job is done.
 
 The master keeps a prioritized queue of jobs. Every job that comes in will be
 placed on the queue. When there are free renderers, the master will take the
-first job from the queue and sends it to the renderer.
+first job from the queue and sends it to the renderer backend.
 
 There is only one queue for all jobs, but it is prioritized. Priorities are
 positive integers, 1 is the highest priority. New jobs are added before the
@@ -87,9 +93,9 @@ the same as "infinite expire time", so if at least one of the jobs has no
 expire time, the new job will have no expire time. Both sources of the two jobs
 will be notified when the job is rendered.
 
-The queue is implemented in a way that its doesn't matter much how many jobs
-there are in the queue. If you want to stick 1000 or 10000 jobs in the
-queue, thats ok.
+The queue is implemented in a way that its doesn't matter how many jobs there
+are in the queue. If you want to stick 1000 or 10000 jobs in the queue, thats
+ok.
 
 It is your job as administrator of the system to decide which priorites to use
 for which kind of requests. Live requests coming in from a user should probably
@@ -110,12 +116,12 @@ A typical setup will have a priority class for live requests from the web (lets
 call it 'live') that works on priorities 1 to, say, 9. And then one or more
 priority classes for background requests for higher priorities.
 
-=head2 THE MANAGER
+=head2 THE MASTER
 
-The rendering manager is the heart of the Tirex system. Its job is to work
-throught the queue in order and to dispatch Jobs to be rendered when its
-their turn. The manager takes the configuration and the current system
-load into account when deciding which and how many tiles can be rendered.
+The master is the heart of the Tirex system. Its job is to work throught the
+queue in order and to dispatch jobs to be rendered when its their turn. The
+manager takes the configuration and the current system load into account when
+deciding which and how many tiles can be rendered.
 
 =head2 MESSAGES
 
@@ -139,34 +145,19 @@ field.
 
 =head2 COMPONENTS
 
-The Tirex tile rendering system consists of three major parts:
+The Tirex tile rendering system consists of these major parts:
 
 =over 2
 
 =item * Clients (tirex-batch, mod_tile, ...) want certain tiles rendered. They create rendering requests and send them to the master. If they want to know when a tile is finished rendering, they can wait for an answer, or they can just go on (for batch operations)
 
-=item * The master daemon (tirex-master) runs continuously. It takes requests for tiles from the clients and puts them into a prioritized queue. It works through this queue and sends requests on to the renderer making sure that there are not too many simultaneous renderings going on.
+=item * The master daemon (tirex-master) runs continuously. It takes requests for tiles from the clients and puts them into a prioritized queue. It works through this queue and sends requests on to the renderer backend making sure that there are not too many simultaneous renderings going on.
 
-=item * The renderer component (several tirex-renderds) do the actual rendering of the tile, write it to disk and tell the master when they are done.
+=item * The renderer backends do the actual rendering of the tile, write it to disk and tell the master when they are done.
+
+=item * The backend-manager starts rendering backends as configured and re-starts them if they fail.
 
 =back
 
 This gives you an overview of the system, of course the details are a bit more complicated.
-
-=head2 PROGRAMS
-
-Tirex provides the following programs:
-
-=over 8
-
-=item tirex-master
-
-=item tirex-send
-
-=item tirex-status
-
-=item tirex-renderd-manager
-
-=back
-
 

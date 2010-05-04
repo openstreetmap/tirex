@@ -3,10 +3,10 @@
 #
 #  Tirex Tile Rendering System
 #
-#  tirex-renderd-test
+#  backends/test
 #
 #-----------------------------------------------------------------------------
-#  See end of this file for documentation.
+#  See Tirex::Backend::Test for documentation.
 #-----------------------------------------------------------------------------
 #
 #  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
@@ -30,57 +30,11 @@
 use strict;
 use warnings;
 
-use Tirex;
 use Tirex::Backend::Test;
 
 #-----------------------------------------------------------------------------
 
 my $backend = Tirex::Backend::Test->new($0);
 $backend->main();
-
-#-----------------------------------------------------------------------------
-
-
-__END__
-
-=head1 NAME
-
-tirex-renderd-test - Test renderer
-
-=head1 SYNOPSIS
-
-tirex-renderd-test
-
-=head1 DESCRIPTION
-
-This renderer creates a checkerboard test pattern for testing the Tirex
-rendering system. It will be called from tirex-renderd-manager if you
-configure it in /etc/tirex/renderer/test.conf.
-
-tirex-renderd-test has no renderer specific configuration option. There
-is one renderer specific configuration option for maps called "sleep".
-It gives the time in seconds the renderer should sleep before notifying
-the tirex-master to simulate a longer rendering time.
-
-=head1 FILES
-
-=over 4
-
-=item F</etc/tirex/renderer/test.conf>
-
-The configuration file.
-
-=back
-
-=head1 DIAGNOSTICS
-
-Exits with exit code 1 if something went wrong.
-
-=head1 AUTHORS
-
-Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
-<jochen.topf@geofabrik.de> and possibly others.
-
-=cut
 
 #-- THE END ------------------------------------------------------------------

@@ -1,3 +1,12 @@
+/*
+ * Tirex Tile Rendering System
+ *
+ * Mapnik rendering backend
+ *
+ * Originally written by Jochen Topf & Frederik Ramm.
+ *
+ */
+
 #include "renderd.h"
 
 #include <iostream>
@@ -111,11 +120,11 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
 
     setStatus("initializing");
 
-    char *tmp = getenv("TIREX_RENDERD_DEBUG");
+    char *tmp = getenv("TIREX_BACKEND_DEBUG");
     Debuggable::msDebugLogging = tmp ? true : false;
 
     std::string strfac;
-    tmp = getenv("TIREX_RENDERD_SYSLOG");
+    tmp = getenv("TIREX_BACKEND_SYSLOG");
     if (tmp) strfac = tmp;
     int fac = LOG_DAEMON;
     if (strfac.empty()) fac = LOG_DAEMON;
@@ -132,26 +141,26 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     {
         die("Cannot use log facility '%s' - only local0-local7, user, daemon are allowed.", strfac.c_str());
     }
-    openlog("tirex-renderd-mapnik", Debuggable::msDebugLogging ? LOG_PERROR|LOG_PID : LOG_PID, fac);
+    openlog("tirex-renderer-mapnik", Debuggable::msDebugLogging ? LOG_PERROR|LOG_PID : LOG_PID, fac);
 
-    tmp = getenv("TIREX_RENDERD_SOCKET_FILENO");
+    tmp = getenv("TIREX_BACKEND_SOCKET_FILENO");
     mSocketFd = tmp ? atoi(tmp) : -1;
 
-    tmp = getenv("TIREX_RENDERD_PIPE_FILENO");
+    tmp = getenv("TIREX_BACKEND_PIPE_FILENO");
     mParentFd = tmp ? atoi(tmp) : -1;
 
-    tmp = getenv("TIREX_RENDERD_PORT");
+    tmp = getenv("TIREX_BACKEND_PORT");
     mPort = tmp ? atoi(tmp) : 9320;
 
-    tmp = getenv("TIREX_RENDERD_CFG_plugindir");
+    tmp = getenv("TIREX_BACKEND_CFG_plugindir");
     if (tmp) mapnik::datasource_cache::instance()->register_datasources(tmp);
 
-    tmp = getenv("TIREX_RENDERD_CFG_fontdir_recurse");
+    tmp = getenv("TIREX_BACKEND_CFG_fontdir_recurse");
     bool fr = tmp ? atoi(tmp) : false;
-    tmp = getenv("TIREX_RENDERD_CFG_fontdir");
+    tmp = getenv("TIREX_BACKEND_CFG_fontdir");
     if (tmp) loadFonts(tmp, fr);
 
-    tmp = getenv("TIREX_RENDERD_MAPFILES");
+    tmp = getenv("TIREX_BACKEND_MAPFILES");
     if (tmp)
     {
         char *dup = strdup(tmp);

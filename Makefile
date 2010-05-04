@@ -10,7 +10,7 @@ install: build
 	install -m 755 -g root -o root -d                          $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-batch             $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-master            $(DESTDIR)/usr/bin/
-	install -m 755 -g root -o root bin/tirex-renderd-manager   $(DESTDIR)/usr/bin/
+	install -m 755 -g root -o root bin/tirex-backend-manager   $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-rendering-control $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-send              $(DESTDIR)/usr/bin/
 	install -m 755 -g root -o root bin/tirex-status            $(DESTDIR)/usr/bin/
@@ -23,6 +23,10 @@ install: build
 	install -m 755 -g root -o root backends/wms                $(DESTDIR)/usr/lib/tirex/backends
 
 	install -m 755 -g root -o root -d                          $(DESTDIR)/usr/share/tirex
+	install -m 755 -g root -o root -d                          $(DESTDIR)/usr/share/tirex/example-map
+	install -m 644 -g root -o root example-map/example.xml     $(DESTDIR)/usr/share/tirex/example-map
+	install -m 644 -g root -o root example-map/ocean.*         $(DESTDIR)/usr/share/tirex/example-map
+	install -m 644 -g root -o root example-map/README          $(DESTDIR)/usr/share/tirex/example-map
 
 	install -m 755 -g root -o root -d                          $(DESTDIR)/usr/share/munin/plugins
 	install -m 755 -g root -o root munin/*                     $(DESTDIR)/usr/share/munin/plugins
@@ -37,13 +41,14 @@ install: build
 	install -m 755 -g root -o root -d                                           $(DESTDIR)/etc/tirex/renderer/test
 	install -m 644 -g root -o root etc/renderer/test.conf.dist                  $(DESTDIR)/etc/tirex/renderer/test.conf
 	install -m 644 -g root -o root etc/renderer/test/checkerboard.conf.dist     $(DESTDIR)/etc/tirex/renderer/test/checkerboard.conf
+	install -m 755 -g root -o root -d                                           $(DESTDIR)/etc/tirex/renderer/wms
+	install -m 644 -g root -o root etc/renderer/wms.conf.dist                   $(DESTDIR)/etc/tirex/renderer/wms.conf
+	install -m 644 -g root -o root etc/renderer/wms/wms-example.conf.dist       $(DESTDIR)/etc/tirex/renderer/wms/wms-example.conf
 	install -m 755 -g root -o root -d                                           $(DESTDIR)/etc/tirex/renderer/mapnik
 	install -m 644 -g root -o root etc/renderer/mapnik.conf.dist                $(DESTDIR)/etc/tirex/renderer/mapnik.conf
-	install -m 644 -g root -o root etc/renderer/mapnik/mapnik-example.conf.dist $(DESTDIR)/etc/tirex/renderer/mapnik/mapnik-example.conf
-	install -m 755 -g root -o root -d                                           $(DESTDIR)/etc/tirex/renderer/wms
-	install -m 644 -g root -o root etc/renderer/mapnik.conf.dist                $(DESTDIR)/etc/tirex/renderer/mapnik.conf
+	install -m 644 -g root -o root example-map/mapnik-example.conf              $(DESTDIR)/etc/tirex/renderer/mapnik/mapnik-example.conf
 	install -m 755 -g root -o root -d                                           $(DESTDIR)/etc/logrotate.d
-	install -m 644 -g root -o root etc/logrotate.d-tirex-master                 $(DESTDIR)/etc/logrotate.d/tirex-master
+	install -m 644 -g root -o root debian/logrotate.d-tirex-master              $(DESTDIR)/etc/logrotate.d/tirex-master
 	install -m 755 -g root -o root -d                                           $(DESTDIR)/usr/share/man/man1/
 	install -m 644 -g root -o root man-generated/*.1                            $(DESTDIR)/usr/share/man/man1/
 	install -m 755 -g root -o root -d                                           $(DESTDIR)/usr/share/man/man5/

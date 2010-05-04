@@ -183,12 +183,12 @@ foreach my $bucket_config (@{Tirex::Config::get('bucket')})
     $rendering_manager->add_bucket(%$bucket_config);
 }
 
-# Set up the renderd return socket. This is where the render daemon notifies
-# us when something is complete.
+# Set up the backend return socket. This is where the rendering backend notifies
+# us when a request was completed.
 # This is a datagram socket.
-my $renderd_return_socket = $rendering_manager->get_socket();
-$want_read->add([$renderd_return_socket, undef]);
-syslog('info', 'Listening for renderd responses');
+my $backend_return_socket = $rendering_manager->get_socket();
+$want_read->add([$backend_return_socket, undef]);
+syslog('info', 'Listening for backend responses');
 
 #-----------------------------------------------------------------------------
 # Set signal handler
@@ -327,7 +327,7 @@ sub main_loop
                     $source->reply({ type => $msg_type, result => 'error_unknown_message_type' });
                 }
             }
-            elsif ($sock == $renderd_return_socket)
+            elsif ($sock == $backend_return_socket)
             {
                 my $buf;
                 my $peer = $sock->recv($buf, $Tirex::MAX_PACKET_SIZE);
@@ -574,7 +574,7 @@ Use the config directory DIR instead of /etc/tirex.
 =head1 DESCRIPTION
 
 The tirex master process gets requests for metatiles from mod_tile and other
-sources, queues them and sends them on to tirex-renderd processes. It has a
+sources, queues them and sends them on to the rendering backends. It has a
 sophisticated queueing and rendering manager that decides what is to be
 rendered when.
 

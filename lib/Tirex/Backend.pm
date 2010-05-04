@@ -13,6 +13,7 @@ use Socket;
 use IO::Socket;
 use GD;
 
+use Tirex;
 use Tirex::Renderer;
 use Tirex::Map;
 
@@ -71,21 +72,21 @@ sub main
 {
     my $self = shift;
 
-    my $renderer_name   = $ENV{'TIREX_RENDERD_NAME'}            or $self->error_disable('missing TIREX_RENDERD_NAME');
-    my $port            = $ENV{'TIREX_RENDERD_PORT'}            or $self->error_disable('missing TIREX_RENDERD_PORT');
-    my $syslog_facility = $ENV{'TIREX_RENDERD_SYSLOG_FACILITY'} or $self->error_disable('missing TIREX_RENDERD_SYSLOG_FACILITY');
-    my $mapfiles        = $ENV{'TIREX_RENDERD_MAPFILES'}        or $self->error_disable('missing TIREX_RENDERD_MAPFILES');
-    my $alive_timeout   = $ENV{'TIREX_RENDERD_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_RENDERD_ALIVE_TIMEOUT');
-    my $pipe_fileno     = $ENV{'TIREX_RENDERD_PIPE_FILENO'}     or $self->error_disable('missing TIREX_RENDERD_PIPE_FILENO');
-    my $socket_fileno   = $ENV{'TIREX_RENDERD_SOCKET_FILENO'};
+    my $renderer_name   = $ENV{'TIREX_BACKEND_NAME'}            or $self->error_disable('missing TIREX_BACKEND_NAME');
+    my $port            = $ENV{'TIREX_BACKEND_PORT'}            or $self->error_disable('missing TIREX_BACKEND_PORT');
+    my $syslog_facility = $ENV{'TIREX_BACKEND_SYSLOG_FACILITY'} or $self->error_disable('missing TIREX_BACKEND_SYSLOG_FACILITY');
+    my $mapfiles        = $ENV{'TIREX_BACKEND_MAPFILES'}        or $self->error_disable('missing TIREX_BACKEND_MAPFILES');
+    my $alive_timeout   = $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_BACKEND_ALIVE_TIMEOUT');
+    my $pipe_fileno     = $ENV{'TIREX_BACKEND_PIPE_FILENO'}     or $self->error_disable('missing TIREX_BACKEND_PIPE_FILENO');
+    my $socket_fileno   = $ENV{'TIREX_BACKEND_SOCKET_FILENO'};
 
-    $Tirex::DEBUG = 1 if (defined $ENV{'TIREX_RENDERD_DEBUG'});
+    $Tirex::DEBUG = 1 if (defined $ENV{'TIREX_BACKEND_DEBUG'});
 
     my @mapfiles = split(' ', $mapfiles);
 
     #-----------------------------------------------------------------------------
 
-    ::openlog($self->{'name'}, $Tirex::DEBUG ? 'pid|perror' : 'pid', $syslog_facility);
+    ::openlog('tirex-renderer-' . $self->{'name'}, $Tirex::DEBUG ? 'pid|perror' : 'pid', $syslog_facility);
     ::syslog('info', 'Renderer started (name=%s)', $renderer_name);
 
     my $pipe = IO::Handle->new();

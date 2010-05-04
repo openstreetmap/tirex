@@ -1,3 +1,12 @@
+/*
+ * Tirex Tile Rendering System
+ *
+ * Mapnik rendering backend
+ *
+ * Originally written by Jochen Topf & Frederik Ramm.
+ *
+ */
+
 #ifndef renderd_included
 #define renderd_included
 

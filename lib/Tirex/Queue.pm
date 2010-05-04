@@ -23,7 +23,7 @@ Tirex::Queue - Job queue for Tirex system
 
 =head1 SYNOPSIS
 
- use Tirex::Queue
+ use Tirex::Queue;
 
  my $q = Tirex::Queue->new();
  $q->add( Tirex::Job->new(...) );

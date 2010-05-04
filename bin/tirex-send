@@ -65,7 +65,6 @@ Tirex::Config::init($config_file);
 my %ports = (
     'master'  => $Tirex::MASTER_UDP_PORT,
     'syncd'   => $Tirex::SYNCD_UDP_PORT,
-    'renderd' => $Tirex::RENDERD_UDP_PORT,
 );
 
 $opts{'to'} ||= 'master';
@@ -171,8 +170,8 @@ Use the config directory DIR instead of /etc/tirex.
 
 =item B<-t>, B<--to=DESTINATION>
 
-Talk to DESTINATION, which can be 'master' (default), 'syncd', 'renderd'
-or a port number.
+Talk to DESTINATION, which can be 'master' (default), 'syncd', or a port
+number.
 
 =item B<-w>, B<--wait=SECONDS>
 
@@ -189,8 +188,8 @@ the local machine and waits for the answer. It can be used to check whether a
 daemon is running, activate debugging in the daemon, send a render request,
 etc.
 
-Messages are normally send to the tirex-master daemon, but you can also send
-them to a renderd or sync daemon.
+Messages are normally sent to the tirex-master daemon, but can also be sent
+to a sync daemon or one of the rendering backends.
 
 You have to give the TYPE of the message on the command line and optionally
 some fields in the format KEY=VALUE.
@@ -237,18 +236,6 @@ Give the name of the bucket as "bucket=NAME".
 
 =back
 
-=head1 MESSAGES FOR RENDERD
-
-The following messages can be send to a renderd server:
-
-=over 8
-
-=item metatile_render_request
-
-Renders the metatile requested.
-
-=back
-
 =head1 MESSAGES FOR SYNCD
 
 The following messages can be send to a syncd server:
@@ -258,6 +245,18 @@ The following messages can be send to a syncd server:
 =item metatile_render_request
 
 Syncs the metatile file.
+
+=back
+
+=head1 MESSAGES TO BACKENDS
+
+The following messages can be send to a rendering backend:
+
+=over 8
+
+=item metatile_render_request
+
+Renders the metatile requested.
 
 =back
 

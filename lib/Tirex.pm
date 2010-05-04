@@ -21,7 +21,8 @@ use Tirex::Config;
 package Tirex;
 
 our $DEBUG = 0;
-our $VERSION = "0.0";
+
+our $VERSION = '0.2';
 
 =head1 NAME
 
@@ -47,7 +48,6 @@ our $MAX_ZOOM = 30;
 our $METATILE_COLUMNS = 8;
 our $METATILE_ROWS    = 8;
 our $PIXEL_PER_TILE   = 256;
-our $RENDERD_UDP_PORT = 9320;
 our $SYNCD_UDP_PORT   = 9323;
 
 our $MODTILE_SOCK = "/var/lib/tirex/modtile.sock";
@@ -55,32 +55,24 @@ our $MODTILE_PERM = 0666;
 
 our $MASTER_UDP_PORT          = 9322;
 our $MASTER_SYSLOG_FACILITY   = 'daemon';
-our $RENDERD_SYSLOG_FACILITY  = 'daemon';
 our $MASTER_PIDFILE           = '/var/run/tirex/tirex-master.pid';
-our $SYNCD_PIDFILE            = '/var/run/tirex/tirex-syncd.pid';
-our $RENDERD_PIDFILE          = '/var/run/tirex/tirex-renderd-manager.pid';
 our $MASTER_LOGFILE           = '/var/log/tirex/jobs.log';
+our $MASTER_RENDERING_TIMEOUT = 10; # minutes
+
+our $SYNCD_PIDFILE            = '/var/run/tirex/tirex-syncd.pid';
+
 our $TIREX_CONFIGDIR          = '/etc/tirex';
 our $TIREX_CONFIGFILENAME     = 'tirex.conf';
 our $TIREX_CONFIGFILE         = $TIREX_CONFIGDIR . '/' . $TIREX_CONFIGFILENAME;
-our $MASTER_RENDERING_TIMEOUT = 10; # minutes
-our $RENDERD_ALIVE_TIMEOUT    = 8; # minutes - make this a tad smaller than the above
+
+our $BACKEND_MANAGER_SYSLOG_FACILITY = 'daemon';
+our $BACKEND_MANAGER_PIDFILE         = '/var/run/tirex/tirex-backend-manager.pid';
+our $BACKEND_MANAGER_ALIVE_TIMEOUT   = 8; # minutes - make this a tad smaller than the above
 
 our $EXIT_CODE_RESTART = 1;
 our $EXIT_CODE_DISABLE = 10;
 
-# set dummy to enable built-in dummy renderer
-# XXX THIS SHOULD BE REMOVED SOON
-our $RENDERD_DUMMY            = 0;
-our $RENDERD_DUMMY_SLEEPTIME  = 2;
-our $RENDERD_PROCESSES        = 5;
-
-our $METATILE_DIR             = '/var/lib/tirex/tiles';
-our $STATS_DIR                = '/var/lib/tirex/stats';
-our $MAPNIK_PLUGINDIR         = '/usr/lib/mapnik/input';
-our $MAPNIK_FONTDIR           = '/usr/lib/mapnik/fonts';
-our $MAPNIK_MAPDIR            = '/etc/mapnik-osm-data/';
-our $MAPNIK_FONTDIR_RECURSE   = 0;
+our $STATS_DIR = '/var/lib/tirex/stats';
 
 =head1 METHODS
 

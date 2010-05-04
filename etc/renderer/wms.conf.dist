@@ -17,10 +17,10 @@ name=wms
 type=wms
 
 # path to executable of renderer
-path=/usr/bin/tirex-renderd-wms
+path=/usr/lib/tirex/backends/wms
 
 # UDP port where the master can contact this renderer
-port=9333
+port=9332
 
 # number of processes that should be started
 procs=2
@@ -35,5 +35,6 @@ syslog_facility=local0
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
+# none
 
 #-- THE END ------------------------------------------------------------------

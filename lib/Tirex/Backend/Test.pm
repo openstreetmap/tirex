@@ -9,6 +9,8 @@ use warnings;
 
 use List::Util qw();
 
+use Tirex::Backend;
+
 #-----------------------------------------------------------------------------
 
 package Tirex::Backend::Test;
@@ -19,6 +21,15 @@ use base qw( Tirex::Backend );
 Tirex::Backend::Test - Test backend for Tirex
 
 =head1 DESCRIPTION
+
+This backend creates a checkerboard test pattern for testing the Tirex
+tile rendering system. It will be called from tirex-backend-manager if you
+configure it in /etc/tirex/renderer/test.conf.
+
+It has no renderer specific configuration option. There is one renderer
+specific configuration option for maps called "sleep".  It gives the time in
+seconds the renderer should sleep before notifying the tirex-master to simulate
+a longer rendering time.
 
 =head1 METHODS
 

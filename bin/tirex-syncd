@@ -146,7 +146,7 @@ Do not actually copy anything.
 
 If you have several tile servers that you want to keep in sync (for instance as
 backup when one fails), you can use the tirex-syncd. The syncd will be notified
-by the master when a tile has been renderd and copy it to another server.
+by the master when a tile has been rendered and copy it to another server.
 
 =head1 FILES
 

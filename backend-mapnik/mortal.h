@@ -1,9 +1,10 @@
 /*
- * Part of TIREX - a map tile rendering tool-chain for OpenStreetMap.
- * 
- * Originally written by Jochen Topf & Frederik Ramm; public domain.
+ * Tirex Tile Rendering System
  *
- * TIREX component: renderd (tile rendering daemon).
+ * Mapnik rendering backend
+ *
+ * Originally written by Jochen Topf & Frederik Ramm.
+ *
  */
 
 /**

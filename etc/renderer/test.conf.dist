@@ -1,6 +1,6 @@
 #-----------------------------------------------------------------------------
 #
-#  Konfiguration for test renderer
+#  Konfiguration for Test renderer
 #
 #  /etc/tirex/renderer/test.conf
 #
@@ -17,7 +17,7 @@ name=test
 type=test
 
 # path to executable of renderer
-path=/usr/bin/tirex-renderd-test
+path=/usr/lib/tirex/backends/test
 
 # UDP port where the master can contact this renderer
 port=9330
@@ -35,5 +35,6 @@ syslog_facility=local0
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
+# none
 
 #-- THE END ------------------------------------------------------------------

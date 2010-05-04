@@ -22,18 +22,12 @@ Both default to I<8> for backward compatibility.
 The directory where meta tiles are stored. Tirex will
 create one subdirectory per map style.
 
-Defaults to F</usr/lib/tirex/tiles>.
-
 =item B<master_udp_port>
 
 UDP port (on localhost) where the master listens for commands (including render requests). 
 Defaults to I<9322>.
 
 =item B<syncd_udp_port>
-
-x
-
-=item B<renderd_udp_port>
 
 x
 
@@ -114,43 +108,6 @@ XXX
 
 =back 
 
-=head2 RENDERD OPTIONS
-
-=over 3
-
-=item B<mapnik_fontdir>
-
-The directory where the Mapnik rendering engine loads its TrueType fonts from.
-If the style sheet references fonts that are not present here, the renderer will 
-throw an exception. Defaults to F</usr/lib/mapnik/fonts>.
-
-=item B<mapnik_fontdir_recurse>
-
-Set this to I<1> if you want fonts loaded recursively from directories
-inside the I<mapnik_fontdir> directory. Defaults to I<0>.
-
-=item B<mapnik_mapdir>
-
-The directory where the map files for rendering reside. The map files must have 
-a file extension of .xml, and all .xml files present in this directory will be 
-loaded as map styles. Tirex will only process requests that have a "map" parameter
-matching one of these files. Defaults to I</etc/mapnik-osm-data>.
-
-=item B<mapnik_plugindir>
-
-The directory where the Mapnik rendering engine loads its plugins from. 
-Defaults to F</usr/lib/mapnik/input>.
-
-=item B<renderd_processes>
-
-The number of renderd processes to start. This should be the same, or slightly 
-smaller, than the maximum I<maxprocs> value used in a I<bucket> section. If you have
-more processes than I<maxprocs> then they will never be assigned a job; if you 
-have less processes than I<maxprocs> then the master will hand out more requests
-than can be processed. Defaults to I<5>.
-
-=back
-
 =head2 SYNCD OPTIONS
 
 =over 3
@@ -168,24 +125,7 @@ x
 
 =head1 EXAMPLE
 
-A standard Tirex configuration file:
-
-    metatile_dir=/var/lib/tirex/tiles
-    renderd_udp_port=9320
-    master_udp_port=9322
-    master_pidfile=/var/run/tirex/tirex-master.pid
-    master_logfile=/var/log/tirex/master.log
-    modtile_socket_name=/var/run/tirex/modtile_sock
-
-    bucket name=live       minprio=1  maxproc=4 maxload=20
-    bucket name=important  minprio=10 maxproc=3 maxload=8
-    bucket name=background minprio=20 maxproc=2 maxload=4
-
-    renderd_processes=5
-
-    mapnik_fontdir=/usr/lib/mapnik/fonts
-    mapnik_mapdir=/etc/mapnik-osm-data/
-    mapnik_plugindir=/usr/lib/mapnik/input
+XXX 
 
 =head1 AUTHORS
 
