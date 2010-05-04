@@ -1,0 +1,39 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for wms map
+#
+#  /etc/tirex/renderer/wms/wms-example.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  general configuration
+#-----------------------------------------------------------------------------
+
+# symbolic name of this map
+name=wms
+
+# symbolic name of renderer used
+renderer=wms
+
+# tile directory
+tiledir=/var/lib/tirex/tiles/wms
+
+# minimum zoom level allowed
+minz=0
+
+# maximum zoom level allowed
+maxz=10
+
+#-----------------------------------------------------------------------------
+#  renderer specific configuration
+#-----------------------------------------------------------------------------
+
+url=SOME URL
+
+layers=SOME LAYERS
+
+srs=EPSG:900913
+
+
+#-- THE END ------------------------------------------------------------------
