@@ -45,7 +45,7 @@ sub read_config_dir
     my $class = shift;
     my $dir   = shift;
 
-    foreach my $file (glob("$dir/maps/*.conf"))
+    foreach my $file (glob("$dir/renderer/*/*.conf"))
     {
         $class->new_from_configfile($file);
     }

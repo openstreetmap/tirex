@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------
 #
-#  Konfiguration for test map
+#  Konfiguration for mapnik map
 #
-#  /etc/tirex/maps/test.conf
+#  /etc/tirex/renderer/mapnik/mapnik-example.conf
 #
 #-----------------------------------------------------------------------------
 
@@ -11,13 +11,13 @@
 #-----------------------------------------------------------------------------
 
 # symbolic name of this map
-name=test
+name=default
 
 # symbolic name of renderer used
-renderer=test
+renderer=mapnik
 
 # tile directory
-tiledir=/var/lib/tirex/tiles/test
+tiledir=/var/lib/tirex/tiles/default
 
 # minimum zoom level allowed
 minz=0
@@ -29,8 +29,7 @@ maxz=10
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
-# time the renderer should sleep to simulate rendering time
-sleep=5
+mapfile=/etc/mapnik-osm-data/default.xml
 
 
 #-- THE END ------------------------------------------------------------------

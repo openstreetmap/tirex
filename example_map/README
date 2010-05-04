@@ -1,0 +1,9 @@
+
+This is some simple test data to test Mapnik with Tirex.
+
+The data is from http://www.naturalearthdata.com/, it is in the Public Domain.
+It was slightly changed to work with mercator projection.
+
+Note that it will only work in low zoom levels, if you zoom in you'll get
+problems at some point because the polygons are to big.
+

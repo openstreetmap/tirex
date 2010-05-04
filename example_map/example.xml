@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Map bgcolor="#eeebe2" srs="+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +no_defs +over">
+    <Style name="ocean">
+        <Rule>
+            <PolygonSymbolizer>
+                <CssParameter name="fill">#b1d2f5</CssParameter>
+            </PolygonSymbolizer>
+        </Rule>
+    </Style>
+    <Layer name="ocean" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
+        <StyleName>ocean</StyleName>
+        <Datasource>
+            <Parameter name="type">shape</Parameter>
+            <Parameter name="file">/usr/share/tirex/example_map/ocean</Parameter>
+        </Datasource>
+    </Layer>
+</Map>

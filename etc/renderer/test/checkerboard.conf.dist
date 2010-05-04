@@ -1,0 +1,36 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for test map
+#
+#  /etc/tirex/renderer/test/checkerboard.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  general configuration
+#-----------------------------------------------------------------------------
+
+# symbolic name of this map
+name=test
+
+# symbolic name of renderer used
+renderer=test
+
+# tile directory
+tiledir=/var/lib/tirex/tiles/test
+
+# minimum zoom level allowed
+minz=0
+
+# maximum zoom level allowed
+maxz=10
+
+#-----------------------------------------------------------------------------
+#  renderer specific configuration
+#-----------------------------------------------------------------------------
+
+# time the renderer should sleep to simulate rendering time
+sleep=0
+
+
+#-- THE END ------------------------------------------------------------------

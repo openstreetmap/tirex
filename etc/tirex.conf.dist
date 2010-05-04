@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------
 #
-#  tirex.conf
+#  /etc/tirex/tirex.conf
 #
-#  Configuration file for the Tirex map tile rendering system.
+#  Configuration file for the Tirex tile rendering system.
 #
 #-----------------------------------------------------------------------------
 
@@ -17,25 +17,22 @@ stats_dir=/var/lib/tirex/stats
 metatile_rows=8
 metatile_columns=8
 
-# This is the UDP port where the tirex-renderd waits for requests.
-renderd_udp_port=9320
-
 # This is the UDP port where the tirex-master waits for requests.
 master_udp_port=9322
 
 # The master writes its process ID into this file.
 master_pidfile=/var/run/tirex/tirex-master.pid
 
-# The syncd process writes its process ID into this file
-syncd_pidfile=/tmp/tirex-syncd.pid
-
 # The renderd-manager writes its process ID into this file
 renderd_pidfile=/var/run/tirex/tirex-renderd-manager.pid
 
-# Syslog facility used in master.
+# The syncd process writes its process ID into this file
+syncd_pidfile=/tmp/tirex-syncd.pid
+
+# Syslog facility used in tirex-master.
 master_syslog_facility=local0
 
-# Syslog facility used by renderd-manager
+# Syslog facility used by tirex-renderd-manager
 renderd_syslog_facility=local0
 
 # Logfile where all rendered jobs are logged.
@@ -56,10 +53,14 @@ renderd_alive_timeout=8
 # The name of the UNIX domain socket for communicating with ModTile.
 modtile_socket_name=/var/run/tirex/modtile_sock
 
+#-----------------------------------------------------------------------------
+
 # Buckets for different priorities.
 bucket name=live       minprio=1  maxproc=4 maxload=20
 bucket name=important  minprio=10 maxproc=3 maxload=8
 bucket name=background minprio=20 maxproc=2 maxload=4
+
+#-----------------------------------------------------------------------------
 
 # If this is defined, the syncd will copy rendered tiles to this server.
 #sync_to_host=some.other.host
