@@ -1,0 +1,93 @@
+#!/usr/bin/perl
+#
+#  tirex-stats-masterlog LOGFILE
+#
+
+use strict;
+use warnings;
+
+use List::Util;
+use JSON;
+
+use Data::Dumper;
+
+my $stats = {
+    'map' => {},
+};
+
+while (<>)
+{
+    chomp;
+    my ($timestamp, @fields) = split(' ', $_);
+    my %fields;
+
+    foreach my $field (@fields)
+    {
+        my ($key, $value) = split(/=/, $field, 2);
+        $fields{$key} = $value;
+    }
+
+    if (! defined $stats->{'map'}->{$fields{'map'}})
+    {
+        $stats->{'map'}->{$fields{'map'}} = {
+            'maxzoom' => 0,
+            'count'   => 0,
+            'success' => 0,
+            'failure' => 0,
+            'prio'    => {},
+            'zoom'    => {},
+        };
+    }
+
+    my $s = $stats->{'map'}->{$fields{'map'}};
+
+    if ($fields{'success'} == 1) { $s->{'success'}++; } else { $s->{'failure'}++; }
+    $s->{'count'}++;
+    $s->{'prio'}->{$fields{'prio'}}++;
+    $s->{'zoom'}->{$fields{'z'}}++;
+    $s->{'maxzoom'} = List::Util::max($s->{'maxzoom'}, 0 + $fields{'z'});
+
+    $s->{'render_time'}->{int($fields{'render_time'}/10_000)}++;
+
+    if ($fields{'render_time'} > 10_000)
+    {
+        $s->{'long_render_time'}->{$fields{'z'}}++;
+    }
+}
+
+print JSON::to_json($stats), "\n";
+
+foreach my $map (keys %{$stats->{'map'}})
+{
+    print "==============================================\n";
+    print "Map: $map\n\n";
+    my $s = $stats->{'map'}->{$map};
+
+    printf("Number of requests: %10d\n", $s->{'count'});
+    printf("  successful      : %10d\n", $s->{'success'});
+    printf("  failure         : %10d\n", $s->{'failure'});
+
+    print "\nNumber of requests per zoom level:\n";
+    print "  Zoom   Requests    Long rendering requests (percent)\n";
+    foreach my $zoom (0..$s->{'maxzoom'})
+    {
+        my $c = $s->{'zoom'}->{$zoom} || 0;
+        my $l = $s->{'long_render_time'}->{$zoom} || 0;
+        printf("   %2d: %10d  %6d  ( %2d%% )\n", $zoom, $c, $l, $c == 0 ? 0 : $l/$c*100);
+    }
+
+    print "\nNumber of requests per prio:\n";
+    foreach my $prio (sort { $a <=> $b } keys %{$s->{'prio'}})
+    {
+        printf("  %3d: %10d\n", $prio, $s->{'prio'}->{$prio});
+    }
+
+    print "\nRendering time histogram:\n";
+    foreach my $rt (sort { $a <=> $b } keys %{$s->{'render_time'}})
+    {
+        printf("  %3d-%3ds %8d\n", $rt*10, ($rt+1)*10, $s->{'render_time'}->{$rt});
+    }
+
+}
+
+
