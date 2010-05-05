@@ -22,6 +22,14 @@ Description: Munin plugin for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering for OpenStreetMap.
  This package contains a plugin that helps to graph Tirex activity with Munin.
 
+Package: tirex-nagios-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core
+Suggests: nagios3 | nagios-nrpe-server
+Description: Nagios plugins for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering for OpenStreetMap.
+ This package contains plugins that helps to monitor Tirex activity with Nagios.
+
 Package: tirex-backend-wms
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl

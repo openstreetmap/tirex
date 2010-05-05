@@ -2,6 +2,10 @@
 Tirex Tile Rendering System
 ===========================
 
+Tirex is a bunch of tools that let you run a tile server. A tile server
+is a web server that hands out pre-rendered map raster images to clients.
+
+Further documentation is in the doc/ subdirectory.
 
 
 PERL MODULES

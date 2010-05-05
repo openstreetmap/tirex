@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+
+# Script that checks the total Tirex queue size.
+#
+# Parameters:
+# -w <n>    issue WARNING if queue larger than <n>
+# -c <n>    issue CRITICAL if queue is larger than <n>
+# 
+# Possible future extensios:
+# Configure for individual queues, or check age of requests in queue.
+
+use strict;
+use JSON;
+use Tirex::Status;
+use Getopt::Std;
+
+our $opt_w;
+our $opt_c;
+getopt('wc');
+
+if (!defined($opt_w) || $opt_w != (0+$opt_w) || !defined($opt_c) || $opt_c != (0+$opt_c))
+{
+    printf STDERR "Usage: tirex-queue-size.pl -w limit -c limit\n";
+    exit 2;
+}
+
+my $status_obj = Tirex::Status->new();
+my $status = $status_obj->read();
+my $d = JSON::from_json($status);
+
+if (!defined($d->{'updated'}))
+{
+    printf "CRITICAL: Cannot retrieve Tirex status\n";
+    exit 2;
+}
+
+my $size = $d->{'queue'}->{'size'};
+
+if ($size > $opt_c)
+{
+    printf "CRITICAL: Queue size = %d\n", $size;
+    exit 2;
+}
+elsif ($size > $opt_w)
+{
+    printf "WARNING: Queue size = %d\n", $size;
+    exit 1;
+}
+
+printf "OK: Queue size = %d\n", $size;
+exit 0;
+

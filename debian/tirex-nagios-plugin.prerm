@@ -1,0 +1,23 @@
+#! /bin/sh
+
+set -e
+
+for dir in /etc/nagios/nrpe.d 
+do  
+    if [ -d $dir ]
+    then
+        rm -f $dir/tirex-health.cfg
+        rm -f $dir/tirex-queue-size.cfg
+    fi
+done
+
+if [ -x /etc/init.d/nagios-nrpe-server ]
+then
+    if which invoke-rc.d >/dev/null 2>&1; then
+        invoke-rc.d nagios-nrpe-server restart
+    else
+        /etc/init.d/nagios-nrpe-server restart
+    fi
+fi
+
+#DEBHELPER#

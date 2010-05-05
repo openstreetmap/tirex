@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+
+# Script that checks whether the Tirex master has recently updated
+# the status message in shared memory.
+#
+# This is *almost* like checking whether the master process is running,
+# but in case the master process should lock up, this test would catch
+# that whereas a simple process list test would not.
+#
+# This script has no parameters and will either issue an "OK" or a "CRITICAL"
+# status message.
+
+use strict;
+use JSON;
+use Tirex::Status;
+
+my $status_obj = Tirex::Status->new();
+my $status = $status_obj->read();
+my $d = JSON::from_json($status);
+
+if (!defined($d->{'updated'}))
+{
+    printf "CRITICAL: Cannot retrieve Tirex status\n";
+    exit 2;
+}
+
+my $age = time() - $d->{'updated'};
+
+if ($age > 300)
+{
+    printf "CRITICAL: Latest status update is too old (%d seconds ago)\n", $age;
+    exit 2;
+}
+
+printf "OK: Latest status update %d seconds ago\n", $age;
+exit 0;
+
