@@ -20,7 +20,7 @@ getopt('wc');
 
 if (!defined($opt_w) || $opt_w != (0+$opt_w) || !defined($opt_c) || $opt_c != (0+$opt_c))
 {
-    printf STDERR "Usage: tirex-queue-size.pl -w limit -c limit\n";
+    printf STDERR "Usage: tirex-queue-size -w limit -c limit\n";
     exit 2;
 }
 
