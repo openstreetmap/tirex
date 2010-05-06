@@ -193,7 +193,8 @@ void RenderDaemon::setStatus(const char *status)
 #ifdef linux
     char **p = mArgv;
     for (int i=1;i<mArgc;i++) { for (char *c = *(++p); *c != 0; c++) *c=0; }
-    sprintf(*mArgv, "%s: %s", mProgramName.c_str(), status);
+//    sprintf(*mArgv, "%s: %s", mProgramName.c_str(), status);
+    sprintf(*mArgv, "mapnik: %s                                ", status);
 #endif
 }
 

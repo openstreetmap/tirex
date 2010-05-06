@@ -16,18 +16,20 @@ name=wms
 # tile directory
 tiledir=/var/lib/tirex/tiles/wms
 
-# minimum zoom level allowed
-minz=0
+# minimum zoom level allowed (default 0)
+#minz=0
 
-# maximum zoom level allowed
+# maximum zoom level allowed (default 17)
 maxz=10
 
 #-----------------------------------------------------------------------------
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
+# the URL prefix for the WMS server, should probably end with a '?'
 url=SOME URL
 
+# comma separated list of layers for the WMS request
 layers=SOME LAYERS
 
 # You need to use the Pseudo-Mercator projection used by OpenStreetMap,
@@ -37,5 +39,8 @@ layers=SOME LAYERS
 # Default is "EPSG:3857".
 #srs=EPSG:3857
 
+# set TRANSPARENT option on WMS request (can be 'TRUE' or 'FALSE', default
+# is 'FALSE').
+#transparent=FALSE
 
 #-- THE END ------------------------------------------------------------------

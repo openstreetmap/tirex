@@ -115,7 +115,8 @@ sub new
 
     # set default values
     $self->{'syslog_facility'} = $Tirex::BACKEND_MANAGER_SYSLOG_FACILITY unless ($self->{'syslog_facility'});
-    $self->{'debug'} = 0                                                 unless ($self->{'debug'});
+    $self->{'debug'}           = 0                                       unless ($self->{'debug'});
+    $self->{'maps'}            = [];
 
     $self->{'config'} = \%args;
 
@@ -295,6 +296,8 @@ sub to_hash
     $hash{'debug'}           = 0 + $self->get_debug(); # force integer (so that it works in JSON)
     $hash{'port'}            = 0 + $self->get_port();
     $hash{'procs'}           = 0 + $self->get_procs();
+
+    $hash{'maps'} = [map { $_->get_name(); } @{$self->get_maps()}];
 
     return \%hash;
 }

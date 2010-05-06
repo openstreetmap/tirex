@@ -28,7 +28,7 @@ Tirex::Backend - Generic Tirex rendering backend
 =head1 SYNOPSIS
 
  use Tirex::Backend::Test;
- my $backend = Tirex::Backend::Test->new($0);
+ my $backend = Tirex::Backend::Test->new();
  $backend->main();
 
 =head1 DESCRIPTION
@@ -53,12 +53,41 @@ sub new
     my $class = shift;
     my $self = bless {} => $class;
 
-    $self->{'name'} = shift;
+    $self->{'name'} = $self->type();
 
+    $self->set_status('initializing');
     $self->init();
 
     return $self;
 }
+
+=head2 $backend->check_map_config($map)
+
+Check a map config for this backend for syntactic and other validity.
+Should croak if it fails.
+
+Overwrite this in the subclass.
+
+=cut
+
+sub check_map_config
+{
+}
+
+=head2 $backend->set_status('text')
+
+Set status text which is shown on the ps output.
+
+=cut
+
+sub set_status
+{
+    my $self = shift;
+    my $text = shift;
+
+    $0 = $self->{'name'} . ': ' . $text;
+}
+
 
 =head2 $backend->main()
 
@@ -97,8 +126,15 @@ sub main
 
     foreach my $file (@mapfiles)
     {
-        my $map = Tirex::Map->new_from_configfile($file, $renderer);
-        ::syslog('info', 'map config found: %s', $map->to_s());
+        eval {
+            my $map = Tirex::Map->new_from_configfile($file, $renderer);
+            $self->check_map_config($map);
+            ::syslog('info', 'map config found: %s', $map->to_s());
+        };
+        if ($@)
+        {
+            $self->error_disable("error reading map config '%s': %s", $file, $@);
+        }
     }
 
     #-----------------------------------------------------------------------------
@@ -134,6 +170,8 @@ sub main
 
         alarm($alive_timeout);
 
+        $self->set_status('idle');
+
         # this will block waiting for new commands on socket
         # if a signal comes in (ALRM or from parent) it will return with EINTR
         my $msg = Tirex::Message->new_from_socket($socket);
@@ -149,6 +187,8 @@ sub main
 
         my $map = Tirex::Map->get($msg->{'map'});
 
+        $self->set_status(sprintf("request map=%s z=%d x=%d y=%d", $map->get_name(), $msg->{'z'}, $msg->{'x'}, $msg->{'y'}));
+
         if ($map)
         {
             my $metatile  = $msg->to_metatile();
@@ -157,6 +197,9 @@ sub main
             ::syslog('debug', 'doing rendering (filename=%s)', $filename) if ($Tirex::DEBUG);
             my $t0 = [Time::HiRes::gettimeofday];
             my $image = $self->create_metatile($map, $metatile);
+
+            $self->set_status('writing metatile');
+
             $self->write_metatile($image, $filename, $metatile);
 
             $msg = $msg->reply();

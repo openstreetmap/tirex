@@ -247,11 +247,10 @@ sub format_renderers
 {
     my $renderers = shift;
 
-    my $text = " Renderers:\n  " . UNDERLINE . "Name                 Type        Port  Procs  Path                               \n" . RESET;
+    my $text = " Renderers:\n  " . UNDERLINE . "Name        Port  Procs  Path                               \n" . RESET;
 
     foreach my $r (@$renderers) {
-        $text .= '  ' . field("%-20s", $r->{'name'}) . ' '
-                      . field("%-10s", $r->{'type'}) . ' '
+        $text .= '  ' . field("%-10s", $r->{'name'}) . ' '
                       . field("%5d",   $r->{'port'}) . ' '
                       . field("    %2d",   $r->{'procs'}) . ' '
                       . field(" %-30s", $r->{'path'}) . ' '
@@ -265,11 +264,11 @@ sub format_maps
 {
     my $maps = shift;
 
-    my $text = " Maps:\n  " . UNDERLINE . "Name                 Renderer              Zoom  Tiledir                               \n" . RESET;
+    my $text = " Maps:\n  " . UNDERLINE . "Name                 Renderer    Zoom  Tiledir                               \n" . RESET;
 
     foreach my $r (@$maps) {
         $text .= '  ' . field("%-20s", $r->{'name'}) . ' '
-                      . field("%-20s", $r->{'renderer'}) . ' '
+                      . field("%-10s", $r->{'renderer'}) . ' '
                       . field("%2d",   $r->{'minz'})
                       . field("-%2d",   $r->{'maxz'}) . ' '
                       . field(" %-30s", $r->{'tiledir'}) . ' '

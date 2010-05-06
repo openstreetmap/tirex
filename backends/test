@@ -34,7 +34,7 @@ use Tirex::Backend::Test;
 
 #-----------------------------------------------------------------------------
 
-my $backend = Tirex::Backend::Test->new($0);
+my $backend = Tirex::Backend::Test->new();
 $backend->main();
 
 #-- THE END ------------------------------------------------------------------

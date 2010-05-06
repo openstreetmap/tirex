@@ -34,7 +34,7 @@ use Tirex::Backend::WMS;
 
 #-----------------------------------------------------------------------------
 
-my $backend = Tirex::Backend::WMS->new($0);
+my $backend = Tirex::Backend::WMS->new();
 $backend->main();
 
 #-- THE END ------------------------------------------------------------------

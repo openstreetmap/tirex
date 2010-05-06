@@ -25,6 +25,8 @@ Tirex::Backend::WMS - WMS backend for Tirex
 Simple "renderer" that gets the map image from a WMS server. The WMS server
 must support the right SRS (EPSG:3857 or the informal EPSG:900913).
 
+Only WMS 1.1.1 is currently supported.
+
 Config parameters for the map file:
 
 =over 8
@@ -34,6 +36,8 @@ Config parameters for the map file:
 =item layers list of comma-separated layers
 
 =item srs spatial reference system, 'EPSG:3857' etc.
+
+=item transparent TRUE or FALSE
 
 =back
 
@@ -109,18 +113,21 @@ sub create_metatile
         SERVICE     => 'WMS',
         VERSION     => '1.1.1',
         REQUEST     => 'GetMap',
-        BBOX        => join(',', $left, $bottom, $right, $top),
-        SRS         => $map->{'srs'} || 'EPSG:3857',
-        WIDTH       => $size,
-        HEIGHT      => $size,
         LAYERS      => $map->{'layers'},
         STYLES      => '',
+        SRS         => $map->{'srs'} || 'EPSG:3857',
+        BBOX        => join(',', $left, $bottom, $right, $top),
+        WIDTH       => $size,
+        HEIGHT      => $size,
         FORMAT      => 'image/png',
-        TRANSPARENT => 'TRUE',
+        TRANSPARENT => $map->{'transparent'} || 'FALSE',
+        EXCEPTIONS  => 'application/vnd.ogc.se_xml',
     );
 
     my $request = $map->{'url'} . join('&', map { $_ . '=' . $wms_request{$_} } sort keys %wms_request);
     ::syslog('debug', 'WMS request: %s', $request) if ($Tirex::DEBUG);
+
+    $self->set_status("wms request");
 
     my $response = $self->{'ua'}->request(HTTP::Request->new(GET => $request));
 
@@ -133,6 +140,10 @@ sub create_metatile
         }
     }
     ::syslog('err', 'Error on WMS request: status=%d (%s) content-type=%s', $response->code(), $response->message(), $response->header('Content-type'));
+    if ($response->header('Content-type') eq 'application/vnd.ogc.se_xml' && $Tirex::DEBUG)
+    {
+        ::syslog('debug', 'WMS request returned: %s', $response->content());
+    }
     return $self->create_error_image($map, $metatile);
 }
 

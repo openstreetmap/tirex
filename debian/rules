@@ -48,7 +48,7 @@ binary-arch: build install
 #   the following line handles all packages *except* tirex-core
 	dh_install --no-package tirex-core --sourcedir=$(CURDIR)/debian/tmp
 #   the following line handles *only* the tirex-core package, it excludes some perl libraries that should not end up in this package
-	dh_install --no-package tirex-backend-wms --no-package tirex-backend-mapnik --no-package tirex-munin-plugin --no-package tirex-syncd --no-package tirex-example-map --exclude Munin --exclude Tirex::Backend::WMS --exclude Backend/WMS --sourcedir=$(CURDIR)/debian/tmp
+	dh_install --no-package tirex-backend-wms --no-package tirex-backend-mapnik --no-package tirex-munin-plugin --no-package tirex-nagios-plugin --no-package tirex-syncd --no-package tirex-example-map --exclude Munin --exclude Tirex::Backend::WMS --exclude Backend/WMS --sourcedir=$(CURDIR)/debian/tmp
 #	dh_installmenu
 #	dh_installdebconf	
 #	dh_installlogrotate

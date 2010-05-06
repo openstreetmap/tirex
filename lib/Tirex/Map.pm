@@ -94,9 +94,9 @@ sub new
     my %args = @_;
     my $self = bless \%args => $class;
 
-    Carp::croak("missing name"    ) unless (defined $self->{'name'    });
-    Carp::croak("missing renderer") unless (defined $self->{'renderer'});
-    Carp::croak("missing tiledir" ) unless (defined $self->{'tiledir' });
+    Carp::croak('missing name'    ) unless (defined $self->{'name'    });
+    Carp::croak('missing renderer') unless (defined $self->{'renderer'});
+    Carp::croak('missing tiledir' ) unless (defined $self->{'tiledir' });
     Carp::croak("map with name $self->{'name'} exists") if ($Maps{$self->{'name'}});
 
     $self->{'minz'} =  0 unless (defined $self->{'minz'});

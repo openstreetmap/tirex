@@ -8,6 +8,7 @@ use strict;
 use warnings;
 
 use List::Util qw();
+use Carp;
 
 use Tirex::Backend;
 
@@ -55,6 +56,25 @@ sub init
     my $self = shift;
 
     $self->{'border_width'} = 6;
+}
+
+=head2 $backend->check_map_config($map)
+
+=cut
+
+sub check_map_config
+{
+    my $self = shift;
+    my $map  = shift;
+
+    if (defined $map->{'sleep'})
+    {
+        Carp::croak("parameter 'sleep' needs integer argument between 0 and 999") unless ($map->{'sleep'} =~ /^[1-9][0-9]{0,2}$/);
+    }
+    else
+    {
+        $map->{'sleep'} = 0; # default: no sleep
+    }
 }
 
 =head2 $backend->create_metatile()

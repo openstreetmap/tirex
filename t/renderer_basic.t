@@ -32,10 +32,11 @@ is($r1->get_type(), 'mapnik', 'type');
 is($r1->get_path(), '/usr/bin/tirex-renderer-mapnik', 'path');
 is($r1->get_port(), 1234, 'port');
 is($r1->get_procs(), 3, 'procs');
+is_deeply($r1->get_maps(), [], 'maps');
 is_deeply($r1->get_config(), {
-    fontdir => '/usr/lib/mapnik/fonts',
+    fontdir         => '/usr/lib/mapnik/fonts',
     fontdir_recurse => 0,
-    plugindir => '/usr/lib/mapnik/input'
+    plugindir       => '/usr/lib/mapnik/input'
 }, 'config');
 
 is($r1->to_s(), 'Renderer mapnik1: type=mapnik port=1234 procs=3 path=/usr/bin/tirex-renderer-mapnik syslog_facility=daemon debug=0 fontdir=/usr/lib/mapnik/fonts fontdir_recurse=0 plugindir=/usr/lib/mapnik/input', 'to_s');
@@ -45,16 +46,17 @@ is(Tirex::Renderer->get('foo'), undef, 'get');
 
 is_deeply(Tirex::Renderer->status(), [
     {
-        name => 'mapnik1',
-        type => 'mapnik',
-        path => '/usr/bin/tirex-renderer-mapnik',
-        port => 1234,
-        procs => 3,
+        name            => 'mapnik1',
+        type            => 'mapnik',
+        path            => '/usr/bin/tirex-renderer-mapnik',
+        port            => 1234,
+        procs           => 3,
         syslog_facility => 'daemon',
-        debug => 0,
-        fontdir => '/usr/lib/mapnik/fonts',
+        debug           => 0,
+        fontdir         => '/usr/lib/mapnik/fonts',
         fontdir_recurse => 0,
-        plugindir => '/usr/lib/mapnik/input',
+        plugindir       => '/usr/lib/mapnik/input',
+        maps            => [],
     },
 ], 'status');
 
