@@ -53,7 +53,7 @@ sub new
     my $class = shift;
     my $self = bless {} => $class;
 
-    $self->{'name'} = $self->type();
+    ($self->{'name'} = $0) =~ s{^.*/}{};
 
     $self->set_status('initializing');
     $self->init();
@@ -122,7 +122,7 @@ sub main
     $pipe->fdopen($pipe_fileno, 'w') or $self->error_disable("Cannot access open pipe: $!");
     $pipe->autoflush(1);
 
-    my $renderer = Tirex::Renderer->new( type => $self->type(), name => $renderer_name, port => $port, path => $0, procs => 0 );
+    my $renderer = Tirex::Renderer->new( name => $renderer_name, port => $port, path => $0, procs => 0 );
 
     foreach my $file (@mapfiles)
     {

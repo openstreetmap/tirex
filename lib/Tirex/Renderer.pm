@@ -79,11 +79,11 @@ sub all
     return sort { $a->get_name() cmp $b->get_name() } values %Renderers;
 }
 
-=head2 Tirex::Renderer->new( name => 'foo', type => 'type', path => '/path/to/exec', port => 1234, procs => 3, ... )
+=head2 Tirex::Renderer->new( name => 'foo', path => '/path/to/exec', port => 1234, procs => 3, ... )
 
 Create new renderer config.
 
-Every renderer has at least these general options: name, type, path, port, and
+Every renderer has at least these general options: name, path, port, and
 procs. Will croak if they are not all present.
 
 In addition it can have zero or more options specific to this renderer.
@@ -100,14 +100,13 @@ sub new
     my $self = bless {} => $class;
 
     Carp::croak("missing name")  unless (defined $args{'name'} );
-    Carp::croak("missing type")  unless (defined $args{'type'} );
     Carp::croak("missing path")  unless (defined $args{'path'} );
     Carp::croak("missing port")  unless (defined $args{'port'} );
     Carp::croak("missing procs") unless (defined $args{'procs'} );
 
     Carp::croak("renderer with name $args{'name'} already exists") if ($Renderers{$args{'name'}});
 
-    foreach my $cfg ( qw( name type path port procs syslog_facility debug filename ) )
+    foreach my $cfg ( qw( name path port procs syslog_facility debug filename ) )
     {
         $self->{$cfg} = $args{$cfg};
         delete $args{$cfg};
@@ -216,14 +215,6 @@ Get debug flag of this renderer.
 
 sub get_debug { return shift->{'debug' }; }
 
-=head2 $rend->get_type();
-
-Get type of this renderer.
-
-=cut
-
-sub get_type { return shift->{'type' }; }
-
 =head2 $rend->get_path();
 
 Get path of this renderer.
@@ -268,7 +259,7 @@ sub to_s
 
     my $s = sprintf("Renderer %s:", $self->get_name());
 
-    foreach my $key ( qw( type port procs path syslog_facility debug ) ) {
+    foreach my $key ( qw( port procs path syslog_facility debug ) ) {
         $s .= " $key=$self->{$key}";
     }
     foreach my $key ( sort keys %{$self->{'config'}}) {
@@ -290,7 +281,6 @@ sub to_hash
 
     my %hash = %{$self->{'config'}};
     $hash{'name'}            =     $self->get_name();
-    $hash{'type'}            =     $self->get_type();
     $hash{'path'}            =     $self->get_path();
     $hash{'syslog_facility'} =     $self->get_syslog_facility();
     $hash{'debug'}           = 0 + $self->get_debug(); # force integer (so that it works in JSON)

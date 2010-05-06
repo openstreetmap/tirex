@@ -43,17 +43,6 @@ Config parameters for the map file:
 
 =head1 METHODS
 
-=head2 $backend->type()
-
-Return type of this backend: 'wms'.
-
-=cut
-
-sub type
-{
-    return 'wms';
-}
-
 =head2 $backend->init()
 
 This method initializes things specific to this backend.

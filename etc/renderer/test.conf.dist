@@ -13,9 +13,6 @@
 # symbolic name
 name=test
 
-# type of renderer
-type=test
-
 # path to executable of renderer
 path=/usr/lib/tirex/backends/test
 

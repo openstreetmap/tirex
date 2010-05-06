@@ -34,17 +34,6 @@ a longer rendering time.
 
 =head1 METHODS
 
-=head2 $backend->type()
-
-Return type of this backend: 'test'.
-
-=cut
-
-sub type
-{
-    return 'test';
-}
-
 =head2 $backend->init()
 
 This method initializes things specific to this backend.

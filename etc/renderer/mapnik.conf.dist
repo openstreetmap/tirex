@@ -13,9 +13,6 @@
 # symbolic name
 name=mapnik
 
-# type of renderer
-type=mapnik
-
 # path to executable of renderer
 path=/usr/lib/tirex/backends/mapnik
 

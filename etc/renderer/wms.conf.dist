@@ -13,9 +13,6 @@
 # symbolic name
 name=wms
 
-# type of renderer
-type=wms
-
 # path to executable of renderer
 path=/usr/lib/tirex/backends/wms
 

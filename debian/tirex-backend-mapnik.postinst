@@ -4,3 +4,4 @@ set -e
 
 [ -d /etc/tirex/renderer/mapnik ] || mkdir -p /etc/tirex/renderer/mapnik
 
+#DEBHELPER#

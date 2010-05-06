@@ -16,20 +16,18 @@ use Tirex::Renderer;
 
 #-----------------------------------------------------------------------------
 
-eval { Tirex::Renderer->new(                                                                                             ); }; ($@ =~ qr{missing name} ) ? pass() : fail();
-eval { Tirex::Renderer->new( name => 'mapnik1'                                                                           ); }; ($@ =~ qr{missing type} ) ? pass() : fail();
-eval { Tirex::Renderer->new( name => 'mapnik1', type => 'mapnik'                                                         ); }; ($@ =~ qr{missing path} ) ? pass() : fail();
-eval { Tirex::Renderer->new( name => 'mapnik1', type => 'mapnik', path => '/usr/bin/tirex-renderer-mapnik'               ); }; ($@ =~ qr{missing port} ) ? pass() : fail();
-eval { Tirex::Renderer->new( name => 'mapnik1', type => 'mapnik', path => '/usr/bin/tirex-renderer-mapnik', port => 1234 ); }; ($@ =~ qr{missing procs}) ? pass() : fail();
+eval { Tirex::Renderer->new(                                                                           ); }; ($@ =~ qr{missing name} ) ? pass() : fail();
+eval { Tirex::Renderer->new( name => 'mapnik1',                                                        ); }; ($@ =~ qr{missing path} ) ? pass() : fail();
+eval { Tirex::Renderer->new( name => 'mapnik1', path => '/usr/lib/tirex/backends/mapnik'               ); }; ($@ =~ qr{missing port} ) ? pass() : fail();
+eval { Tirex::Renderer->new( name => 'mapnik1', path => '/usr/lib/tirex/backends/mapnik', port => 1234 ); }; ($@ =~ qr{missing procs}) ? pass() : fail();
 
 is(Tirex::Renderer->get('mapnik1'), undef, 'get');
 
-my $r1 = Tirex::Renderer->new( name => 'mapnik1', type => 'mapnik', path => '/usr/bin/tirex-renderer-mapnik', port => 1234, procs => 3, fontdir => '/usr/lib/mapnik/fonts', fontdir_recurse => 0, plugindir => '/usr/lib/mapnik/input' );
+my $r1 = Tirex::Renderer->new( name => 'mapnik1', path => '/usr/lib/tirex/backends/mapnik', port => 1234, procs => 3, fontdir => '/usr/lib/mapnik/fonts', fontdir_recurse => 0, plugindir => '/usr/lib/mapnik/input' );
 
 isa_ok($r1, 'Tirex::Renderer', 'class');
 is($r1->get_name(), 'mapnik1', 'name');
-is($r1->get_type(), 'mapnik', 'type');
-is($r1->get_path(), '/usr/bin/tirex-renderer-mapnik', 'path');
+is($r1->get_path(), '/usr/lib/tirex/backends/mapnik', 'path');
 is($r1->get_port(), 1234, 'port');
 is($r1->get_procs(), 3, 'procs');
 is_deeply($r1->get_maps(), [], 'maps');
@@ -39,7 +37,7 @@ is_deeply($r1->get_config(), {
     plugindir       => '/usr/lib/mapnik/input'
 }, 'config');
 
-is($r1->to_s(), 'Renderer mapnik1: type=mapnik port=1234 procs=3 path=/usr/bin/tirex-renderer-mapnik syslog_facility=daemon debug=0 fontdir=/usr/lib/mapnik/fonts fontdir_recurse=0 plugindir=/usr/lib/mapnik/input', 'to_s');
+is($r1->to_s(), 'Renderer mapnik1: port=1234 procs=3 path=/usr/lib/tirex/backends/mapnik syslog_facility=daemon debug=0 fontdir=/usr/lib/mapnik/fonts fontdir_recurse=0 plugindir=/usr/lib/mapnik/input', 'to_s');
 
 is(Tirex::Renderer->get('mapnik1'), $r1, 'get');
 is(Tirex::Renderer->get('foo'), undef, 'get');
@@ -47,8 +45,7 @@ is(Tirex::Renderer->get('foo'), undef, 'get');
 is_deeply(Tirex::Renderer->status(), [
     {
         name            => 'mapnik1',
-        type            => 'mapnik',
-        path            => '/usr/bin/tirex-renderer-mapnik',
+        path            => '/usr/lib/tirex/backends/mapnik',
         port            => 1234,
         procs           => 3,
         syslog_facility => 'daemon',
@@ -60,7 +57,7 @@ is_deeply(Tirex::Renderer->status(), [
     },
 ], 'status');
 
-eval { Tirex::Renderer->new( name => 'mapnik1', type => 'mapnik', path => '/usr/bin/tirex-renderer-mapnik', port => 1234, procs => 3, fontdir => '/usr/lib/mapnik/fonts', fontdir_recurse => 0, plugindir => '/usr/lib/mapnik/input' ); };
+eval { Tirex::Renderer->new( name => 'mapnik1', path => '/usr/lib/tirex/backends/mapnik', port => 1234, procs => 3, fontdir => '/usr/lib/mapnik/fonts', fontdir_recurse => 0, plugindir => '/usr/lib/mapnik/input' ); };
 ($@ =~ qr{exists}) ? pass() : fail();
 
 eval { Tirex::Renderer->new_from_configfile('does not exist'); };
@@ -71,8 +68,7 @@ is(Tirex::Renderer->get('mapnik2'), $r3, 'get');
 
 isa_ok($r3, 'Tirex::Renderer', 'class');
 is($r3->get_name(), 'mapnik2', 'name');
-is($r3->get_type(), 'mapnik', 'type');
-is($r3->get_path(), '/usr/bin/tirex-renderer-mapnik', 'path');
+is($r3->get_path(), '/usr/lib/tirex/backends/mapnik', 'path');
 is($r3->get_port(), 1234, 'port');
 is($r3->get_procs(), 3, 'procs');
 
