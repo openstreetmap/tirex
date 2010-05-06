@@ -2,14 +2,11 @@
 
 set -e
 
-for dir in /etc/nagios/nrpe.d 
-do  
-    if [ -d $dir ]
-    then
-        rm -f $dir/tirex-health.cfg
-        rm -f $dir/tirex-queue-size.cfg
-    fi
-done
+dir=/etc/nagios/nrpe.d 
+if [ -d $dir ]; then
+    rm -f $dir/tirex-health.cfg
+    rm -f $dir/tirex-queue-size.cfg
+fi
 
 if [ -x /etc/init.d/nagios-nrpe-server ]
 then
