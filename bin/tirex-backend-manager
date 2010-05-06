@@ -125,7 +125,6 @@ $SIG{INT}  = \&sigterm_handler;
 #-----------------------------------------------------------------------------
 
 Tirex::Renderer->read_config_dir($config_dir);
-Tirex::Map->read_config_dir($config_dir);
 
 my @renderers = Tirex::Renderer->all();
 syslog('info', 'Found config for renderers: %s', join(' ', map { $_->get_name(); } @renderers));
@@ -275,7 +274,7 @@ sub execute_renderer
     $ENV{'TIREX_BACKEND_NAME'}            = $renderer->get_name();
     $ENV{'TIREX_BACKEND_PORT'}            = $renderer->get_port();
     $ENV{'TIREX_BACKEND_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
-    $ENV{'TIREX_BACKEND_MAPFILES'}        = join(' ', map { $_->get_filename() } grep { $_->get_renderer() eq $renderer } Tirex::Map->all());
+    $ENV{'TIREX_BACKEND_MAPFILES'}        = join(' ', map { $_->get_filename() } @{$renderer->get_maps()});
     $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
     $ENV{'TIREX_BACKEND_PIPE_FILENO'}     = $pipe_fileno;
     $ENV{'TIREX_BACKEND_SOCKET_FILENO'}   = $socket_fileno;
@@ -304,7 +303,7 @@ sub sigchld_handler
         push(@closed_children, $child);
 
         # if the return code of the child is something other than $EXIT_CODE_RESTART, the renderer is disabled
-        if ($exit_code != $EXIT_CODE_RESTART)
+        if ($exit_code != $Tirex::EXIT_CODE_RESTART)
         {
             my $renderer = $workers->{$child}->{'renderer'};
             @renderers = grep { $_ ne $renderer } @renderers;

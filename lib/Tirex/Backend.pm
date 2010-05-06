@@ -97,7 +97,7 @@ sub main
 
     foreach my $file (@mapfiles)
     {
-        my $map = Tirex::Map->new_from_configfile($file);
+        my $map = Tirex::Map->new_from_configfile($file, $renderer);
         ::syslog('info', 'map config found: %s', $map->to_s());
     }
 

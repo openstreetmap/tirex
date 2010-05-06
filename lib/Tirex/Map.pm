@@ -28,29 +28,10 @@ my $map = Tirex::Map->new();
 
 =head1 DESCRIPTION
 
-A Tirex map configuration. It always contains the name, renderer, tile
-directory and zoom range for this map. Depending on the renderer there
-can be more options.
+A Tirex map configuration. It always contains the name, tile directory and zoom
+range for this map. Depending on the backend there can be more options.
 
 =head1 METHODS
-
-=head2 Tirex::Map->read_config_dir($dir)
-
-Read all map configs in given config directory.
-
-=cut
-
-sub read_config_dir
-{
-    my $class = shift;
-    my $dir   = shift;
-
-    foreach my $file (glob("$dir/renderer/*/*.conf"))
-    {
-        $class->new_from_configfile($file);
-    }
-}
-
 
 =head2 Tirex::Map->get('foo')
 
@@ -113,9 +94,9 @@ sub new
     my %args = @_;
     my $self = bless \%args => $class;
 
-    Carp::croak("missing name"     ) unless (defined $self->{'name'    });
-    Carp::croak("missing renderer" ) unless (defined $self->{'renderer'});
-    Carp::croak("missing tiledir"  ) unless (defined $self->{'tiledir' });
+    Carp::croak("missing name"    ) unless (defined $self->{'name'    });
+    Carp::croak("missing renderer") unless (defined $self->{'renderer'});
+    Carp::croak("missing tiledir" ) unless (defined $self->{'tiledir' });
     Carp::croak("map with name $self->{'name'} exists") if ($Maps{$self->{'name'}});
 
     $self->{'minz'} =  0 unless (defined $self->{'minz'});
@@ -126,9 +107,9 @@ sub new
     return $self;
 }
 
-=head2 Tirex::Map->new_from_configfile($filename)
+=head2 Tirex::Map->new_from_configfile($filename, $renderer)
 
-Create new map config from a file.
+Create new map config from a file for a given renderer.
 
 Croaks if the file does not exist.
 
@@ -138,6 +119,7 @@ sub new_from_configfile
 {
     my $class    = shift;
     my $filename = shift;
+    my $renderer = shift;
 
     my %config;
     open(my $cfgfh, '<', $filename) or Carp::croak("Can't open map config file '$filename': $!");
@@ -151,8 +133,8 @@ sub new_from_configfile
     }
     close($cfgfh);
 
-    $config{'renderer'} = Tirex::Renderer->get($config{'renderer'});
     $config{'filename'} = $filename;
+    $config{'renderer'} = $renderer;
 
     return $class->new(%config);
 }
@@ -219,7 +201,7 @@ sub to_s
     my $s = sprintf("Map %s: renderer=%s tiledir=%s zoom=%d-%d", $self->get_name(), $self->get_renderer()->get_name(), $self->get_tiledir(), $self->get_minz(), $self->get_maxz());
 
     foreach my $key (sort keys %$self) {
-        $s .= " $key=$self->{$key}" unless ($key =~ /^(name|renderer|tiledir|minz|maxz)$/);
+        $s .= " $key=$self->{$key}" unless ($key =~ /^(name|renderer|tiledir|minz|maxz|filename)$/);
     }
 
     return $s;

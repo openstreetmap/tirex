@@ -58,7 +58,7 @@ is($m2->get_maxz(), 17, 'maxz');
 eval { Tirex::Map->new_from_configfile('does not exist'); };
 ($@ =~ qr{Can't open map config file}) ? pass() : fail();
 
-my $m3 = Tirex::Map->new_from_configfile('t/map.conf');
+my $m3 = Tirex::Map->new_from_configfile('t/map.conf', $r);
 is(Tirex::Map->get('baz'), $m3, 'get');
 
 isa_ok($m3, 'Tirex::Map', 'class');

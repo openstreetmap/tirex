@@ -26,9 +26,14 @@ my $r = Tirex::Renderer->new( ... );
 
 =head1 DESCRIPTION
 
-Tirex can work with several rendering backends. For each one several processes
-are started by tirex-backend-manager and they are sent requests my tirex-master.
-This class defines methods to configure renderers.
+Tirex can work with several rendering backends such as Mapnik or WMS.  A
+backend can be started with different configurations, for the Mapnik backend
+you need to configure the font directory for instance. This class defines
+methods for reading the config files (/etc/tirex/renderer/*.conf) describing
+the backend configurations and managing those renderers.
+
+See the class L<Tirex::Backend> and its subclasses for the actual code of
+some backends.
 
 =head1 METHODS
 
@@ -102,7 +107,7 @@ sub new
 
     Carp::croak("renderer with name $args{'name'} already exists") if ($Renderers{$args{'name'}});
 
-    foreach my $cfg ( qw( name type path port procs syslog_facility debug ) )
+    foreach my $cfg ( qw( name type path port procs syslog_facility debug filename ) )
     {
         $self->{$cfg} = $args{$cfg};
         delete $args{$cfg};
@@ -132,7 +137,7 @@ sub new_from_configfile
     my $class    = shift;
     my $filename = shift;
 
-    my %config;
+    my %config = ( filename => $filename );
     open(my $cfgfh, '<', $filename) or Carp::croak("Can't open renderer config file '$filename': $!");
     while (<$cfgfh>)
     {
@@ -144,8 +149,42 @@ sub new_from_configfile
     }
     close($cfgfh);
 
-    return $class->new(%config);
+    my $renderer = $class->new(%config);
+    $renderer->read_map_config();
+
+    return $renderer;
 }
+
+=head2 $rend->read_map_config()
+
+Read all map configs for this renderer.
+
+=cut
+
+sub read_map_config
+{
+    my $self = shift;
+
+    (my $dirname = $self->{'filename'}) =~ s/\.conf$//;
+
+    return unless (-d $dirname);
+
+    my @maps;
+    foreach my $file (glob("$dirname/*.conf"))
+    {
+        push(@maps, Tirex::Map->new_from_configfile($file, $self));
+    }
+
+    $self->{'maps'} = \@maps;
+}
+
+=head2 $rend->get_maps()
+
+Get array ref of map configs for this renderer.
+
+=cut
+
+sub get_maps { return shift->{'maps'}; }
 
 =head2 $rend->get_config()
 

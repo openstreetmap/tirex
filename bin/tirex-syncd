@@ -65,7 +65,7 @@ my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', LocalPort => $Tire
 my $host = Tirex::Config::get('sync_to_host');
 
 if (! defined($host) || $host eq '') {
-    die("Please set 'sync_to_host' config option\n");
+    die("Please set 'sync_to_host' config option in $config_file\n");
 }
 
 #-----------------------------------------------------------------------------

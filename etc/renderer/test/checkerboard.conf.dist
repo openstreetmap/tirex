@@ -13,9 +13,6 @@
 # symbolic name of this map
 name=test
 
-# symbolic name of renderer used
-renderer=test
-
 # tile directory
 tiledir=/var/lib/tirex/tiles/test
 

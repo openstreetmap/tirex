@@ -91,7 +91,6 @@ Tirex::Config::dump_to_syslog();
 #-----------------------------------------------------------------------------
 
 Tirex::Renderer->read_config_dir($config_dir);
-Tirex::Map->read_config_dir($config_dir);
 
 foreach my $renderer (Tirex::Renderer->all()) {
     syslog('info', $renderer->to_s());
@@ -520,6 +519,7 @@ sub cleanup
     unlink($modtile_socket_name);
     unlink($pidfile);
     $status->destroy();
+    syslog('info', 'tirex-master shutting down');
 }
 
 sub sigint_handler

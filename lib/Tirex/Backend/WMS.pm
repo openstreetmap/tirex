@@ -23,7 +23,7 @@ Tirex::Backend::WMS - WMS backend for Tirex
 =head1 DESCRIPTION
 
 Simple "renderer" that gets the map image from a WMS server. The WMS server
-must support the right SRS (EPSG:3785 or the informal EPSG:900913).
+must support the right SRS (EPSG:3857 or the informal EPSG:900913).
 
 Config parameters for the map file:
 
@@ -33,7 +33,7 @@ Config parameters for the map file:
 
 =item layers list of comma-separated layers
 
-=item srs spatial reference system, 'EPSG:3785' etc.
+=item srs spatial reference system, 'EPSG:3857' etc.
 
 =back
 
@@ -110,7 +110,7 @@ sub create_metatile
         VERSION     => '1.1.1',
         REQUEST     => 'GetMap',
         BBOX        => join(',', $left, $bottom, $right, $top),
-        SRS         => $map->{'srs'},
+        SRS         => $map->{'srs'} || 'EPSG:3857',
         WIDTH       => $size,
         HEIGHT      => $size,
         LAYERS      => $map->{'layers'},
