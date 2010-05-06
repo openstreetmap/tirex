@@ -303,8 +303,8 @@ sub sigchld_handler
         syslog('warning', 'child %d terminated (exit_code=%d, signal=%d)', $child, $exit_code, $signal);
         push(@closed_children, $child);
 
-        # if the return code of the child is 10, the renderer is disabled
-        if ($exit_code == 10)
+        # if the return code of the child is something other than $EXIT_CODE_RESTART, the renderer is disabled
+        if ($exit_code != $EXIT_CODE_RESTART)
         {
             my $renderer = $workers->{$child}->{'renderer'};
             @renderers = grep { $_ ne $renderer } @renderers;

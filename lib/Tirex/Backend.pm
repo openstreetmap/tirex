@@ -175,6 +175,7 @@ sub main
     }
 
     ::syslog('info', 'shutting down %s', $self->{'name'});
+    exit($Tirex::EXIT_CODE_RESTART);
 }
 
 =head2 $backend->create_metatile($map, $metatile)

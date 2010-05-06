@@ -69,7 +69,7 @@ our $BACKEND_MANAGER_SYSLOG_FACILITY = 'daemon';
 our $BACKEND_MANAGER_PIDFILE         = '/var/run/tirex/tirex-backend-manager.pid';
 our $BACKEND_MANAGER_ALIVE_TIMEOUT   = 8; # minutes - make this a tad smaller than the above
 
-our $EXIT_CODE_RESTART = 1;
+our $EXIT_CODE_RESTART = 9;
 our $EXIT_CODE_DISABLE = 10;
 
 our $STATS_DIR = '/var/lib/tirex/stats';
