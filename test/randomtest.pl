@@ -56,14 +56,10 @@ my $miny = 21236*2;
 my $maxy = 22739*2;
 
 my $status = eval { Tirex::Status->new(); };
-die("Can't connect to shared memory. Is the tirex-master running?\n") if ($@);
+die("Cannot connect to shared memory. Is the tirex-master running?\n") if ($@);
 
-my $socket = IO::Socket::INET->new(
-    LocalAddr => 'localhost',
-    Proto     => 'udp',
-) or die("Cannot open UDP socket: $!\n");
-
-my $master = Socket::pack_sockaddr_in( $Tirex::MASTER_UDP_PORT, Socket::inet_aton('localhost') );
+my $socket = IO::Socket::INET->new(LocalAddr => 'localhost', Proto => 'udp') or die("Cannot open UDP socket: $!\n");
+$socket->connect( Socket::pack_sockaddr_in($Tirex::MASTER_UDP_PORT, Socket::inet_aton('localhost')) );
 
 my $count = 0;
 while (1)
@@ -82,14 +78,14 @@ while (1)
 
     my $msg = Tirex::Message->new( type => 'metatile_enqueue_request', prio => $prio, map => 'test', z => $z, x => $x, y => $y );
     print "sending msg ", $msg->to_s(), "\n";
-    $msg->send($socket, $master);
+    $msg->send($socket);
 
     Time::HiRes::usleep( rand($RANDOM_SLEEP) );
 
     if ($count++ % 10 == 0)
     {
         my $s = $status->read();
-        die("Can't read status\n") unless (defined $s);
+        die("Cannot read status\n") unless (defined $s);
 
         my $queue_size = JSON::from_json($s)->{'queue'}->{'size'};
         print "queue_size=$queue_size\n";
