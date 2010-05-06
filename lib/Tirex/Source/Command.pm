@@ -176,14 +176,6 @@ sub reply
         Tirex::create_msg($msg), 
         Socket::pack_sockaddr_in($Tirex::MASTER_UDP_PORT, Socket::inet_aton('localhost'))
     );
-
-#    my $socket = IO::Socket::INET->new(
-#        Proto    => 'udp',
-#        PeerPort => $self->{'peerport'},
-#        PeerAddr => $self->{'peerhost'},
-#    );
-#
-#    return $socket->send( Tirex::create_msg($msg) );
 }
 
 sub name

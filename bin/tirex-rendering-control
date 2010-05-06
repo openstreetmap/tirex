@@ -56,7 +56,7 @@ if ($opts{'help'})
     );
 }
 
-if (! $opts{'stop'} && !$opts{'continue'})
+if (!$opts{'stop'} && !$opts{'continue'})
 {
     print STDERR "You need to have the --stop or --continue option!\n";
     exit(4);
@@ -73,13 +73,13 @@ Tirex::Config::init($config_file);
 my $status = eval { Tirex::Status->new() };
 if ($@)
 {
-    print STDERR "Can't open shared memory. Is the tirex-master running?\n";
+    print STDERR "Cannot open shared memory. Is the tirex-master running?\n";
     exit(3);
 }
 my $s = eval { JSON::from_json($status->read()); };
 if ($@)
 {
-    print STDERR "Can't read shared memory. Is the tirex-master running?\n";
+    print STDERR "Cannot read shared memory. Is the tirex-master running?\n";
     exit(3);
 }
 
@@ -117,14 +117,14 @@ else
     @want_buckets = @cmd_buckets;
 }
 
-printf STDERR "buckets cmdline: (%s), all: (%s), live: (%s), want: (%s)\n", join(', ', @cmd_buckets), join(', ', @all_buckets), $livebucket, join(', ', @want_buckets);
+printf STDERR "Buckets cmdline: (%s), all: (%s), live: (%s), want: (%s)\n", join(', ', @cmd_buckets), join(', ', @all_buckets), $livebucket, join(', ', @want_buckets) if ($Tirex::DEBUG);
 
 #-----------------------------------------------------------------------------
 
 my $port = Tirex::Config::get('master_udp_port', $Tirex::MASTER_UDP_PORT);
 
-my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
-$socket->connect( Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost')) );
+my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' ) or die("Cannot open socket: $!");
+$socket->connect( Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost')) ) or die("Cannot connect socket: $!");
 
 #-----------------------------------------------------------------------------
 
@@ -153,7 +153,7 @@ sub busy
 
     my $s = eval { JSON::from_json($status->read()); };
     if ($@) {
-        print STDERR "Can't read shared memory. Is the tirex-master running?\n";
+        print STDERR "Cannot read shared memory. Is the tirex-master running?\n";
         exit(3);
     }
 
@@ -179,15 +179,14 @@ sub send_command
 {
     my ($socket, $command, $bucket) = @_;
 
-    my %msg = (
+    my $request = Tirex::Message->new(
         type   => "${command}_rendering_bucket",
         id     => "tirex-rendering-control.$$",
         bucket => $bucket,
     );
 
-    my $request = Tirex::Message->new(%msg);
     print STDERR "sending: ", $request->to_s(), "\n" if ($Tirex::DEBUG);
-    $request->send($socket);
+    $request->send($socket) or die("Cannot send message: $!");
 
     my $reply = Tirex::Message->new_from_socket($socket);
     if (! defined $reply)
@@ -276,13 +275,13 @@ The configuration file. See tirex.conf(5) for further details.
 
 =head1 DIAGNOSTICS
 
-tirex-send returns
+tirex-rendering-control returns
 
 =over 8
 
 =item 0 if everything was alright,
 
-=item 3 if the server couldn't be reached,
+=item 3 if the server could not be reached,
 
 =item 4 if there was an error parsing the command line.
 
