@@ -274,7 +274,7 @@ sub execute_renderer
     $ENV{'TIREX_BACKEND_NAME'}            = $renderer->get_name();
     $ENV{'TIREX_BACKEND_PORT'}            = $renderer->get_port();
     $ENV{'TIREX_BACKEND_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
-    $ENV{'TIREX_BACKEND_MAPFILES'}        = join(' ', map { $_->get_filename() } @{$renderer->get_maps()});
+    $ENV{'TIREX_BACKEND_MAP_CONFIGS'}     = join(' ', map { $_->get_filename() } @{$renderer->get_maps()});
     $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
     $ENV{'TIREX_BACKEND_PIPE_FILENO'}     = $pipe_fileno;
     $ENV{'TIREX_BACKEND_SOCKET_FILENO'}   = $socket_fileno;

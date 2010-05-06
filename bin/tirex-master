@@ -115,7 +115,7 @@ my $master_socket = IO::Socket::INET->new(
     LocalAddr => 'localhost',
     LocalPort => $master_udp_port,
     Proto     => 'udp',
-) or die("Can't open master UDP socket: :$!\n");
+) or die("Cannot open master UDP socket: $!\n");
 
 $want_read->add([$master_socket, undef]);
 syslog('info', 'Listening for commands on port %d/UDP', $master_udp_port);
@@ -129,7 +129,7 @@ my $modtile_socket = IO::Socket::UNIX->new(
     Listen   => 1,
     Local    => $modtile_socket_name,
     Blocking => 0,
-) or die("Can't open modtile socket: :$!\n");
+) or die("Cannot open modtile socket: $!\n");
 chmod($Tirex::MODTILE_PERM, $modtile_socket_name) or die("can't chmod socket '$modtile_socket_name': $!");
 $want_read->add([$modtile_socket, undef]);
 syslog('info', 'Listening for mod_tile connections on %s (UNIX)', $modtile_socket_name);

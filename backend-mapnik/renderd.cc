@@ -160,7 +160,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     tmp = getenv("TIREX_BACKEND_CFG_fontdir");
     if (tmp) loadFonts(tmp, fr);
 
-    tmp = getenv("TIREX_BACKEND_MAPFILES");
+    tmp = getenv("TIREX_BACKEND_MAP_CONFIGS");
     if (tmp)
     {
         char *dup = strdup(tmp);

@@ -7,6 +7,10 @@
 #
 #-----------------------------------------------------------------------------
 #
+#  Tests queue filling and emptying speed
+#
+#-----------------------------------------------------------------------------
+#
 #  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
 #                      Jochen Topf <jochen.topf@geofabrik.de>
 #  
@@ -36,6 +40,8 @@ use Tirex::Queue;
 use Time::HiRes;
 
 #-----------------------------------------------------------------------------
+
+# changes these variables as needed
 
 my $NUMJOBS = 100000;
 my $MAXZOOM = 14;

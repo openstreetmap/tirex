@@ -58,7 +58,8 @@ sub check_map_config
 
     if (defined $map->{'sleep'})
     {
-        Carp::croak("parameter 'sleep' needs integer argument between 0 and 999") unless ($map->{'sleep'} =~ /^[1-9][0-9]{0,2}$/);
+        Carp::croak("parameter 'sleep' needs integer argument between 0 and 999 (is '" . $map->{'sleep'} . "')") unless ($map->{'sleep'} =~ /^[0-9]{1,3}$/);
+        $map->{'sleep'} = 0 + $map->{'sleep'}; # force to integer
     }
     else
     {

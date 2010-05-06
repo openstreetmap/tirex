@@ -26,8 +26,8 @@ maxz=10
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
-# time the renderer should sleep to simulate rendering time
-sleep=0
+# time the renderer should sleep to simulate rendering time (default is 0)
+#sleep=0
 
 
 #-- THE END ------------------------------------------------------------------

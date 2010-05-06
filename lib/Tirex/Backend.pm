@@ -104,7 +104,7 @@ sub main
     my $renderer_name   = $ENV{'TIREX_BACKEND_NAME'}            or $self->error_disable('missing TIREX_BACKEND_NAME');
     my $port            = $ENV{'TIREX_BACKEND_PORT'}            or $self->error_disable('missing TIREX_BACKEND_PORT');
     my $syslog_facility = $ENV{'TIREX_BACKEND_SYSLOG_FACILITY'} or $self->error_disable('missing TIREX_BACKEND_SYSLOG_FACILITY');
-    my $mapfiles        = $ENV{'TIREX_BACKEND_MAPFILES'}        or $self->error_disable('missing TIREX_BACKEND_MAPFILES');
+    my $mapfiles        = $ENV{'TIREX_BACKEND_MAP_CONFIGS'}     or $self->error_disable('missing TIREX_BACKEND_MAP_CONFIGS');
     my $alive_timeout   = $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   or $self->error_disable('missing TIREX_BACKEND_ALIVE_TIMEOUT');
     my $pipe_fileno     = $ENV{'TIREX_BACKEND_PIPE_FILENO'}     or $self->error_disable('missing TIREX_BACKEND_PIPE_FILENO');
     my $socket_fileno   = $ENV{'TIREX_BACKEND_SOCKET_FILENO'};
@@ -131,9 +131,10 @@ sub main
             $self->check_map_config($map);
             ::syslog('info', 'map config found: %s', $map->to_s());
         };
-        if ($@)
+        my $err = $@;
+        if ($err)
         {
-            $self->error_disable("error reading map config '%s': %s", $file, $@);
+            $self->error_disable("error reading map config '%s': %s", $file, $err);
         }
     }
 
