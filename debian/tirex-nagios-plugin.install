@@ -1,1 +1,2 @@
 usr/lib/nagios/plugins/*
+etc/nagios/nrpe.d/*

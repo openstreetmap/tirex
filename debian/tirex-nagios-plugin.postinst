@@ -1,33 +1,6 @@
 #! /bin/sh
-#
-# Installs Nagios config snippets in the proper directories for nagios server or
-# nrpe daemon.
 
 set -e
-
-if [ -d /etc/nagios ]
-then
-    dir=/etc/nagios/nrpe.d
-    mkdir -p $dir
-
-    if [ -f $dir/tirex-health.cfg ]
-    then
-        # is a file, leave alone
-        :
-    else
-        # does not exist 
-        echo "command[tirex-health]=/usr/lib/nagios/plugins/tirex-health" > $dir/tirex-health.cfg
-    fi
-
-    if [ -f $dir/tirex-queue-size.cfg ]
-    then
-        # is a file, leave alone
-        :
-    else
-        # does not exist 
-        echo "command[tirex-queue-size]=/usr/lib/nagios/plugins/tirex-queue-size -w 10000 -c 50000" > $dir/tirex-queue-size.cfg
-    fi
-fi  
 
 if [ -x /etc/init.d/nagios-nrpe-server ]
 then

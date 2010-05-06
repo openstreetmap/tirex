@@ -19,7 +19,9 @@ install: build
 	install -m 755 -g root -o root bin/tirex-tiledir-stat      $(DESTDIR)/usr/bin/
 
 	install -m 755 -g root -o root -d                          $(DESTDIR)/usr/lib/nagios/plugins
+	install -m 755 -g root -o root -d                          $(DESTDIR)/etc/nagios/nrpe.d
 	install -m 755 -g root -o root nagios/tirex*               $(DESTDIR)/usr/lib/nagios/plugins
+	install -m 755 -g root -o root nagios/cfg/*cfg             $(DESTDIR)/etc/nagios/nrpe.d
 
 	install -m 755 -g root -o root -d                          $(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 -g root -o root backends/test               $(DESTDIR)/usr/lib/tirex/backends

@@ -2,12 +2,6 @@
 
 set -e
 
-dir=/etc/nagios/nrpe.d 
-if [ -d $dir ]; then
-    rm -f $dir/tirex-health.cfg
-    rm -f $dir/tirex-queue-size.cfg
-fi
-
 if [ -x /etc/init.d/nagios-nrpe-server ]
 then
     if which invoke-rc.d >/dev/null 2>&1; then
