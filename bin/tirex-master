@@ -193,9 +193,9 @@ syslog('info', 'Listening for backend responses');
 # Set signal handler
 #-----------------------------------------------------------------------------
 
-$SIG{TERM} = \&sigterm_handler;  
-$SIG{INT}  = \&sigint_handler;  
-$SIG{HUP}  = \&sighup_handler;  
+$SIG{'TERM'} = \&sigterm_handler;  
+$SIG{'INT'}  = \&sigint_handler;  
+$SIG{'HUP'}  = \&sighup_handler;  
 
 # run main loop in eval() since Perl socket operations are notorious for
 # calling croak() when unhappy; if they do, we want to know what happened.
@@ -203,10 +203,11 @@ $SIG{HUP}  = \&sighup_handler;
 my $started = time();
 
 eval { main_loop() };
-if ($@)
+my $err = $@;
+if ($err)
 {
-    syslog('crit', $@);
-    die($@);
+    syslog('crit', $err);
+    die($err);
 }
 
 #-----------------------------------------------------------------------------

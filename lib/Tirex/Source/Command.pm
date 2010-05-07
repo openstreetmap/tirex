@@ -73,70 +73,64 @@ sub make_job
 {
     my $self = shift;
 
-    if ($self->{'type'} =~ /^metatile_(enqueue|remove)_request$/)
+    my $metatile = eval {
+        my $mt = Tirex::Metatile->new(
+            map => $self->{'map'}, 
+            x   => $self->{'x'}, 
+            y   => $self->{'y'}, 
+            z   => $self->{'z'}
+        );
+        Tirex::Map->get_map_for_metatile($mt);
+        return $mt;
+    };
+
+    # if we couldn't create the metatile...
+    if ($@)
     {
-        (my $responsetype = $self->{'type'}) =~ s/request$/response/;
-        my $metatile = eval {
-            Tirex::Metatile->new(
-                map => $self->{'map'}, 
-                x   => $self->{'x'}, 
-                y   => $self->{'y'}, 
-                z   => $self->{'z'}
-            );
-        };
-
-        # if we couldn't create the metatile...
-        if ($@)
+        ::syslog('warning', $@) if ($Tirex::DEBUG);
+        # and the client wanted an answer...
+        if (defined $self->{'id'})
         {
-            # and the client wanted an answer...
-            if (defined $self->{'id'})
-            {
-                # send error message
-                $self->reply({
-                    type    => $responsetype,
-                    map     => $self->{'map'}, 
-                    x       => $self->{'x'}, 
-                    y       => $self->{'y'}, 
-                    z       => $self->{'z'},
-                    prio    => $self->{'prio'},
-                    result  => 'error_illegal_metatile'
-                });
-            }
-            return undef;
+            # send error message
+            $self->reply({
+                type    => $self->{'type'},
+                map     => $self->{'map'}, 
+                x       => $self->{'x'}, 
+                y       => $self->{'y'}, 
+                z       => $self->{'z'},
+                prio    => $self->{'prio'},
+                result  => 'error_illegal_metatile'
+            });
         }
-
-        my $job = eval {
-            Tirex::Job->new( metatile => $metatile, prio => $self->{'prio'} );
-        };
-
-        # if we couldn't create the job...
-        if ($@)
-        {
-            # and the client wanted an answer...
-            if (defined $self->{'id'})
-            {
-                # send error message
-                $self->reply({
-                    type    => $responsetype,
-                    map     => $self->{'map'}, 
-                    x       => $self->{'x'}, 
-                    y       => $self->{'y'}, 
-                    z       => $self->{'z'},
-                    prio    => $self->{'prio'},
-                    result  => 'error_illegal_prio'
-                });
-            }
-            return undef;
-        }
-
-        $job->add_notify($self) if (defined $self->{id});
-        return $job;
+        return;
     }
-    else
+
+    my $job = eval {
+        Tirex::Job->new( metatile => $metatile, prio => $self->{'prio'} );
+    };
+
+    # if we couldn't create the job...
+    if ($@)
     {
-        syslog('err', 'Ignoring unknown msg type: %s', $self->{'type'});
+        # and the client wanted an answer...
+        if (defined $self->{'id'})
+        {
+            # send error message
+            $self->reply({
+                type    => $self->{'type'},
+                map     => $self->{'map'}, 
+                x       => $self->{'x'}, 
+                y       => $self->{'y'}, 
+                z       => $self->{'z'},
+                prio    => $self->{'prio'},
+                result  => 'error_illegal_prio'
+            });
+        }
         return undef;
     }
+
+    $job->add_notify($self) if (defined $self->{id});
+    return $job;
 }
 
 

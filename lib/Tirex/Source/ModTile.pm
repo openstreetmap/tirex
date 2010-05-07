@@ -99,16 +99,21 @@ sub make_job
     my $sock = shift;
 
     my $metatile = eval {
-        Tirex::Metatile->new(
+        my $mt = Tirex::Metatile->new(
             map => $self->{'map'}, 
             x   => $self->{'x'}, 
             y   => $self->{'y'}, 
             z   => $self->{'z'}
         );
+        Tirex::Map->get_map_for_metatile($mt);
+        return $mt;
     };
 
-    # return error if we can't create the metatile
-    return if ($@);
+    # return error if we cannot create the metatile
+    if ($@) {
+        ::syslog('warning', $@) if ($Tirex::DEBUG);
+        return;
+    }
 
     my $job = eval {
         Tirex::Job->new(
