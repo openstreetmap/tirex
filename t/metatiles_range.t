@@ -41,6 +41,7 @@ is($r->{'xmax'}, 0, 'r1 xmax');
 is($r->{'ymin'}, 8, 'r1 ymin');
 is($r->{'ymax'}, 8, 'r1 ymax');
 is($r->count(), 1, 'r1 count');
+is($r->to_s(), 'maps=test z=3 x=0 y=8', 'r1 to_s');
 
 $r = Tirex::Metatiles::Range->new( map => ['t1', 't2'], z => 3, x => '0-6', y => '7-8' );
 isa_ok($r, 'Tirex::Metatiles::Range', 'create r2');
@@ -117,5 +118,9 @@ is($r->{'ymin'},    168, 'r7 ymin');
 is($r->{'ymax'},    192, 'r7 ymax');
 is($r->count(),   1*2*4, 'r7 count');
 
+$r = Tirex::Metatiles::Range->new( init => 'map=foo,bar z=1-2 lon=4,8 lat=40,50' );
+isa_ok($r, 'Tirex::Metatiles::Range', 'create r8');
+is_deeply($r->{'maps'}, ['foo', 'bar'], 'r8 map');
+is($r->to_s(), 'maps=foo,bar z=1,2 lon=4,8 lat=40,50', 'r8 to_s');
 
 #-- THE END ------------------------------------------------------------------

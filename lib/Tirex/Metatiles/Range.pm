@@ -120,7 +120,7 @@ sub _parse_key_value
     my $key   = shift;
     my $value = shift;
 
-    if ($key eq 'map')       { $self->{'maps'} = ref($value) eq '' ? [$value] : $value; }
+    if ($key eq 'map')       { $self->{'maps'} = ref($value) eq '' ? [split(',', $value)] : $value; }
 
     elsif ($key eq 'z')      { $self->_parse_int_range('z', $value); }
     elsif ($key eq 'x')      { $self->_parse_int_range('x', $value); }
