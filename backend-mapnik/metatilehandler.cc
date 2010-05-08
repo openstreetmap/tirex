@@ -18,6 +18,7 @@
 #include <iostream>
 #include <fstream>
 
+#include <mapnik/version.hpp>
 #include <mapnik/map.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
@@ -149,8 +150,13 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             {
                 if ((col < mtc) && (row < mtr))
                 {
+#if MAPNIK_VERSION >= 800
+                    mapnik::image_view<mapnik::image_data_32> view(col * mTileWidth, 
+                        row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
+#else
                     mapnik::image_view<mapnik::ImageData32> view(col * mTileWidth, 
                         row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
+#endif
                     rawpng[index] = mapnik::save_to_string(view, "png256");
                     offsets[index].offset = offset;
                     offset += offsets[index].size = rawpng[index].length();
@@ -272,15 +278,24 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
             west, south, east, north, rr->srs, rr->width, rr->height);
     }
 
+#if MAPNIK_VERSION >= 800
+    mapnik::box2d<double> bbox(west, south, east, north);
+#else
     mapnik::Envelope<double> bbox(west, south, east, north);
+#endif
     mMap.resize(rr->width, rr->height);
     mMap.zoomToBox(bbox);
     mMap.set_buffer_size(128);
 
     debug("width: %d, height:%d", rr->width, rr->height);
     RenderResponse *resp = new RenderResponse();
+#if MAPNIK_VERSION >= 800
+    resp->image = new mapnik::image_32(rr->width, rr->height);
+    mapnik::agg_renderer<mapnik::image_32> renderer(mMap, *(resp->image));
+#else
     resp->image = new mapnik::Image32(rr->width, rr->height);
     mapnik::agg_renderer<mapnik::Image32> renderer(mMap, *(resp->image));
+#endif
     try
     {
         renderer.apply();
