@@ -47,15 +47,15 @@ sub get
     return $Maps{$name};
 }
 
-=head2 Tirex::Map->all();
+=head2 Tirex::Map->clear();
 
-Return sorted (by name) list of all configured maps.
+Clear list of maps.
 
 =cut
 
-sub all
+sub clear
 {
-    return sort { $a->get_name() cmp $b->get_name() } values %Maps;
+    %Maps = ();
 }
 
 =head2 Tirex::Map->get_map_for_metatile($metatile)

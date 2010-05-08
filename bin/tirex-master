@@ -30,14 +30,14 @@
 use strict;
 use warnings;
 
-use Getopt::Long qw( :config gnu_getopt );
-use IO::Socket;
-use IO::Select;
-use Socket;
 use Fcntl;
-use Sys::Syslog;
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Select;
+use IO::Socket;
 use POSIX 'setsid';
-use Pod::Usage;
+use Pod::Usage qw();
+use Socket;
+use Sys::Syslog;
 
 use Data::Dumper;
 
@@ -57,19 +57,21 @@ die("refusing to run as root\n") if ($< == 0);
 # Reading command line and config
 #-----------------------------------------------------------------------------
 
+my @argv = @ARGV;
+
 my %opts = ();
 GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s' ) or exit(2);
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-master - tirex master daemon\n",
         -exitval => 0
     );
 }
 
-$Tirex::DEBUG = $opts{'debug'} if ($opts{'debug'});
+$Tirex::DEBUG = 1 if ($opts{'debug'});
 
 my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
@@ -82,7 +84,7 @@ Tirex::Config::init($config_file);
 openlog('tirex-master', $Tirex::DEBUG ? 'pid|perror' : 'pid', 
     Tirex::Config::get('master_syslog_facility', $Tirex::MASTER_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
 
-syslog('info', 'tirex-master started');
+syslog('info', 'tirex-master started with cmd line options: %s', join(' ', @argv));
 
 Tirex::Config::dump_to_syslog();
 
@@ -92,12 +94,13 @@ Tirex::Config::dump_to_syslog();
 
 Tirex::Renderer->read_config_dir($config_dir);
 
-foreach my $renderer (Tirex::Renderer->all()) {
+foreach my $renderer (Tirex::Renderer->all())
+{
     syslog('info', $renderer->to_s());
-}
-
-foreach my $map (Tirex::Map->all()) {
-    syslog('info', $map->to_s());
+    foreach my $map ($renderer->get_maps())
+    {
+        syslog('info', '  %s', $map->to_s());
+    }
 }
 
 #-----------------------------------------------------------------------------
@@ -606,6 +609,10 @@ metatile rendered.
 =back
 
 =head1 DIAGNOSTICS
+
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
 
 =head1 AUTHORS
 

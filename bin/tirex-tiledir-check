@@ -347,6 +347,10 @@ The configuration file. See tirex.conf(5) for further details.
 Returns 0 if no errors were found or 1 if there were errors. If there were
 errors parsing the command line 2 is returned.
 
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
 =head1 AUTHORS
 
 Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf

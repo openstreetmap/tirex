@@ -30,14 +30,15 @@
 use strict;
 use warnings;
 
-use Getopt::Long qw( :config gnu_getopt );
-use Socket;
-use IO::Socket;
-use IO::Select;
-use IO::Pipe;
-use Sys::Syslog;
-use POSIX qw(sys_wait_h setsid);
 use Fcntl;
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Pipe;
+use IO::Select;
+use IO::Socket;
+use POSIX qw(sys_wait_h setsid);
+use Pod::Usage qw();
+use Socket;
+use Sys::Syslog;
 
 use Tirex;
 use Tirex::Renderer;
@@ -51,19 +52,21 @@ die("refusing to run as root\n") if ($< == 0);
 # Reading command line and config
 #-----------------------------------------------------------------------------
 
+my @argv = @ARGV;
+
 my %opts = ();
 GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s' ) or exit(2);
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-backend-manager - tirex backend manager\n",
         -exitval => 0
     );
 }
 
-$Tirex::DEBUG = $opts{'debug'} if ($opts{'debug'});
+$Tirex::DEBUG = 1 if ($opts{'debug'});
 
 my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
@@ -76,7 +79,7 @@ Tirex::Config::init($config_file);
 openlog('tirex-backend-manager', $Tirex::DEBUG ? 'pid|perror' : 'pid',
     Tirex::Config::get('backend_manager_syslog_facility', $Tirex::BACKEND_MANAGER_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
 
-syslog('info', 'tirex-backend-manager started');
+syslog('info', 'tirex-backend-manager started with cmd line options: %s', join(' ', @argv));
 
 Tirex::Config::dump_to_syslog();
 
@@ -115,78 +118,159 @@ else
 # Set signal handler
 #-----------------------------------------------------------------------------
 
-$SIG{CHLD} = \&sigchld_handler;
-$SIG{HUP}  = \&sighup_handler;
-$SIG{TERM} = \&sigterm_handler;
-$SIG{INT}  = \&sigterm_handler;
+my $received_sighup  = 0;
+my $received_sigterm = 0;
 
-#-----------------------------------------------------------------------------
-# Read renderer and map config
-#-----------------------------------------------------------------------------
-
-Tirex::Renderer->read_config_dir($config_dir);
-
-my @renderers = Tirex::Renderer->all();
-syslog('info', 'Found config for renderers: %s', join(' ', map { $_->get_name(); } @renderers));
+$SIG{'HUP'}  = \&sighup_handler;
+$SIG{'TERM'} = \&sigterm_handler;
+$SIG{'INT'}  = \&sigterm_handler;
 
 #-----------------------------------------------------------------------------
 
-my $workers = {};
-my @closed_children = ();
-my $udp_sockets = {};
-
-# children must check in every so often; note they will not check
+# workers must check in every so often; note they will not check
 # in during tile rendering so allow ample time.
-my $alive_timeout = Tirex::Config::get('backend_manager_alive_timeout', $Tirex::BACKEND_MANAGER_ALIVE_TIMEOUT) * 60; # minutes -> seconds
+my $ALIVE_TIMEOUT = Tirex::Config::get('backend_manager_alive_timeout', $Tirex::BACKEND_MANAGER_ALIVE_TIMEOUT) * 60; # minutes -> seconds
 
 # a child that has been sent a signal must react this quickly
-my $hangup_timeout = 15;
-my $term_timeout = 5;
+my $HANGUP_TIMEOUT = 15;
+my $TERM_TIMEOUT   =  5;
 
-while (1)
+# timeout when waiting for alive messages from workers
+my $SELECT_TIMEOUT = 10;
+
+#-----------------------------------------------------------------------------
+# Main loop
+#-----------------------------------------------------------------------------
 {
-    foreach my $renderer (@renderers)
+    my $sockets = {};
+    while (1)
     {
-        if (! defined $udp_sockets->{$renderer})
+        my $workers = {};
+
+        Tirex::Renderer->read_config_dir($config_dir);
+        syslog('info', 'Found config for renderers: %s', join(' ', map { $_->get_name(); } Tirex::Renderer->all()));
+
+        $sockets = open_sockets($sockets);
+
+        $received_sighup = 0;
+        $SIG{'HUP'}  = \&sighup_handler;
+
+        while (! $received_sighup)
         {
-            my $port = $renderer->get_port();
-            ::syslog('debug', "Opening port %d for renderer '%s'", $port, $renderer->get_name());
-            $udp_sockets->{$renderer} = IO::Socket::INET->new(
+            start_workers($workers, $sockets);
+            check_for_alive_messages($workers);
+            cleanup_dead_workers($workers);
+            kill_old_workers($workers);
+
+            if ($received_sigterm)
+            {
+                syslog('info', 'TERM/INT received, forwarding to children: %s', join(' ', keys %$workers));
+
+                foreach my $pid (keys %$workers)
+                {
+                    kill('HUP', $pid);
+                }
+
+                unlink($pidfile); # ignore return code
+                exit(0);
+            }
+        }
+
+        syslog('info', 'HUP received, forwarding to children: %s', join(' ', keys %$workers));
+        foreach my $pid (keys %$workers)
+        {
+            kill('HUP', $pid);
+        }
+
+        Tirex::Renderer->clear();
+        Tirex::Map->clear();
+    }
+}
+
+
+#-----------------------------------------------------------------------------
+# Open sockets for all renderers or re-use old ones after a SIGHUP
+#-----------------------------------------------------------------------------
+sub open_sockets
+{
+    my $old_sockets = shift;
+
+    my $new_sockets = {};
+
+    # go through all renderers and open sockets if they are not already open
+    foreach my $renderer (Tirex::Renderer->all())
+    {
+        my $port = $renderer->get_port();
+        if ($old_sockets->{$port})
+        {
+            syslog('debug', 're-using socket for port %d', $port);
+            $new_sockets->{$port} = $old_sockets->{$port};
+            delete $old_sockets->{$port};
+        }
+        else
+        {
+            my $socket = IO::Socket::INET->new(
                 LocalAddr => 'localhost', 
                 LocalPort => $port, 
                 Proto     => 'udp', 
                 ReuseAddr => 1,
-            ) or die("Cannot open UDP socket on port $port: :$!");
-            $udp_sockets->{$renderer}->fcntl(F_SETFD, 0); # unset close-on-exec
+            );
+
+            if ($socket)
+            {
+                syslog('debug', "opened port %d for renderer '%s'", $port, $renderer->get_name());
+                $socket->fcntl(Fcntl::F_SETFD, 0); # unset close-on-exec
+                $new_sockets->{$port} = $socket;
+            }
+            else
+            {
+                syslog('err', "could not open socket on port %d for renderer '%s', renderer disabled", $port, $renderer->get_name());
+                $renderer->disable();
+            }
         }
+    }
+
+    # close all sockets that are not needed by any renderer
+    foreach my $port (keys %$old_sockets)
+    {
+        syslog('info', 'closing socket for port %d', $port);
+        $old_sockets->{$port}->close();
+    }
+
+    return $new_sockets;
+}
+
+
+#-----------------------------------------------------------------------------
+# Start workers if there are less than configured
+#-----------------------------------------------------------------------------
+sub start_workers
+{
+    my $workers = shift;
+    my $sockets = shift;
+
+    foreach my $renderer (Tirex::Renderer->enabled())
+    {
+        my $socket = $sockets->{$renderer->get_port()};
+        next unless ($socket);
 
         while ($renderer->num_workers() < $renderer->get_procs())
         {
-            my $reader = IO::Pipe::End->new();
-            my $writer = IO::Pipe::End->new();
-            my $pipe = IO::Pipe->new($reader, $writer);
-            $reader->fcntl(F_SETFD, 0); # unset close-on-exec
-            $writer->fcntl(F_SETFD, 0); # unset close-on-exec
-            $reader->blocking(0);
-            $writer->blocking(0);
+            my $pipe = create_pipe();
 
             my $pid = fork();
             if ($pid == 0) # child
             {
-                # keep a reference to this so its not closed
-                my $socket = $udp_sockets->{$renderer};
-
-                # remove hashes with workers and udp sockets, because they contain references to open pipes and sockets
+                # remove hash with workers because it contains references to open pipes and sockets
                 # that should be closed in the child
                 $workers = undef;
-                $udp_sockets = undef;
 
                 $pipe->writer();
 
                 execute_renderer($renderer, $pipe->fileno(), $socket->fileno());
 
                 # if we are here the execute failed
-                ::syslog('err', "Cannot execute renderer %s (%s)", $renderer->get_name(), $renderer->get_path());
+                syslog('err', "Cannot execute renderer %s (%s)", $renderer->get_name(), $renderer->get_path());
                 exit($Tirex::EXIT_CODE_DISABLE);
             }
             elsif ($pid > 0) # parent
@@ -196,19 +280,49 @@ while (1)
                 syslog('info', 'renderer %s started with pid %d', $renderer->get_name(), $pid);
 
                 $workers->{$pid} = { 
-                    pid          => $pid,
-                    last_contact => time(),
-                    handle       => $pipe,
-                    renderer     => $renderer,
+                    pid             => $pid,
+                    last_seen_alive => time(),
+                    handle          => $pipe,
+                    renderer        => $renderer,
                 };
                 $renderer->add_worker($pid);
             }
             else
             {
-                syslog('err', 'error in fork(): %s', $!);
+                syslog('crit', 'error in fork(): %s', $!);
             }
         }
     }
+}
+
+
+#-----------------------------------------------------------------------------
+# Create pipe for alive message from worker child to parent
+#-----------------------------------------------------------------------------
+sub create_pipe
+{
+    my $reader = IO::Pipe::End->new();
+    my $writer = IO::Pipe::End->new();
+
+    my $pipe = IO::Pipe->new($reader, $writer);
+
+    $reader->fcntl(F_SETFD, 0); # unset close-on-exec
+    $writer->fcntl(F_SETFD, 0); # unset close-on-exec
+    $reader->blocking(0);
+    $writer->blocking(0);
+
+    return $pipe;
+}
+
+
+#-----------------------------------------------------------------------------
+# Check for alive messages from workers
+# will return after $SELECT_TIMEOUT seconds, when a message arrived or when
+# we caught a signal
+#-----------------------------------------------------------------------------
+sub check_for_alive_messages
+{
+    my $workers = shift;
 
     my $select = IO::Select->new();
     foreach my $worker (values %$workers)
@@ -216,46 +330,80 @@ while (1)
         $select->add([$worker->{'handle'}, $worker]);
     }
 
-    my $now = time();
-    foreach my $handle_wrapper ($select->can_read($alive_timeout / 2))
+    foreach my $handle_wrapper ($select->can_read($SELECT_TIMEOUT))
     {
         my ($handle, $worker) = @$handle_wrapper;
         my $buf;
         $handle->read($buf, 9999);
         if (length($buf) > 0)
         {
-            $worker->{'last_contact'} = $now;
+            $worker->{'last_seen_alive'} = time();
         }
     }
+}
 
-    # remove dead children from the worker list
-    while (my $pid = shift @closed_children)
+
+#-----------------------------------------------------------------------------
+# Cleanup dead workers
+#-----------------------------------------------------------------------------
+sub cleanup_dead_workers
+{
+    my $workers = shift;
+
+    while ((my $pid = waitpid(-1, WNOHANG)) > 0) 
     {
+        my $exit_code = $? >> 8;
+        my $signal    = $? & 127;
+        syslog('warning', 'child %d terminated (exit_code=%d, signal=%d)', $pid, $exit_code, $signal);
+
+        # this will happen if a worker child dies which we don't know about
+        # because we got a SIGHUP in between
+        next unless ($workers->{$pid});
+
+        # if the return code of the child is something other than $EXIT_CODE_RESTART, the renderer is disabled
+        # this does not happen if the worker child was killed because of a timeout
+        if ($exit_code != $Tirex::EXIT_CODE_RESTART && ! defined $workers->{$pid}->{'hungup'})
+        {
+            my $renderer = $workers->{$pid}->{'renderer'};
+            $renderer->disable();
+            syslog('err', 'disabled renderer %s', $renderer->get_name());
+        }
+
         $workers->{$pid}->{'handle'}->close();
         $workers->{$pid}->{'renderer'}->remove_worker($pid);
         delete $workers->{$pid};
     }
+}
 
-    # kill workers that haven't said anything for a while
+
+#-----------------------------------------------------------------------------
+# Kill workers that haven't send an alive message for a while
+#-----------------------------------------------------------------------------
+sub kill_old_workers
+{
+    my $workers = shift;
+
+    my $now = time();
+
     foreach my $worker (values %$workers) 
     { 
-        if ($worker->{'last_contact'} < $now - $alive_timeout)
+        if ($worker->{'last_seen_alive'} < $now - $ALIVE_TIMEOUT)
         {
-            if (! defined($worker->{'killed'}) && defined($worker->{'terminated'}) && ($worker->{'terminated'} < $now - $term_timeout))
+            if (! defined($worker->{'killed'}) && defined($worker->{'terminated'}) && ($worker->{'terminated'} < $now - $TERM_TIMEOUT))
             {
-                syslog('info', 'sending sigkill to pid %d', $worker->{'pid'});
+                syslog('info', "sending KILL to worker '%s' with pid %d (due to timeout)", $worker->{'renderer'}->get_name(), $worker->{'pid'});
                 kill('KILL', $worker->{'pid'});
                 $worker->{'killed'} = $now;
             }
-            elsif (! defined($worker->{'terminated'}) && defined($worker->{'hungup'}) && ($worker->{'hungup'} < $now - $hangup_timeout))
+            elsif (! defined($worker->{'terminated'}) && defined($worker->{'hungup'}) && ($worker->{'hungup'} < $now - $HANGUP_TIMEOUT))
             {
-                syslog('info', 'sending sigterm to pid %d', $worker->{'pid'});
+                syslog('info', "sending TERM to worker '%s' with pid %d (due to timeout)", $worker->{'renderer'}->get_name(), $worker->{'pid'});
                 kill('TERM', $worker->{'pid'});
                 $worker->{'terminated'} = $now;
             }
             elsif (! defined($worker->{'hungup'}))
             {
-                syslog('err', 'killing child with pid %d due to timeout', $worker->{'pid'});
+                syslog('info', "sending HUP to worker '%s' with pid %d (due to timeout)", $worker->{'renderer'}->get_name(), $worker->{'pid'});
                 kill('HUP', $worker->{'pid'});
                 $worker->{'hungup'} = $now;
             }
@@ -263,8 +411,10 @@ while (1)
     }
 }
 
-#-----------------------------------------------------------------------------
 
+#-----------------------------------------------------------------------------
+# Execute the worker child with the right environment
+#-----------------------------------------------------------------------------
 sub execute_renderer
 {
     my $renderer      = shift;
@@ -274,8 +424,8 @@ sub execute_renderer
     $ENV{'TIREX_BACKEND_NAME'}            = $renderer->get_name();
     $ENV{'TIREX_BACKEND_PORT'}            = $renderer->get_port();
     $ENV{'TIREX_BACKEND_SYSLOG_FACILITY'} = $renderer->get_syslog_facility();
-    $ENV{'TIREX_BACKEND_MAP_CONFIGS'}     = join(' ', map { $_->get_filename() } @{$renderer->get_maps()});
-    $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   = $alive_timeout - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
+    $ENV{'TIREX_BACKEND_MAP_CONFIGS'}     = join(' ', map { $_->get_filename() } $renderer->get_maps());
+    $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'}   = $ALIVE_TIMEOUT - 20; # give the child 20 seconds less than what the parent uses as timeout to be on the safe side
     $ENV{'TIREX_BACKEND_PIPE_FILENO'}     = $pipe_fileno;
     $ENV{'TIREX_BACKEND_SOCKET_FILENO'}   = $socket_fileno;
     $ENV{'TIREX_BACKEND_DEBUG'}           = 1 if ($Tirex::DEBUG || $renderer->get_debug());
@@ -291,48 +441,18 @@ sub execute_renderer
 
 
 #-----------------------------------------------------------------------------
-# Signal handler
+# Signal handlers
 #-----------------------------------------------------------------------------
-sub sigchld_handler 
-{
-    while ((my $child = waitpid(-1, WNOHANG)) > 0) 
-    {
-        my $exit_code = $? >> 8;
-        my $signal    = $? & 127;
-        syslog('warning', 'child %d terminated (exit_code=%d, signal=%d)', $child, $exit_code, $signal);
-        push(@closed_children, $child);
-
-        # if the return code of the child is something other than $EXIT_CODE_RESTART, the renderer is disabled
-        if ($exit_code != $Tirex::EXIT_CODE_RESTART)
-        {
-            my $renderer = $workers->{$child}->{'renderer'};
-            @renderers = grep { $_ ne $renderer } @renderers;
-            syslog('err', 'disabled renderer %s', $renderer->get_name());
-        }
-    }
-
-    $SIG{'CHLD'} = \&sigchld_handler;
-}
 
 sub sighup_handler 
 {
-    syslog('info', 'hangup received, forwarding to children: %s', join(' ', keys %$workers));
-#XXX we should re-read the config files here
-    foreach my $pid (keys %$workers)
-    {
-        kill('HUP', $pid);
-    }
-    $SIG{'HUP'} = \&sighup_handler;
+    $received_sighup = 1;
+    $SIG{'HUP'} = 'IGNORE';
 }
 
 sub sigterm_handler 
 {
-    syslog('info', 'sigterm/int received, forwarding to children: %s', join(' ', keys %$workers));
-    foreach my $pid (keys %$workers)
-    {
-        kill('HUP', $pid);
-    }
-    exit(0);
+    $received_sigterm = 1;
 }
 
 
@@ -340,7 +460,7 @@ __END__
 
 =head1 NAME
 
-tirex-backend-manager - manages Tirex backend renderers
+tirex-backend-manager - manages Tirex rendering backend workers
 
 =head1 SYNOPSIS
 
@@ -356,7 +476,7 @@ Display help message.
 
 =item B<-d>, B<--debug>
 
-Run in debug mode, and pass on the debug flag to spawned processes
+Run in debug mode, and pass on the debug flag to workers
 
 =item B<--config=DIR>
 
@@ -366,17 +486,19 @@ Use the DIR config directory instead of /etc/tirex.
 
 =head1 DESCRIPTION
 
-The backend manager starts and monitors as many backend processes as given in
+The backend manager starts and monitors as many backend workers as given in
 the configuration. The backend processes do the actual rendering of tiles.
 
-The backend manager expects each backend process to send an "alive" message in
+The backend manager expects each worker process to send an "alive" message in
 regular intervals, and will kill the process if it does not do so in time.
-
-In addition, if the manager receives a HANGUP signal, it will relay this signal
-to all backends, causing them to exit after completing their current request.
 
 The backend manager does not handle render requests in any way; these are read
 directly from a local UDP socket by the individual backend processes.
+
+If the backend manager receives a HUP signal, it will relay this signal
+to all backends, causing them to exit after completing their current request.
+It will reload the renderer and map configuration and re-start all workers
+with the new configuration.
 
 =head1 FILES
 
@@ -386,12 +508,24 @@ directly from a local UDP socket by the individual backend processes.
 
 The configuration file. See tirex.conf(5) for further details.
 
+=item F</etc/tirex/renderer/*.conf>
+
+Configuration files for renderers
+
+=item F</etc/tirex/renderer/*/*.conf>
+
+Map configurations
+
 =back
 
 =head1 DIAGNOSTICS
 
 The backend manager logs to the I<daemon> syslog facility unless configured
 otherwise. In debug mode, logging is also copied to stderr.
+
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
 
 =head1 AUTHORS
 

@@ -321,6 +321,10 @@ and uses ANSI control codes for colour, unless you specify the --raw option.
 
 tirex-status returns 1 if there was an error, 0 otherwise.
 
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
 =head1 AUTHORS
 
 Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf

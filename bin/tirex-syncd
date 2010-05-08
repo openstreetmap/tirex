@@ -161,6 +161,10 @@ The configuration file. See tirex.conf(5) for further details.
 =head1 DIAGNOSTICS
 
 
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
 =head1 AUTHORS
 
 Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf

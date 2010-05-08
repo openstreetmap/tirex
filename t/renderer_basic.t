@@ -30,7 +30,21 @@ is($r1->get_name(), 'mapnik1', 'name');
 is($r1->get_path(), '/usr/lib/tirex/backends/mapnik', 'path');
 is($r1->get_port(), 1234, 'port');
 is($r1->get_procs(), 3, 'procs');
-is_deeply($r1->get_maps(), [], 'maps');
+
+is($r1->is_enabled(), 1, 'is_enabled');
+my @e = Tirex::Renderer->enabled();
+is(scalar(@e), 1, 'enabled');
+is($e[0], $r1, 'enabled');
+$r1->disable();
+is($r1->is_enabled(), 0, 'not is_enabled');
+is(scalar(Tirex::Renderer->enabled()), 0, 'enabled');
+$r1->enable();
+is($r1->is_enabled(), 1, 'is_enabled');
+@e = Tirex::Renderer->enabled();
+is(scalar(@e), 1, 'enabled');
+is($e[0], $r1, 'enabled');
+
+is_deeply([$r1->get_maps()], [], 'maps');
 is_deeply($r1->get_config(), {
     fontdir         => '/usr/lib/mapnik/fonts',
     fontdir_recurse => 0,

@@ -287,6 +287,10 @@ tirex-rendering-control returns
 
 =back
 
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
 =head1 AUTHORS
 
 Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf

@@ -79,6 +79,28 @@ sub all
     return sort { $a->get_name() cmp $b->get_name() } values %Renderers;
 }
 
+=head2 Tirex::Renderer->clear();
+
+Clear list of renderers.
+
+=cut
+
+sub clear
+{
+    %Renderers = ();
+}
+
+=head2 Tirex::Renderer->enabled();
+
+Return sorted (by name) list of all enabled renderers.
+
+=cut
+
+sub enabled
+{
+    return grep { $_->is_enabled(); } all();
+}
+
 =head2 Tirex::Renderer->new( name => 'foo', path => '/path/to/exec', port => 1234, procs => 3, ... )
 
 Create new renderer config.
@@ -116,6 +138,7 @@ sub new
     $self->{'syslog_facility'} = $Tirex::BACKEND_MANAGER_SYSLOG_FACILITY unless ($self->{'syslog_facility'});
     $self->{'debug'}           = 0                                       unless ($self->{'debug'});
     $self->{'maps'}            = [];
+    $self->{'enabled'}         = 1;
 
     $self->{'config'} = \%args;
 
@@ -180,11 +203,11 @@ sub read_map_config
 
 =head2 $rend->get_maps()
 
-Get array ref of map configs for this renderer.
+Get array of map configs for this renderer.
 
 =cut
 
-sub get_maps { return shift->{'maps'}; }
+sub get_maps { return @{shift->{'maps'}}; }
 
 =head2 $rend->get_config()
 
@@ -247,6 +270,30 @@ Get syslog facility of this renderer.
 
 sub get_syslog_facility { return shift->{'syslog_facility'}; }
 
+=head2 $rend->is_enabled()
+
+Is this renderer enabled?
+
+=cut
+
+sub is_enabled { return shift->{'enabled'}; }
+
+=head2 $rend->disable();
+
+Disable this renderer.
+
+=cut
+
+sub disable { shift->{'enabled'} = 0; }
+
+=head2 $rend->enable();
+
+Enable this renderer.
+
+=cut
+
+sub enable { shift->{'enabled'} = 1; }
+
 =head2 $rend->to_s();
 
 Return human readable description of this renderer.
@@ -259,10 +306,12 @@ sub to_s
 
     my $s = sprintf("Renderer %s:", $self->get_name());
 
-    foreach my $key ( qw( port procs path syslog_facility debug ) ) {
+    foreach my $key ( qw( port procs path syslog_facility debug ) )
+    {
         $s .= " $key=$self->{$key}";
     }
-    foreach my $key ( sort keys %{$self->{'config'}}) {
+    foreach my $key ( sort keys %{$self->{'config'}} )
+    {
         $s .= " $key=$self->{'config'}->{$key}";
     }
 
@@ -287,7 +336,7 @@ sub to_hash
     $hash{'port'}            = 0 + $self->get_port();
     $hash{'procs'}           = 0 + $self->get_procs();
 
-    $hash{'maps'} = [map { $_->get_name(); } @{$self->get_maps()}];
+    $hash{'maps'} = [map { $_->get_name(); } $self->get_maps()];
 
     return \%hash;
 }
