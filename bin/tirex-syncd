@@ -32,9 +32,9 @@ use warnings;
 
 use Getopt::Long qw( :config gnu_getopt );
 use IO::Socket;
-use Socket;
 use POSIX 'setsid';
-use Pod::Usage;
+use Pod::Usage qw();
+use Socket;
 
 use Tirex;
 
@@ -45,14 +45,14 @@ GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'dry-run|n' ) or exit(2);
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-syncd - sync rendered tiles to backup host\n",
         -exitval => 0
     );
 }
 
-$Tirex::DEBUG = $opts{'debug'};
+$Tirex::DEBUG = 1 if ($opts{'debug'});
 
 my $dryrun = $opts{'dry-run'};
 

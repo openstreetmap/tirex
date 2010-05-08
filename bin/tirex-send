@@ -30,11 +30,11 @@
 use strict;
 use warnings;
 
+use Errno;
 use Getopt::Long qw( :config gnu_getopt );
 use IO::Socket;
+use Pod::Usage qw();
 use Socket;
-use Pod::Usage;
-use Errno;
 
 use Tirex;
 
@@ -47,7 +47,7 @@ GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'to|t=s', 'wait|w=i' ) or
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-send - send messages to a tirex daemon\n",
         -exitval => 0

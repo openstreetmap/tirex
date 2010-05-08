@@ -30,12 +30,12 @@
 use strict;
 use warnings;
 
+use Errno;
 use Getopt::Long qw( :config gnu_getopt );
 use IO::Socket;
-use Socket;
-use Pod::Usage;
-use Errno;
 use JSON;
+use Pod::Usage qw();
+use Socket;
 
 use Tirex;
 use Tirex::Status;
@@ -49,7 +49,7 @@ GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'stop', 'continue' ) or e
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-rendering-control - send messages to control rendering\n",
         -exitval => 0

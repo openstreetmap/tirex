@@ -30,13 +30,13 @@
 use strict;
 use warnings;
 
+use File::stat;
 use Getopt::Long qw( :config gnu_getopt );
 use IO::Socket;
-use Socket;
 use JSON;
+use Pod::Usage qw();
+use Socket;
 use Time::HiRes;
-use Pod::Usage;
-use File::stat;
 
 use Tirex;
 use Tirex::Status;
@@ -50,17 +50,14 @@ GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'num|n=i', 'prio|p=i', 'e
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-batch - send rendering requests to tirex master\n",
         -exitval => 0
     );
 }
 
-if ($opts{'debug'})
-{
-    $Tirex::DEBUG = $opts{'debug'};
-}
+$Tirex::DEBUG = 1 if ($opts{'debug'});
 
 my $prio = $opts{'prio'} || 99;          # default batch prio is 99
 my $num  = $opts{'num'}  || 999_999_999; # huge queue size as default max size

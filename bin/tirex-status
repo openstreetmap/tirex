@@ -32,9 +32,9 @@ use warnings;
 
 use Getopt::Long qw( :config gnu_getopt );
 use JSON;
-use Term::ANSIColor qw(:constants);
 use List::Util qw();
-use Pod::Usage;
+use Pod::Usage qw();
+use Term::ANSIColor qw(:constants);
 
 use Tirex;
 use Tirex::Status;
@@ -48,7 +48,7 @@ GetOptions( \%opts, 'help|h', 'once|o', 'raw|r' ) or exit(2);
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-status - show status of tirex master\n",
         -exitval => 0

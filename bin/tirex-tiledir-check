@@ -30,14 +30,14 @@
 use strict;
 use warnings;
 
-use Getopt::Long qw( :config gnu_getopt );
 use File::Find;
 use File::stat;
-use Pod::Usage;
-use List::Util;
+use Getopt::Long qw( :config gnu_getopt );
 use IO::File;
 use IO::Handle;
 use JSON;
+use List::Util qw();
+use Pod::Usage qw();
 
 use Tirex;
 
@@ -50,7 +50,7 @@ GetOptions( \%opts, 'help|h', 'config|c=s', 'list|l=s', 'stats|s=s' ) or exit(2)
 
 if ($opts{'help'})
 {
-    pod2usage(
+    Pod::Usage::pod2usage(
         -verbose => 1,
         -msg     => "tirex-tiledir-check - check tile dir\n",
         -exitval => 0
