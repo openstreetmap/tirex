@@ -123,4 +123,15 @@ isa_ok($r, 'Tirex::Metatiles::Range', 'create r8');
 is_deeply($r->{'maps'}, ['foo', 'bar'], 'r8 map');
 is($r->to_s(), 'maps=foo,bar z=1,2 lon=4,8 lat=40,50', 'r8 to_s');
 
+$r = Tirex::Metatiles::Range->new( map => 'foo', z => 10, bbox => '8, 48, 9, 49' );
+isa_ok($r, 'Tirex::Metatiles::Range', 'create r9');
+is_deeply($r->{'maps'}, ['foo'], 'r9 map');
+is($r->to_s(), 'maps=foo z=10 lon=8,9 lat=48,49', 'r9 to_s');
+
+$r = Tirex::Metatiles::Range->new( init => 'map=foo z=10 bbox=8,48,9,49' );
+isa_ok($r, 'Tirex::Metatiles::Range', 'create r10');
+is_deeply($r->{'maps'}, ['foo'], 'r10 map');
+is($r->to_s(), 'maps=foo z=10 lon=8,9 lat=48,49', 'r10 to_s');
+
+
 #-- THE END ------------------------------------------------------------------
