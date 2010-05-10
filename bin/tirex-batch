@@ -331,8 +331,11 @@ Single metatile:
 Multiple metatiles:
  map=foo x=0-32 y=16-32 z=15
 
-Using bounding box (8 to 9 degrees longitude, 48 to 49 degrees latitude)
+Using longitude and latitude ranges (8 to 9 degrees longitude, 48 to 49 degrees latitude)
  map=foo lon=8,9 lat=48,49 z=15-17
+
+Using a bounding box (8 to 9 degrees longitude, 48 to 49 degrees latitude)
+ map=foo bbox=8,48,9,49 z=15-17
 
 Multiple maps are allowed, too:
  map=foo,bar

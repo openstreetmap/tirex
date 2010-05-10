@@ -90,10 +90,12 @@ sub new
     # make sure we have all needed parameters
     Carp::croak("missing 'map' parameter") if ( ! exists($self->{'maps'}));
     Carp::croak("missing 'z' or 'zmin'/'zmax' parameter") if ( ! exists($self->{'z'}) && ! exists($self->{'zmin'}) && ! exists($self->{'zmax'}) );
-    Carp::croak("missing 'x' or 'xmin'/'xmax' or 'lon' or 'lonmin/lonmax' parameter") if ( ! exists($self->{'x'}) && ! exists($self->{'xmin'}) && ! exists($self->{'xmax'}) &&
-                                                                                           ! exists($self->{'lon'}) && ! exists($self->{'lonmin'}) && ! exists($self->{'lonmax'}) );
-    Carp::croak("missing 'y' or 'ymin'/'ymax' or 'lat' or 'latmin/latmax' parameter") if ( ! exists($self->{'y'}) && ! exists($self->{'ymin'}) && ! exists($self->{'ymax'}) &&
-                                                                                           ! exists($self->{'lat'}) && ! exists($self->{'latmin'}) && ! exists($self->{'latmax'}) );
+    Carp::croak("missing 'x' or 'xmin'/'xmax' or 'lon' or 'lonmin/lonmax' or 'bbox' parameter")
+        if ( ! exists($self->{'x'}) && ! exists($self->{'xmin'}) && ! exists($self->{'xmax'}) &&
+             ! exists($self->{'lon'}) && ! exists($self->{'lonmin'}) && ! exists($self->{'lonmax'}) );
+    Carp::croak("missing 'y' or 'ymin'/'ymax' or 'lat' or 'latmin/latmax' or 'bbox' parameter")
+        if ( ! exists($self->{'y'}) && ! exists($self->{'ymin'}) && ! exists($self->{'ymax'}) &&
+             ! exists($self->{'lat'}) && ! exists($self->{'latmin'}) && ! exists($self->{'latmax'}) );
 
     # make sure min is always smaller than max
     ($self->{'zmin'  }, $self->{'zmax'  }) = (List::Util::min($self->{'zmin'  }, $self->{'zmax'  }), List::Util::max($self->{'zmin'  }, $self->{'zmax'  })) if (defined $self->{'zmin'  });
@@ -141,6 +143,8 @@ sub _parse_key_value
     elsif ($key eq 'lonmax') { $self->{'lonmax'} = $value; }
     elsif ($key eq 'latmin') { $self->{'latmin'} = $value; }
     elsif ($key eq 'latmax') { $self->{'latmax'} = $value; }
+
+    elsif ($key eq 'bbox')   { $self->_parse_bbox($value); }
 
     elsif ($key eq 'init')   { $self->_parse_init($value); }
 
@@ -407,6 +411,25 @@ sub _parse_degree_range
     }
     return;
 }
+
+sub _parse_bbox
+{
+    my $self = shift;
+    my $val  = shift;
+
+    if ($val =~ /^(-?[0-9]+(?:\.[0-9]+)?)\s*[:,]\s*(-?[0-9]+(?:\.[0-9]+)?)\s*[:,]\s*(-?[0-9]+(?:\.[0-9]+)?)\s*[:,]\s*(-?[0-9]+(?:\.[0-9]+)?)$/)
+    {
+        $self->{'lonmin'} = $1;
+        $self->{'lonmax'} = $3;
+        $self->{'latmin'} = $2;
+        $self->{'latmax'} = $4;
+    }
+    else
+    {
+        Carp::croak("wrong format for 'bbox'");
+    }
+    return
+}    
 
 
 1;
