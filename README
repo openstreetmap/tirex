@@ -9,22 +9,85 @@ Further documentation is in the doc/ subdirectory.
 
 The web page for Tirex is at http://wiki.openstreetmap.org/wiki/Tirex .
 
+BUILDING
+--------
+
+To build Tirex run
+
+  make
+
+in the main directory. This will compile the mapnik backend and create
+the man pages for the Perl modules.
+
+Call 'make clean' to cleanup after a 'make'.
+
+INSTALLING
+----------
+
+To install Tirex call
+
+  make install
+
+as root user. This will install the main parts of Tirex including the
+tirex-master, tirex-backend-manager and the Mapnik backend.
+
+This will not install the example map, or the munin or nagios plugins.
+To install those, call
+
+  make install-example-map
+  make install-munin
+  make install-nagios
+
+respectively. You can also install everything with
+
+  make install-all
+
+DEBIAN/UBUNTU
+-------------
+
+To create Debian/Ubuntu packages you need the package 'devscripts'
+installed. Call
+
+  make deb
+
+to create the packages. The following packages will be created in the parent
+directory:
+
+  tirex-core
+  tirex-backend-mapnik
+  tirex-backend-wms
+  tirex-example-map
+  tirex-munin-plugin
+  tirex-nagios-plugin
+  tirex-syncd
+
+Call 'make deb-clean' to cleanup after a 'make deb'.
+
 PERL MODULES
 ------------
 
-You'll need the following Perl modules:
+You'll need the following Perl modules to run Tirex:
 
 * IPC::ShareLite (Debian/Ubuntu: libipc-sharelite-perl)
 * JSON           (Debian/Ubuntu: libjson-perl)
 * GD             (Debian/Ubuntu: libgd-gd2-perl)
 * LWP            (Debian/Ubuntu: libwww-perl)
 
+TESTS
+-----
+
+Call 'prove' in the main directory to run Perl unit tests. You need Test::More
+(Debian/Ubuntu: libtest-simple-perl) and Test::Harness (Debian/Ubuntu:
+libtest-harness-perl) installed.
+
+There are some other tests in the 'test' directory. See the description at the
+beginning of the scripts for information on how to use them.
 
 LOGGING
 -------
 
 Tirex-master has two logs:
-* General noticies, warnings, errors, debug messages and the like are
+
   logged via syslog. You can configure the syslog facility that should
   be used ('master_syslog_facility').
 * For each rendered metatile a line is written to a logfile. This can
@@ -33,13 +96,4 @@ Tirex-master has two logs:
   Use the config variable 'master_logfile' to set the filename for this
   log.
 
-
-TESTING
--------
-
-Call 'prove' in the main directory to run Perl tests. You need Test::More
-(Debian/Ubuntu: libtest-simple-perl) and Test::Harness (Debian/Ubuntu:
-libtest-harness-perl) installed.
-
-Call 'perl test/queue_speed_test.pl' to run queue speed test.
 

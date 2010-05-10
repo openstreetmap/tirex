@@ -32,7 +32,7 @@ install: build
 	dh_installdirs
 
 	# commands to install the package into debian/tmp
-	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install-all
 
 # Build architecture-independent files here.
 binary-indep: build install
