@@ -28,7 +28,6 @@ is($mt1->get_y(),    0,      'mt1 y');
 is($mt1->get_z(),    3,      'mt1 z');
 is($mt1->get_map(),  'test', 'mt1 map');
 is($mt1->get_filename(), '3/0/0/0/0/0.meta', 'mt1 get_filename');
-is($mt1->filename(), '/test/3/0/0/0/0/0.meta', 'mt1 filename');
 is($mt1->to_s(),     'map=test z=3 x=0 y=0', 'mt1 to_s');
 ok($mt1->equals($mt1), 'mt1 == mt2');
 
@@ -40,13 +39,8 @@ is($mt2->get_y(),  1232, 'mt2 y');
 is($mt2->get_z(),    15, 'mt2 z');
 is($mt2->get_map(),  'test', 'mt2 map');
 is($mt2->get_filename(), '15/0/80/180/125/128.meta', 'mt2 get_filename');
-is($mt2->filename(), '/test/15/0/80/180/125/128.meta', 'mt2 filename');
 is($mt2->to_s(),     'map=test z=15 x=23416 y=1232', 'mt2 to_s');
 ok(! $mt2->equals($mt1), 'mt1 != mt2');
-
-my $mt2f = Tirex::Metatile->new_from_filename( $mt2->filename() );
-isa_ok($mt2f, 'Tirex::Metatile', 'create mt2f from filename of mt2');
-ok($mt2f->equals($mt2), 'mt2f and mt2 are the same');
 
 my $mt2g = Tirex::Metatile->new_from_filename_and_map( $mt2->get_filename(), $mt2->get_map() );
 isa_ok($mt2g, 'Tirex::Metatile', 'create mt2g from filename of mt2');
@@ -68,7 +62,7 @@ ok($m1->equals($m2), 'm1 and m2 are the same');
 foreach (1..100)
 {
     $m1 = Tirex::Metatile->new( map => 'test', z => $ZOOM, x => int(rand($LIMIT)), y => int(rand($LIMIT)) );
-    $m2 = Tirex::Metatile->new_from_filename( $m1->filename() );
+    $m2 = Tirex::Metatile->new_from_filename_and_map( $m1->get_filename(), $m1->get_map() );
     ok($m1->equals($m2), 'm1 and m2 are the same');
 }
 

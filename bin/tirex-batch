@@ -165,9 +165,9 @@ sub handle_init
     my $count_metatiles = 0;
 
     # if this looks like a metatile path name, decode it
-    if ($init =~ qr{^\.?/})
+    if ($init =~ qr{^\.?/([^/]+)/(.*)$})
     {
-        my $metatile = Tirex::Metatile->new_from_filename($init);
+        my $metatile = Tirex::Metatile->new_from_filename_and_map($2, $1);
         $init = $metatile->to_s();
     }
 

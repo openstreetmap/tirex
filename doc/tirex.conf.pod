@@ -17,11 +17,6 @@ that can be set.
 The number of rows and columns in one meta tile. 
 Both default to I<8> for backward compatibility.
 
-=item B<metatile_dir>
-
-The directory where meta tiles are stored. Tirex will
-create one subdirectory per map style.
-
 =item B<master_udp_port>
 
 UDP port (on localhost) where the master listens for commands (including render requests). 

@@ -6,10 +6,6 @@
 #
 #-----------------------------------------------------------------------------
 
-# The directory where metatiles are stored.
-# Below this will be a subdirectory for each map.
-metatile_dir=/var/lib/tirex/tiles
-
 # Directory where statistics are stored
 stats_dir=/var/lib/tirex/stats
 

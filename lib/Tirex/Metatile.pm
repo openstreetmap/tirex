@@ -69,47 +69,6 @@ sub new
     return $self;
 }
 
-=head2 Tirex::Metatile->new_from_filename($filename)
-
-Create metatile from filename. The first directory element must be the
-map name.
-
-Optionally, the filename can start with '/' or './'.
-
-=cut
-
-sub new_from_filename
-{
-    my $class    = shift;
-    my $filename = shift;
-
-    # remove leading / or ./
-    $filename =~ s{^\.?/}{};
-
-    # remove trailing .meta
-    $filename =~ s{\.meta$}{};
-
-    my @path_components = split('/', $filename);
-    my $map = shift @path_components;
-    my $z   = shift @path_components;
-
-    my $x = 0;
-    my $y = 0;
-
-    Carp::croak("not a valid metatile filename: too many or too few components") unless (scalar(@path_components) == 5);
-
-    while (defined (my $c = shift @path_components))
-    {
-        Carp::croak("failed to parse tile path (invalid component '$c')") if ($c < 0 || $c > 255);
-        $x <<= 4;
-        $y <<= 4;
-        $x |= ($c & 0xf0) >> 4;
-        $y |= ($c & 0x0f);
-    }
-
-    return $class->new( map => $map, z => $z, x => $x, y => $y );
-}
-
 =head2 Tirex::Metatile->new_from_filename_and_map($filename, $map)
 
 Create metatile from filename. The first directory element must be the
@@ -293,28 +252,18 @@ sub up
     return Tirex::Metatile->new( map => $self->{'map'}, z => $self->{'z'} - 1, x => $x, y => $y );
 }
 
-=head2 $mt->filename()
+=head2 $mt->get_filename()
 
 Return filename for this metatile.
 
 Format is something like:
-  /[metatile_dir]/[map]/[zoom]/[path].meta
+  [zoom]/[path].meta
 
-  metatile_dir  from the config file
-  map           map
   zoom          zoom level
   path          path with 4 directory elements and a filename
                 based on x and y coordinates
 
 =cut
-
-sub filename
-{
-    my $self = shift;
-
-    return (Tirex::Config::get('metatile_dir') || '') . '/' . $self->{'map'} . '/' . $self->get_filename();
-}
-
 
 sub get_filename
 {
