@@ -44,7 +44,7 @@ use Tirex::Status;
 #-----------------------------------------------------------------------------
 
 my %opts = ( raw => 0, once => 0 );
-GetOptions( \%opts, 'help|h', 'once|o', 'raw|r' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'once|o', 'raw|r', 'extended|e' ) or exit(2);
 
 if ($opts{'help'})
 {
@@ -121,8 +121,7 @@ sub format_status
                  . format_queue($d->{'queue'})
                  . format_buckets($d->{'rm'}, $d->{'queue'})
                  . format_rendering($d->{'rm'})
-                 . format_renderers($d->{'renderers'})
-                 . format_maps($d->{'maps'});
+                 . ($opts{'extended'} ?  format_renderers($d->{'renderers'}) . format_maps($d->{'maps'}) : '');
 }
 
 sub format_master_server
@@ -305,6 +304,10 @@ Show status only once, default is to show it once per second.
 
 Return status in raw JSON format instead of in ANSI coloured human readable
 form. Implies --once.
+
+=item B<-e>, B<--extended>
+
+Show renderer and map config, too.
 
 =back
 
