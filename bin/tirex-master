@@ -88,20 +88,7 @@ syslog('info', 'tirex-master started with cmd line options: %s', join(' ', @argv
 
 Tirex::Config::dump_to_syslog();
 
-#-----------------------------------------------------------------------------
-# Read renderer and map config
-#-----------------------------------------------------------------------------
-
-Tirex::Renderer->read_config_dir($config_dir);
-
-foreach my $renderer (Tirex::Renderer->all())
-{
-    syslog('info', $renderer->to_s());
-    foreach my $map ($renderer->get_maps())
-    {
-        syslog('info', '  %s', $map->to_s());
-    }
-}
+read_renderer_and_map_config();
 
 #-----------------------------------------------------------------------------
 # Prepare sockets
@@ -321,6 +308,11 @@ sub main_loop
                     syslog('info', 'got continue_rendering_bucket message');
                     my $res = defined($source->{'bucket'}) ? $rendering_manager->set_active_flag_on_bucket(1, $source->{'bucket'}) : undef;
                     $source->reply({ type => $msg_type, result => $res ? 'ok' : 'error_bucket_not_found' });
+                } elsif ($msg_type eq 'reload_config') {
+                    syslog('info', 'got reload_config messages');
+                    read_renderer_and_map_config();
+                    $queue->remove_jobs_for_unknown_maps();
+                    $source->reply({ type => 'reload_config', result => 'ok' });
                 } elsif ($msg_type eq 'shutdown') {
                     syslog('info', 'got shutdown message, shutting down cleanly');
                     $source->reply({ type => 'shutdown', result => 'error_not_implemented' });
@@ -513,6 +505,26 @@ sub log_job
     }
 }
 
+
+#-----------------------------------------------------------------------------
+# Read renderer and map config
+#-----------------------------------------------------------------------------
+sub read_renderer_and_map_config
+{
+    Tirex::Map->clear();
+    Tirex::Renderer->clear();
+
+    Tirex::Renderer->read_config_dir($config_dir);
+
+    foreach my $renderer (Tirex::Renderer->all())
+    {
+        syslog('info', $renderer->to_s());
+        foreach my $map ($renderer->get_maps())
+        {
+            syslog('info', '  %s', $map->to_s());
+        }
+    }
+}
 
 #-----------------------------------------------------------------------------
 

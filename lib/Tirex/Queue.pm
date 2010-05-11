@@ -287,6 +287,23 @@ sub _calc_size
     return $sum;
 }
 
+=head2 $pq->remove_jobs_for_unknown_maps()
+
+Remove all jobs from this prioqueue where the map is undefined. This can happen
+after a reload of the config file, when a map was deleted from it.
+
+=cut
+
+sub remove_jobs_for_unknown_maps
+{
+    my $self = shift;
+
+    foreach my $prioqueue (@{$self->{'queues'}})
+    {
+        $prioqueue->remove_jobs_for_unknown_maps() if (defined $prioqueue);
+    }
+}
+
 =head1 SEE ALSO
 
 L<Tirex::PrioQueue>, L<Tirex::Job>

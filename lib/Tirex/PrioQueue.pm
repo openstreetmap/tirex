@@ -270,6 +270,25 @@ sub reset_maxsize
     return $self->{'maxsize'};
 }
 
+=head2 $pq->remove_jobs_for_unknown_maps()
+
+Remove all jobs from this prioqueue where the map is undefined. This can happen
+after a reload of the config file, when a map was deleted from it.
+
+=cut
+
+sub remove_jobs_for_unknown_maps
+{
+    my $self = shift;
+
+    my @jobs = grep { ! defined Tirex::Map->get($_->get_map()) } @{$self->{'queue'}};
+    
+    foreach my $job (@jobs)
+    {
+        $self->remove($job);
+    }
+}
+
 =head2 $pq->status()
 
 Return status of the priority queue.
