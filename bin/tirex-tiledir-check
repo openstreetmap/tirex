@@ -40,6 +40,8 @@ use List::Util qw();
 use Pod::Usage qw();
 
 use Tirex;
+use Tirex::Renderer;
+use Tirex::Map;
 
 #-----------------------------------------------------------------------------
 
@@ -82,19 +84,27 @@ elsif ($opts{'stats'})
     $fh_stats = IO::File->new($opts{'stats'}, 'w') or die("Can't open stats file '$opts{'stats'}': $!\n");
 }
 
+die("missing map parameter\n") unless (defined $ARGV[0]);
+my $mapname = shift;
+
 my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 
+Tirex::Renderer->read_config_dir($config_dir);
+
+my $map = Tirex::Map->get($mapname);
+die("unknown map: $map\n") unless (defined $map);
+
 #-----------------------------------------------------------------------------
 
-my $REGEX_DIR  = qr{^/[a-zA-Z0-9_-]+(/[0-9]+){0,5}$};
-my $REGEX_FILE = qr{^/[a-zA-Z0-9_-]+(/[0-9]+){0,5}/[0-9]+\.meta$};
-my $REGEX_TMP  = qr{^/[a-zA-Z0-9_-]+(/[0-9]+){0,5}/[0-9]+\.meta\.[0-9]+\.tmp$};
+my $REGEX_DIR  = qr{^(/[0-9]+){0,5}$};
+my $REGEX_FILE = qr{^(/[0-9]+){0,5}/[0-9]+\.meta$};
+my $REGEX_TMP  = qr{^(/[0-9]+){0,5}/[0-9]+\.meta\.[0-9]+\.tmp$};
 
 my $BLOCKSIZE = 512;
 
-my $mtdir = Tirex::Config::get('metatile_dir');
+my $mtdir = $map->get_tiledir();
 chop $mtdir if ($mtdir =~ qr{/$});
 
 my %stats;
@@ -129,19 +139,6 @@ sub process
 {
     (my $path = $_) =~ s/^$mtdir//;
 
-    # ignore lost+found directories
-    if ($path =~ /lost\+found/)
-    {
-        $File::Find::prune = 1;
-        return;
-    }
-
-    # ignore /planet-import-complete (used by mod_tile)
-    if ($path eq '/planet-import-complete')
-    {
-        return;
-    }
-
     # directories
     if (-d $_)
     {
@@ -158,7 +155,7 @@ sub process
 
     my $stat = stat($_);
 
-    # tmp files
+    # is a tmp file
     if ($path =~ $REGEX_TMP)
     {
         #  older than 1 minute
@@ -166,14 +163,14 @@ sub process
         return;
     }
 
-    # metatile files
+    # not a metatile file
     if ($path !~ $REGEX_FILE)
     {
         error("Unknown file format: $path");
         return;
     }
 
-    my $metatile = Tirex::Metatile->new_from_filename($path);
+    my $metatile = Tirex::Metatile->new_from_filename_and_map($path, $mapname);
 
     if (!$stat)
     {
@@ -229,7 +226,7 @@ tirex-tiledir-check - check tile dir
 
 =head1 SYNOPSIS
 
-tirex-tiledir-check [OPTIONS]
+tirex-tiledir-check [OPTIONS] MAP
 
 =head1 OPTIONS
 
@@ -255,9 +252,9 @@ Write stats about tiles to FILE. See below for format.
 
 =head1 DESCRIPTION
 
-Walks recursively through the tiles directory and checks for wrong directory
-or file names or files that can't be accessed. If problems are found, messages
-are written to STDERR.
+Walks recursively through the tiles directory for the given MAP and checks for
+wrong directory or file names or files that can't be accessed. If problems are
+found, messages are written to STDERR.
 
 When the --list and/or --stats options are given, it outputs information about
 each tile and/or generates statistics, respectively. The list and stats are

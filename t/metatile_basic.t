@@ -48,17 +48,21 @@ my $mt2f = Tirex::Metatile->new_from_filename( $mt2->filename() );
 isa_ok($mt2f, 'Tirex::Metatile', 'create mt2f from filename of mt2');
 ok($mt2f->equals($mt2), 'mt2f and mt2 are the same');
 
+my $mt2g = Tirex::Metatile->new_from_filename_and_map( $mt2->get_filename(), $mt2->get_map() );
+isa_ok($mt2g, 'Tirex::Metatile', 'create mt2g from filename of mt2');
+ok($mt2g->equals($mt2), 'mt2g and mt2 are the same');
+
 #-----------------------------------------------------------------------------
 
 my $ZOOM  = 12;
 my $LIMIT = 2**$ZOOM;
 
 my $m1 = Tirex::Metatile->new( map => 'test', z => $ZOOM, x => 0, y => $LIMIT-1 );
-my $m2 = Tirex::Metatile->new_from_filename( $m1->filename() );
+my $m2 = Tirex::Metatile->new_from_filename_and_map( $m1->get_filename(), $m1->get_map() );
 ok($m1->equals($m2), 'm1 and m2 are the same');
 
 $m1 = Tirex::Metatile->new( map => 'test', z => $ZOOM, x => $LIMIT-1, y => 0 );
-$m2 = Tirex::Metatile->new_from_filename( $m1->filename() );
+$m2 = Tirex::Metatile->new_from_filename_and_map( $m1->get_filename(), $m1->get_map() );
 ok($m1->equals($m2), 'm1 and m2 are the same');
 
 foreach (1..100)

@@ -17,6 +17,9 @@
 # how many of the oldest metatiles should be put into the queue?
 OLDESTNUM=5000
 
+# map that we want the statistics for
+MAP=default
+
 #-----------------------------------------------------------------------------
 
 # append output to logfile
@@ -43,17 +46,17 @@ tirex-rendering-control --debug --stop
 find $DIR -type f -mtime +1 -name tiles-\* | xargs --no-run-if-empty rm
 
 # check tile directory and create statistics
-tirex-tiledir-check --list=$DIR/tiles-$DATE.csv --stats=$DIR/tiles-$DATE.stats
+tirex-tiledir-check --list=$DIR/tiles-$DATE-$MAP.csv --stats=$DIR/tiles-$DATE-$MAP.stats $MAP
 
 # link tiles.stats to newest statistics file
-rm -f $DIR/tiles.stats
-ln -s $DIR/tiles-$DATE.stats $DIR/tiles.stats
+rm -f $DIR/tiles-$MAP.stats
+ln -s $DIR/tiles-$DATE-$MAP.stats $DIR/tiles-$MAP.stats
 
 # find $OLDESTNUM oldest metatiles...
-sort --field-separator=, --numeric-sort --reverse $DIR/tiles-$DATE.csv | head -$OLDESTNUM | cut -d, -f4 >$DIR/tiles-$DATE.oldest
+sort --field-separator=, --numeric-sort --reverse $DIR/tiles-$DATE-$MAP.csv | head -$OLDESTNUM | cut -d, -f4 >$DIR/tiles-$DATE-$MAP.oldest
 
 # ...and add them to tirex queue
-tirex-batch --prio=20 <$DIR/tiles-$DATE.oldest
+tirex-batch --prio=20 <$DIR/tiles-$DATE-$MAP.oldest
 
 # re-start background rendering
 tirex-rendering-control --debug --continue

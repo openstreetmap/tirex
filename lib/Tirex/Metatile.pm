@@ -110,6 +110,47 @@ sub new_from_filename
     return $class->new( map => $map, z => $z, x => $x, y => $y );
 }
 
+=head2 Tirex::Metatile->new_from_filename_and_map($filename, $map)
+
+Create metatile from filename. The first directory element must be the
+zoom level.
+
+Optionally, the filename can start with '/' or './'.
+
+=cut
+
+sub new_from_filename_and_map
+{
+    my $class    = shift;
+    my $filename = shift;
+    my $map      = shift;
+
+    # remove leading / or ./
+    $filename =~ s{^\.?/}{};
+
+    # remove trailing .meta
+    $filename =~ s{\.meta$}{};
+
+    my @path_components = split('/', $filename);
+    my $z   = shift @path_components;
+
+    my $x = 0;
+    my $y = 0;
+
+    Carp::croak("not a valid metatile filename: too many or too few components") unless (scalar(@path_components) == 5);
+
+    while (defined (my $c = shift @path_components))
+    {
+        Carp::croak("failed to parse tile path (invalid component '$c')") if ($c < 0 || $c > 255);
+        $x <<= 4;
+        $y <<= 4;
+        $x |= ($c & 0xf0) >> 4;
+        $y |= ($c & 0x0f);
+    }
+
+    return $class->new( map => $map, z => $z, x => $x, y => $y );
+}
+
 =head2 Tirex::Metatile->new_from_lon_lat(map => $map, lon => $lon, lat => $lat, z => $z)
 
 Create metatile from zoom, longitude, and latitude.
