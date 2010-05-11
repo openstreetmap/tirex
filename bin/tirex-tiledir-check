@@ -276,9 +276,9 @@ fields are:
 
 =over 8
 
-=item mtime
+=item age
 
-Last modified time in seconds since epoch.
+Age of metatile in seconds.
 
 =item size
 
