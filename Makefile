@@ -74,6 +74,10 @@ deb:
 deb-clean:
 	debuild clean
 
+check:
+	podchecker bin/*
+	find lib -type f -name \*.pm | sort | xargs podchecker
+
 htmldoc:
 	rm -fr htmldoc
 	mkdir -p htmldoc
