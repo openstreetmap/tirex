@@ -5,9 +5,22 @@ Tirex Tile Rendering System
 Tirex is a bunch of tools that let you run a tile server. A tile server
 is a web server that hands out pre-rendered map raster images to clients.
 
+The web page for Tirex is at http://wiki.openstreetmap.org/wiki/Tirex .
+See there for more information.
+
 Further documentation is in the doc/ subdirectory.
 
-The web page for Tirex is at http://wiki.openstreetmap.org/wiki/Tirex .
+PREREQUISITES
+-------------
+
+You'll need the following Perl modules to run Tirex:
+
+* IPC::ShareLite (Debian/Ubuntu: libipc-sharelite-perl)
+* JSON           (Debian/Ubuntu: libjson-perl)
+* GD             (Debian/Ubuntu: libgd-gd2-perl)
+* LWP            (Debian/Ubuntu: libwww-perl)
+
+You'll need a C++ compiler and build tools to compile the Mapnik backend.
 
 BUILDING
 --------
@@ -63,16 +76,6 @@ directory:
 
 Call 'make deb-clean' to cleanup after a 'make deb'.
 
-PERL MODULES
-------------
-
-You'll need the following Perl modules to run Tirex:
-
-* IPC::ShareLite (Debian/Ubuntu: libipc-sharelite-perl)
-* JSON           (Debian/Ubuntu: libjson-perl)
-* GD             (Debian/Ubuntu: libgd-gd2-perl)
-* LWP            (Debian/Ubuntu: libwww-perl)
-
 TESTS
 -----
 
@@ -82,18 +85,4 @@ libtest-harness-perl) installed.
 
 There are some other tests in the 'test' directory. See the description at the
 beginning of the scripts for information on how to use them.
-
-LOGGING
--------
-
-Tirex-master has two logs:
-
-  logged via syslog. You can configure the syslog facility that should
-  be used ('master_syslog_facility').
-* For each rendered metatile a line is written to a logfile. This can
-  be used for generating statistics. Failed renderings (when the
-  rendering backend didn't answer) are not logged here (but in the syslog).
-  Use the config variable 'master_logfile' to set the filename for this
-  log.
-
 
