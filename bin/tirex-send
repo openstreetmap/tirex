@@ -266,7 +266,7 @@ Renders the metatile requested.
 
 =item F</etc/tirex/tirex.conf>
 
-The configuration file. See tirex.conf(5) for further details.
+The configuration file.
 
 =back
 

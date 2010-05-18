@@ -339,7 +339,7 @@ tirex-tiledir-stat. It is also read by several Munin plugins.
 
 =item F</etc/tirex/tirex.conf>
 
-The configuration file. See tirex.conf(5) for further details.
+The configuration file.
 
 =back
 

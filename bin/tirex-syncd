@@ -154,7 +154,7 @@ by the master when a tile has been rendered and copy it to another server.
 
 =item F</etc/tirex/tirex.conf>
 
-The configuration file. See tirex.conf(5) for further details.
+The configuration file.
 
 =back
 

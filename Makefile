@@ -49,13 +49,11 @@ install: build
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/logrotate.d
 	install -m 644 -g root -o root debian/logrotate.d-tirex-master          $(DESTDIR)/etc/logrotate.d/tirex-master
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/usr/share/man/man1/
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/usr/share/man/man5/
 	for program in bin/*; do \
         if grep -q "=head" $$program; then \
             pod2man $$program > $(DESTDIR)/usr/share/man/man1/`basename $$program`.1; \
         fi; \
     done
-	pod2man --section=5 doc/tirex.conf.pod > $(DESTDIR)/usr/share/man/man5/tirex.conf.5
 	cd backend-mapnik; $(MAKE) DESTDIR=$(DESTDIR) install
 	$(MAKE) -f Makefile.perl install
 

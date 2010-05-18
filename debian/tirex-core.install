@@ -15,7 +15,6 @@ usr/share/man/man1/tirex-status.1
 usr/share/man/man1/tirex-tiledir-check.1
 usr/share/man/man1/tirex-tiledir-stat.1
 usr/share/man/man3
-usr/share/man/man5
 usr/share/perl5
 etc/tirex/tirex.conf
 etc/tirex/renderer/test.conf
