@@ -1,5 +1,5 @@
 # /etc/logrotate.d/tirex-master
-/var/log/tirex/master.log {
+/var/log/tirex/jobs.log {
   daily
   rotate 35
   dateext
