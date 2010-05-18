@@ -10,7 +10,7 @@
 /**
  * NetworkMessage
  *
- * Superclass for messages forming renderd's network protocol. Protocol
+ * Superclass for messages of the Tirex network protocol. Protocol
  * messages consist of a series of lines, ending with LF or CRLF, and
  * each line contains a plain-text key, followed by an equal sign, and
  * a plain-text value. Keys must not contain equal signs; lines without

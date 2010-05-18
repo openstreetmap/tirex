@@ -115,7 +115,7 @@ sub main
 
     #-----------------------------------------------------------------------------
 
-    ::openlog('tirex-renderer-' . $self->{'name'}, $Tirex::DEBUG ? 'pid|perror' : 'pid', $syslog_facility);
+    ::openlog('tirex-backend-' . $self->{'name'}, $Tirex::DEBUG ? 'pid|perror' : 'pid', $syslog_facility);
     ::syslog('info', 'Renderer started (name=%s)', $renderer_name);
 
     my $pipe = IO::Handle->new();
