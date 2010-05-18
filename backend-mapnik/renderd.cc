@@ -124,7 +124,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     Debuggable::msDebugLogging = tmp ? true : false;
 
     std::string strfac;
-    tmp = getenv("TIREX_BACKEND_SYSLOG");
+    tmp = getenv("TIREX_BACKEND_SYSLOG_FACILITY");
     if (tmp) strfac = tmp;
     int fac = LOG_DAEMON;
     if (strfac.empty()) fac = LOG_DAEMON;
