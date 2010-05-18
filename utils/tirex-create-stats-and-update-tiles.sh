@@ -23,7 +23,7 @@ MAP=default
 #-----------------------------------------------------------------------------
 
 # append output to logfile
-exec >>/var/log/tirex/do-tirex-stats-and-update.log 2>&1
+exec >>/var/log/tirex/tirex-create-stats-and-update-tiles.log 2>&1
 
 # do not run if this lockfile exists, because the osm database is updated
 # (you only need this if you have some other script that touches this file

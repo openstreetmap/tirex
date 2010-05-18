@@ -144,7 +144,7 @@ sub format_stats
         my $statvalue = $stats->{$statkey};
         if (ref($statvalue) eq '')
         {
-            $text .= "  $statkey=$statvalue";
+            $text .= "  $statkey=$statvalue\n";
         }
         elsif (ref($statvalue) eq 'HASH')
         {
@@ -152,13 +152,13 @@ sub format_stats
             {
                 $text .= "  $statkey" . "[$map]=";
                 $text .= join(', ', map { $_ || 0 } @{$statvalue->{$map}});
+                $text .= "\n";
             }
         }
         else
         {
-            $text .= '?';
+            $text .= "?\n";
         }
-        $text .= "\n";
     }
 
     return "$text\n";

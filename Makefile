@@ -15,7 +15,7 @@ install-example-map:
 	install -m 644 -g root -o root example-map/ocean.*             $(DESTDIR)/usr/share/tirex/example-map
 	install -m 644 -g root -o root example-map/README              $(DESTDIR)/usr/share/tirex/example-map
 	install -m 755 -g root -o root -d                              $(DESTDIR)/etc/tirex/renderer/mapnik
-	install -m 644 -g root -o root example-map/mapnik-example.conf $(DESTDIR)/etc/tirex/renderer/mapnik/mapnik-example.conf
+	install -m 644 -g root -o root example-map/mapnik-example.conf $(DESTDIR)/etc/tirex/renderer/mapnik/example.conf
 
 install-munin:
 	install -m 755 -g root -o root -d                              $(DESTDIR)/usr/share/munin/plugins
