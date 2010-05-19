@@ -60,9 +60,9 @@ sub new
     if ($self->{'master'})
     {
         my $id = shmget($SHMKEY, 0, 0);
-        shmctl($id, IPC_RMID, 0) if (defined($id));
+        shmctl($id, IPC::SysV::IPC_RMID, 0) if (defined($id));
         $id = semget($SHMKEY, 0, 0);
-        semctl($id, IPC_RMID, 0, 0) if (defined($id));
+        semctl($id, IPC::SysV::IPC_RMID, 0, 0) if (defined($id));
     }
 
     $self->{'share'} = IPC::ShareLite->new(
