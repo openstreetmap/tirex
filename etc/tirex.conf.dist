@@ -14,7 +14,7 @@
 #metatile_columns=8
 
 #  The name of the UNIX domain socket for communicating with ModTile.
-#modtile_socket_name=/var/run/tirex/modtile_sock
+#modtile_socket_name=/var/lib/tirex/modtile.sock
 
 #-----------------------------------------------------------------------------
 #  MASTER

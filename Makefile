@@ -43,7 +43,7 @@ install: build
 	install -m 644 -g root -o root etc/renderer/test/checkerboard.conf.dist $(DESTDIR)/etc/tirex/renderer/test/checkerboard.conf
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/wms
 	install -m 644 -g root -o root etc/renderer/wms.conf.dist               $(DESTDIR)/etc/tirex/renderer/wms.conf
-	install -m 644 -g root -o root etc/renderer/wms/wms-example.conf.dist   $(DESTDIR)/etc/tirex/renderer/wms/wms-example.conf
+	install -m 644 -g root -o root etc/renderer/wms/demowms.conf.dist       $(DESTDIR)/etc/tirex/renderer/wms/demowms.conf
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/mapnik
 	install -m 644 -g root -o root etc/renderer/mapnik.conf.dist            $(DESTDIR)/etc/tirex/renderer/mapnik.conf
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/logrotate.d

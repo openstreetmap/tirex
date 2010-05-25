@@ -92,8 +92,8 @@ sub create_metatile
 
         $left   = ( $xc                           * $factor) - 20037508.3392;
         $right  = (($xc+$Tirex::METATILE_COLUMNS) * $factor) - 20037508.3392;
-        $top    = ( $yy                           * $factor) - 20037508.3392;
-        $bottom = (($yy+$Tirex::METATILE_ROWS)    * $factor) - 20037508.3392;
+        $bottom = ( $yy                           * $factor) - 20037508.3392;
+        $top    = (($yy+$Tirex::METATILE_ROWS)    * $factor) - 20037508.3392;
 
         $size   = $Tirex::PIXEL_PER_TILE * $Tirex::METATILE_COLUMNS;
     }

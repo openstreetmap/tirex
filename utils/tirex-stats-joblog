@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  tirex-stats-masterlog LOGFILE
+#  tirex-stats-joblog LOGFILE
 #
 
 use strict;

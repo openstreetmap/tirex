@@ -2,7 +2,7 @@
 #
 #  Konfiguration for wms map
 #
-#  /etc/tirex/renderer/wms/wms-example.conf
+#  /etc/tirex/renderer/wms/demowms.conf
 #
 #-----------------------------------------------------------------------------
 
@@ -11,10 +11,10 @@
 #-----------------------------------------------------------------------------
 
 # symbolic name of this map
-name=wms
+name=demowms
 
 # tile directory
-tiledir=/var/lib/tirex/tiles/wms
+tiledir=/var/lib/tirex/tiles/demowms
 
 # minimum zoom level allowed (default 0)
 #minz=0
@@ -26,11 +26,11 @@ maxz=10
 #  renderer specific configuration
 #-----------------------------------------------------------------------------
 
-# the URL prefix for the WMS server, should probably end with a '?'
-url=SOME URL
+# the URL prefix for the WMS server, should probably end with a '?' or '&'
+url=http://demowms.fossgis.de/wms/simple?
 
 # comma separated list of layers for the WMS request
-layers=SOME LAYERS
+layers=land
 
 # You need to use the Pseudo-Mercator projection used by OpenStreetMap,
 # Google, etc. here. This was sometimes called 900913, for a short time
