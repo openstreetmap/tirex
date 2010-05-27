@@ -18,17 +18,9 @@ use base qw( Tirex::Munin::Tiledir );
 
 Tirex::Munin::Tiledir::Tilecount - Number of tiles
 
-=head1 SYNOPSIS
-
-my $m = Tirex::Munin::Tiledir::Tilecount->new(...)
-$m->init()
-print $m->config()
-print $m->fetch()
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for number of metatiles on disk for a map and specified zoom levels or zoom level ranges.
 
 =cut
 

@@ -18,13 +18,9 @@ use base qw( Tirex::Munin::Status );
 
 Tirex::Munin::Status::QueuedRequests - Queued requests
 
-=head1 SYNOPSIS
-
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for number of metatile requests queued for rendering.
 
 =cut
 

@@ -24,6 +24,9 @@ my $job = Tirex::Job->new( metatile => $metatile, prio => 5, expire => time() + 
 
 =head1 DESCRIPTION
 
+Tirex jobs consist of a metatile, rendering priority and an expire time plus
+some optional additional info.  They are created when rendering requests reach
+the master and put into the queue.
 
 =head1 METHODS
 

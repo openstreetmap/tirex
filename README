@@ -8,8 +8,6 @@ is a web server that hands out pre-rendered map raster images to clients.
 The web page for Tirex is at http://wiki.openstreetmap.org/wiki/Tirex .
 See there for more information.
 
-Further documentation is in the doc/ subdirectory.
-
 PREREQUISITES
 -------------
 

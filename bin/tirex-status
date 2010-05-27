@@ -317,9 +317,6 @@ Reads out the status of the running tirex-master process through shared memory
 and displays it. The display is formatted for human consumption on a terminal
 and uses ANSI control codes for colour, unless you specify the --raw option.
 
-=head1 FILES
-
-
 =head1 DIAGNOSTICS
 
 tirex-status returns 1 if there was an error, 0 otherwise.

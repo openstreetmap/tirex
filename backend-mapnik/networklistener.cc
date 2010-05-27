@@ -54,7 +54,7 @@ NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<st
     if (sockfd >= 0)
     {
         mSocket = sockfd;
-        info("using existing socket %d", sockfd);
+        debug("using existing socket %d", sockfd);
     }
     else
     {
@@ -68,7 +68,7 @@ NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<st
         server.sin_addr.s_addr = inet_addr("127.0.0.1");
         server.sin_port = htons(port);
         if (bind(mSocket,(struct sockaddr *) &server, length) < 0) die("cannot bind to port %d: %s", port, strerror(errno));
-        info("bound to port %d", port);
+        debug("bound to port %d", port);
     }
     mParent = parentfd;
 }

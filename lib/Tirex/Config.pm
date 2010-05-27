@@ -19,14 +19,24 @@ Tirex::Config - Configuration
 
 =head1 SYNOPSIS
 
+ my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+ my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
+ Tirex::Config::init($config_file);
+
+ Tirex::Config::dump_to_syslog();
+
+ my $some_var = Tirex::Config::get('some_option', $Tirex::SOME_OPTION);
+
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Methods for reading the main Tirex configuration file (usually
+/etc/tirex/tirex.conf) and accessing the config options.
 
 =cut
 
 our $confhash = {};
+
+=head1 METHODS
 
 =head2 init($configfilename [,$prefix])
 

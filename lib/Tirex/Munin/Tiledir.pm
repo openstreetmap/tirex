@@ -27,6 +27,7 @@ $m->init();
 
 =head1 DESCRIPTION
 
+Parent class for Tirex munin classes using tiledir statistics.
 
 =head1 METHODS
 

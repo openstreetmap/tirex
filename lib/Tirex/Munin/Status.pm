@@ -28,6 +28,7 @@ $m->init();
 
 =head1 DESCRIPTION
 
+Parent class for Tirex munin classes using status.
 
 =head1 METHODS
 

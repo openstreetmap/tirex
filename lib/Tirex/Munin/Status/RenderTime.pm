@@ -18,13 +18,9 @@ use base qw( Tirex::Munin::Status );
 
 Tirex::Munin::Status::RenderTime - Rendering time for requests
 
-=head1 SYNOPSIS
-
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for milliseconds each second spend rendering tiles for a map.
 
 =cut
 

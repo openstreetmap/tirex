@@ -18,17 +18,11 @@ use base qw( Tirex::Munin::Tiledir );
 
 Tirex::Munin::Tiledir::Diskusage - Diskusage of tiledir
 
-=head1 SYNOPSIS
-
-my $m = Tirex::Munin::Tiledir::Diskusage->new(...)
-$m->init()
-print $m->config()
-print $m->fetch()
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munint plugin for sum of bytes in all metatile files for a map and specified
+zoom levels or zoom level ranges. Actual disk usage will be a bit higher
+because of file system blocks.
 
 =cut
 

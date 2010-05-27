@@ -18,13 +18,9 @@ use base qw( Tirex::Munin::Status );
 
 Tirex::Munin::Status::ActiveRequests - Currently rendering requests
 
-=head1 SYNOPSIS
-
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for number of metatile requests currently rendering. This is reported per bucket (ie. range of priorities).
 
 =cut
 

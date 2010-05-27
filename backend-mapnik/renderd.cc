@@ -142,6 +142,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
         die("Cannot use log facility '%s' - only local0-local7, user, daemon are allowed.", strfac.c_str());
     }
     openlog("tirex-backend-mapnik", Debuggable::msDebugLogging ? LOG_PERROR|LOG_PID : LOG_PID, fac);
+    info("Renderer started (name=%s)", getenv("TIREX_BACKEND_NAME"));
 
     tmp = getenv("TIREX_BACKEND_SOCKET_FILENO");
     mSocketFd = tmp ? atoi(tmp) : -1;

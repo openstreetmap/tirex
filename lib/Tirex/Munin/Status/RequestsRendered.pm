@@ -18,13 +18,9 @@ use base qw( Tirex::Munin::Status );
 
 Tirex::Munin::Status::RequestsRendered - Number of requests rendered
 
-=head1 SYNOPSIS
-
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for number of metatile requests rendered per second or minute for a map.
 
 =cut
 

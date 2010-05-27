@@ -27,6 +27,9 @@ Tirex::Manager::Bucket - Rendering buckets for different priorities
 
 =head1 DESCRIPTION
 
+To simplify the configuration of rendering parameters for different zoom
+levels, they are configured through Buckets. One Bucket contains the
+configuration for a range of zoom levels.
 
 =head1 METHODS
 

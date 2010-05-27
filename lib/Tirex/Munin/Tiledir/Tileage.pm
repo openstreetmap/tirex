@@ -20,17 +20,9 @@ use base qw( Tirex::Munin::Tiledir );
 
 Tirex::Munin::Tiledir::Tileage - Age of tiles
 
-=head1 SYNOPSIS
-
-my $m = Tirex::Munin::Tiledir::Tileage->new(...)
-$m->init()
-print $m->config()
-print $m->fetch()
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for max age of metatiles on disk for a map and specified zoom levels or zoom level ranges.
 
 =cut
 

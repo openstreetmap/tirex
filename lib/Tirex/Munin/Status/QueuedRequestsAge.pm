@@ -20,13 +20,9 @@ use base qw( Tirex::Munin::Status );
 
 Tirex::Munin::Status::QueuedRequestsAge - Age of queued requests
 
-=head1 SYNOPSIS
-
-
 =head1 DESCRIPTION
 
-
-=head1 METHODS
+Munin plugin for age of oldest requests in the queue for each bucket (ie. range of priorities).
 
 =cut
 

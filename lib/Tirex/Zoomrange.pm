@@ -21,6 +21,7 @@ my $zr = Tirex::Job->new($name, $min[, $max])
 
 =head1 DESCRIPTION
 
+Optionally named zoom level range.
 
 =head1 METHODS
 
@@ -85,7 +86,7 @@ sub get_max
 
 =head2 $zr->to_s()
 
-Get range as string. Format "MIN-MAX" or "MIN" if MIN==MAX was empty.
+Get range as string. Format "MIN-MAX" or "MIN" if MIN==MAX.
 
 =cut
 
