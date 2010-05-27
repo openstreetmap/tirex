@@ -39,13 +39,13 @@ sub config
     my $map = $self->{'map'};
 
     my $rel   = $self->{'relative'} ? 'relative' : 'absolute/stacked';
-    my $label = $self->{'relative'} ? 'percentage of world covered' : 'number of meta tiles';
+    my $label = $self->{'relative'} ? 'percentage of world covered' : 'number of metatiles';
 
     my $config = <<EOF;
 graph_title Tile count for map $map ($rel)
 graph_vlabel $label
 graph_category tirex
-graph_info Number of meta tiles on disk for map $map and specified zoom levels or zoom level ranges.
+graph_info Number of metatiles on disk for map $map and specified zoom levels or zoom level ranges.
 graph_args --lower-limit 0
 EOF
     $config .= "graph_scale no\n" if ($self->{'relative'});

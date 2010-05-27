@@ -3,7 +3,7 @@
 #
 #  Tirex Tile Rendering System
 #
-#  munin/tirex-tileage
+#  munin/tirex-tiledir-tileage
 #
 #-----------------------------------------------------------------------------
 
@@ -19,10 +19,19 @@ Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
-my $map = 'default';
-my @z   = ('0-9', '10-14', '15-17');
+(my $execname = $0) =~ s{^.*/}{};
 
-Tirex::Munin::Tiledir::Tileage->new( map => $map, z => \@z )->do();
+my $map = 'default';
+if ($execname =~ /^tirex-tiledir-tileage-(.*)$/)
+{
+    $map = $1;
+}
+
+my @z   = ('0-9', 10 .. 17);
+
+my $statsfile = Tirex::Config::get('stats_dir', $Tirex::STATS_DIR) . "/tiles-$map.stats";
+
+Tirex::Munin::Tiledir::Tileage->new( map => $map, z => \@z )->do( statsfile => $statsfile );
 
 
 #-- THE END ------------------------------------------------------------------

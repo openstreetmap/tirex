@@ -3,7 +3,7 @@
 #
 #  Tirex Tile Rendering System
 #
-#  munin/tirex-diskusage
+#  munin/tirex-tiledir-diskusage
 #
 #-----------------------------------------------------------------------------
 
@@ -19,10 +19,19 @@ Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
+(my $execname = $0) =~ s{^.*/}{};
+
 my $map = 'default';
+if ($execname =~ /^tirex-tiledir-diskusage-(.*)$/)
+{
+    $map = $1;
+}
+
 my @z   = ('0-9', 10 .. 17);
 
-Tirex::Munin::Tiledir::Diskusage->new( map => $map, z => \@z )->do();
+my $statsfile = Tirex::Config::get('stats_dir', $Tirex::STATS_DIR) . "/tiles-$map.stats";
+
+Tirex::Munin::Tiledir::Diskusage->new( map => $map, z => \@z )->do( statsfile => $statsfile );
 
 
 #-- THE END ------------------------------------------------------------------
