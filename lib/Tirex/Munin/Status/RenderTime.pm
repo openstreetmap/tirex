@@ -39,7 +39,7 @@ graph_vlabel millisecond/second
 graph_category tirex
 graph_args --lower-limit 0
 graph_scale no
-graph_info Milliseconds each second spend rendering tiles for map $map
+graph_info Milliseconds each second spend rendering tiles for map $map.
 EOF
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})

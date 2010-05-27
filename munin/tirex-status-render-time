@@ -19,7 +19,14 @@ Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
+(my $execname = $0) =~ s{^.*/}{};
+
 my $map = 'default';
+if ($execname =~ /^tirex-status-render-time-(.*)$/)
+{
+    $map = $1;
+}
+
 my @z   = ('0-9', '10-12', '13-15', '16-17');
 
 Tirex::Munin::Status::RenderTime->new( map => $map, z => \@z )->do();

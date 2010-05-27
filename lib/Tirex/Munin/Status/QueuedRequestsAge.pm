@@ -39,7 +39,7 @@ graph_title Age of queued requests
 graph_vlabel age in seconds
 graph_category tirex
 graph_args --lower-limit 1 --logarithmic --units=si
-graph_info Age of oldest requests in the queue for each bucket (ie. range of priorities)
+graph_info Age of oldest requests in the queue for each bucket (ie. range of priorities).
 EOF
 
     foreach my $bucket (sort { $b->{'minprio'} <=> $a->{'minprio'} } @{$self->{'status'}->{'rm'}->{'buckets'}})
