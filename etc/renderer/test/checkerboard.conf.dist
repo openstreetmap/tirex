@@ -7,26 +7,26 @@
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-#  general configuration
+#  General configuration
 #-----------------------------------------------------------------------------
 
-# symbolic name of this map
+#  symbolic name of this map
 name=test
 
-# tile directory
+#  tile directory
 tiledir=/var/lib/tirex/tiles/test
 
-# minimum zoom level allowed (default 0)
+#  minimum zoom level allowed (default 0)
 #minz=0
 
-# maximum zoom level allowed (default 17)
+#  maximum zoom level allowed (default 17)
 maxz=10
 
 #-----------------------------------------------------------------------------
-#  renderer specific configuration
+#  Backend specific configuration
 #-----------------------------------------------------------------------------
 
-# time the renderer should sleep to simulate rendering time (default is 0)
+#  time the renderer should sleep to simulate rendering time (default is 0)
 #sleep=0
 
 

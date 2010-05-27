@@ -7,40 +7,40 @@
 #-----------------------------------------------------------------------------
 
 #-----------------------------------------------------------------------------
-#  general configuration
+#  General configuration
 #-----------------------------------------------------------------------------
 
-# symbolic name of this map
+#  symbolic name of this map
 name=demowms
 
-# tile directory
+#  tile directory
 tiledir=/var/lib/tirex/tiles/demowms
 
-# minimum zoom level allowed (default 0)
+#  minimum zoom level allowed (default 0)
 #minz=0
 
-# maximum zoom level allowed (default 17)
+#  maximum zoom level allowed (default 17)
 maxz=10
 
 #-----------------------------------------------------------------------------
-#  renderer specific configuration
+#  Backend specific configuration
 #-----------------------------------------------------------------------------
 
-# the URL prefix for the WMS server, should probably end with a '?' or '&'
+#  the URL prefix for the WMS server, should probably end with a '?' or '&'
 url=http://demowms.fossgis.de/wms/simple?
 
-# comma separated list of layers for the WMS request
+#  comma separated list of layers for the WMS request
 layers=land
 
-# You need to use the Pseudo-Mercator projection used by OpenStreetMap,
-# Google, etc. here. This was sometimes called 900913, for a short time
-# it was 3785, but the current (May 2010) official EPSG number is 3857.
-# It depends on the WMS server whether it already uses the official number.
-# Default is "EPSG:3857".
+#  You need to use the Pseudo-Mercator projection used by OpenStreetMap,
+#  Google, etc. here. This was sometimes called 900913, for a short time
+#  it was 3785, but the current (May 2010) official EPSG number is 3857.
+#  It depends on the WMS server whether it already uses the official number.
+#  Default is "EPSG:3857".
 #srs=EPSG:3857
 
-# set TRANSPARENT option on WMS request (can be 'TRUE' or 'FALSE', default
-# is 'FALSE').
+#  set TRANSPARENT option on WMS request (can be 'TRUE' or 'FALSE', default
+#  is 'FALSE').
 #transparent=FALSE
 
 #-- THE END ------------------------------------------------------------------
