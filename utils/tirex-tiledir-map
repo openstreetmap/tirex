@@ -1,0 +1,364 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-tiledir-map
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <fred@remote.org> and
+#                      Jochen Topf <jochen@remote.org>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use GD;
+
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'zoom|z=s', 'var|v=s', 'size|s=i', 'min=i', 'max=i', 'background|b=s', 'color|c=s' ) or exit(2);
+
+if ($opts{'help'})
+{
+    Pod::Usage::pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-tiledir-map - create heatmaps from tile dir\n",
+        -exitval => 0
+    );
+}
+
+die("unknown var: $opts{'var'}\n") if (exists $opts{'var'} && $opts{'var'} !~ /^(age|size|blocks)$/);
+
+my @background_color = (0, 0, 0); # default black
+if (exists $opts{'background'})
+{
+    @background_color = get_color($opts{'background'}) or die("Unknown color: " . $opts{'background'} . "\n");
+}
+
+my $colortable = 'green';
+if (exists $opts{'color'})
+{
+    if ($opts{'color'} =~ /^(red|green|blue)$/)
+    {
+        $colortable = $opts{'color'};
+    }
+    elsif ($opts{'color'} =~ /^0$/)
+    {
+        $colortable = $opts{'color'};
+    }
+    else
+    {
+        die("Unknown colortable: " . $opts{'color'} . "\n");
+    }
+}
+
+#-----------------------------------------------------------------------------
+# initialize min and max value
+#-----------------------------------------------------------------------------
+
+my $minvalue = $opts{'min'} || 0;
+
+my %maxvalue_defaults = (
+    'age'    => 10 * 24 * 60 * 60, # 10 days
+    'size'   => 2_000_000,         # 2MB
+    'blocks' => 2_000,             # 2000 1024k blocks
+);
+my $maxvalue = $opts{'max'} || $maxvalue_defaults{$opts{'var'} || 'age'};
+
+die("maxvalue <= minvalue\n") if ($maxvalue <= $minvalue);
+
+#-----------------------------------------------------------------------------
+# initialize zoom level (range)
+#-----------------------------------------------------------------------------
+
+my $minzoom = 14;
+my $maxzoom = 14;
+if ($opts{'zoom'} =~ /^[1-9]?[0-9]$/)
+{
+    $minzoom = $opts{'zoom'};
+    $maxzoom = $opts{'zoom'};
+}
+elsif ($opts{'zoom'} =~ /^([1-9]?[0-9])-([1-9]?[0-9])/)
+{
+    $minzoom = $1;
+    $maxzoom = $2;
+}
+my $numzoom = $maxzoom - $minzoom + 1;
+
+#-----------------------------------------------------------------------------
+
+my $IMGEXP = ($opts{'size'} || 14) - 2; # 12;
+my $METASIZE = 8;
+my $IMGSIZE = 2 ** $IMGEXP;
+my $IMGSIZE_TIMES_METASIZE = $IMGSIZE * $METASIZE;
+
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+my @colortables;
+
+$colortables[0] = [
+              "#000066","#0d0073","#110077","#190073","#1e0578","#1d0479","#24047a",
+    "#26037b","#2a037e","#2d057f","#32057f","#340482","#380685","#3b0586","#3f0587",
+    "#420589","#45068c","#4a068c","#4d058f","#500591","#530693","#560694","#5a0595",
+    "#5d0597","#62079a","#640699","#660699","#680699","#6a0699","#6d0599","#6f0599",
+    "#710599","#730599","#760499","#780499","#7a0499","#7c0499","#7f0399","#810399",
+    "#830399","#850399","#880299","#8a0299","#8c0299","#8e0299","#910199","#930199",
+    "#950199","#970199","#9a0199","#9b0198","#9c0197","#9e0297","#9f0296","#a10395",
+    "#a20395","#a40394","#a50493","#a70493","#a80592","#aa0591","#ab0591","#ad0690",
+    "#ae0690","#b0078f","#b1078e","#b3078e","#b4088d","#b6088c","#b7098c","#b9098b",
+    "#ba098a","#bc0a8a","#bd0a89","#bf0b89","#c00c86","#c10d83","#c20e81","#c3107e",
+    "#c4117c","#c51279","#c61477","#c71574","#c81672","#c9186f","#ca196d","#cb1a6a",
+    "#cc1c68","#cd1d65","#ce1e63","#cf2060","#d0215e","#d1225b","#d22459","#d32556",
+    "#d42654","#d52851","#d6294f","#d72a4c","#d92c4a","#d92d47","#da2f45","#da3042",
+    "#db3240","#dc333e","#dc353b","#dd3639","#de3836","#de3a34","#df3b32","#e03d2f",
+    "#e03e2d","#e1402a","#e14128","#e24326","#e34423","#e34621","#e4481e","#e5491c",
+    "#e54b1a","#e64c17","#e74e15","#e74f12","#e85110","#e9530e","#e9540d","#e9560c",
+    "#ea570c","#ea590b","#eb5a0b","#eb5c0a","#eb5d0a","#ec5f09","#ec6108","#ed6208",
+    "#ed6407","#ed6507","#ee6706","#ee6806","#ef6a05","#ef6b05","#ef6d04","#f06f03",
+    "#f07003","#f17202","#f17302","#f17501","#f27601","#f27800","#f37a00","#f37b00",
+    "#f37d00","#f47f00","#f48000","#f48200","#f58400","#f58600","#f58700","#f68900",
+    "#f68b00","#f68c00","#f78e00","#f79000","#f89200","#f89300","#f89500","#f99700",
+    "#f99800","#f99a00","#fa9c00","#fa9e00","#fa9f00","#fba100","#fba300","#fca500",
+    "#fca600","#fca700","#fca900","#fcaa00","#fcac00","#fcad00","#fcaf00","#fcb000",
+    "#fcb100","#fcb300","#fcb400","#fcb600","#fcb700","#fcb900","#fcba00","#fcbc00",
+    "#fcbd00","#fcbe00","#fcc000","#fcc100","#fcc300","#fcc400","#fcc600","#fcc700",
+    "#fcc900","#fcca05","#fccb0a","#fccc0f","#fccd14","#fcce19","#fccf1e","#fcd023",
+    "#fcd128","#fcd22d","#fcd333","#fcd438","#fcd53d","#fcd742","#fcd847","#fcd94c",
+    "#fcda51","#fddb56","#fddc5b","#fddd60","#fdde66","#fddf6b","#fde070","#fde175",
+    "#fde27a","#fde47f","#fde584","#fde689","#fde78e","#fde893","#fde999","#fdea9e",
+    "#fdeba3","#fdeca8","#feedad","#feeeb2","#feefb7","#fef0bc","#fef2c1","#fef3c6",
+    "#fef4cc","#fef5d1","#fef6d6","#fef7db","#fef8e0","#fef9e5","#fefaea","#fefbef",
+    "#fefcf4","#fefdf9","#ffffff","#ffffff","#ffffff","#ffffff","#ffffff","#ffffff"
+];
+
+#-----------------------------------------------------------------------------
+
+my $image = GD::Image->new($IMGSIZE, $IMGSIZE);
+
+my $background = $image->colorAllocate(@background_color);
+$image->filledRectangle(0, 0, $IMGSIZE, $IMGSIZE, $background);
+
+my @colors;
+if ($colortable =~ /^[0-9]+$/) {
+    @colors = color_range_table($image, $colortables[$colortable]);
+}
+else
+{
+    my ($r, $g, $b) = (0, 0, 0);
+    $r = 255 if ($colortable eq 'red');
+    $g = 255 if ($colortable eq 'green');
+    $b = 255 if ($colortable eq 'blue');
+    if ($opts{'var'})
+    {
+        @colors = color_range_monochrome($image, 1, 255, 255, $r, $g, $b);
+    }
+    else
+    {
+        @colors = color_range_monochrome($image, $minzoom, $maxzoom, $numzoom, $r, $g, $b);
+    }
+}
+
+my $maxcolor = scalar(@colors) - 1;
+my $value2color_index = $maxcolor / ($maxvalue - $minvalue);
+
+while (<>)
+{
+    chomp;
+    my ($age, $size, $blocks, $mt) = split(',', $_, 4);
+
+    my %metatile = split(/[ =]/, $mt);
+
+    next if ($metatile{'z'} < $minzoom || $metatile{'z'} > $maxzoom);
+
+    my $zpow = 2**$metatile{'z'};
+
+    my $x = int($metatile{'x'} / $zpow * $IMGSIZE);
+    my $y = int($metatile{'y'} / $zpow * $IMGSIZE);
+    my $w = int($IMGSIZE_TIMES_METASIZE / $zpow) - 1;
+
+    my $color_index;
+    if ($opts{'var'})
+    {
+        my $value = $opts{'var'} eq 'age' ? $age : $opts{'var'} eq 'size' ? $size : $blocks;
+        $value = $minvalue if ($value < $minvalue);
+        $value = $maxvalue if ($value > $maxvalue);
+
+        $color_index = int(($value - $minvalue) * $value2color_index);
+    }
+    else
+    {
+        $color_index = $metatile{'z'} - $minzoom;
+    }
+
+    $image->filledRectangle($x, $y, $x + $w, $y + $w, $colors[$color_index]);
+}
+
+binmode STDOUT;
+print $image->png();
+
+exit(0);
+
+#-----------------------------------------------------------------------------
+
+sub get_color
+{
+    my $color = shift;
+    if ($color =~ /^([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i)
+    {
+        return (hex($1), hex($2), hex($3));
+    }
+    return;
+}
+
+sub color_range_monochrome
+{
+    my $image    = shift;
+    my $min      = shift;
+    my $max      = shift;
+    my $num      = shift;
+    my $r_factor = shift;
+    my $g_factor = shift;
+    my $b_factor = shift;
+
+    my @colors;
+    foreach my $v ($min .. $max)
+    {
+        my $r = $r_factor * ($v - $min + 1) / $num;
+        my $g = $g_factor * ($v - $min + 1) / $num;
+        my $b = $b_factor * ($v - $min + 1) / $num;
+        push(@colors, $image->colorAllocate($r, $g, $b));
+    }
+
+    return @colors;
+}
+
+sub color_range_table
+{
+    my $image = shift;
+    my $table = shift;
+
+    my @colors;
+    foreach my $c (@$table)
+    {
+        $c =~ /^#(..)(..)(..)$/;
+        push(@colors, $image->colorAllocate(hex($1), hex($2), hex($3)));
+    }
+
+    return @colors;
+}
+
+__END__
+
+=head1 NAME
+
+tirex-tiledir-map - create heatmaps from tile dir
+
+=head1 SYNOPSIS
+
+tirex-tiledir-map [OPTIONS] FILE
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-v>, B<--var=VARIABLE>
+
+Variable to show. Can be 'age', 'size', or 'blocks'. If this option is
+not given just the existence of a metatile is plotted.
+
+=item B<-z>, B<--zoom=ZOOMRANGE>
+
+Zoom level or zoom level range (format: min "-" max). Default is 14.
+A zoom level range makes mostly sense for the display of metatile
+existence, not for showing age, size, or blocks.
+
+=item B<-s>, B<--SIZE=SIZE>
+
+Size of resulting image given as zoom level. Default is 14, ie. the image
+will be large enough to show 1 pixel per metatile on zoom level 14, which
+is 4096x4096 pixels.
+
+=item B<--min=VALUE>
+
+Minimum value (default is 0). Cells with this value or smaller will get
+the first color or the color range.
+
+=item B<--max=VALUE>
+
+Maximum value (default for age 10 days, for size 2MB, for blocks 2000 1024k
+blocks). Cells with this value or larger get the last color in the color
+range.
+
+=item B<-b>, B<--background=COLOR>
+
+Set background color. Format 'rrggbb'. Default is black (000000).
+
+=item B<-c>, B<--color=NAME>
+
+Set color table. The following tables are available: 'red', 'green', 'blue',
+or a number starting with 0. Default is 'green'.
+
+=back
+
+=head1 DESCRIPTION
+
+Create heatmap images from tiledir CSV created by tirex-tiledir-check. Images
+are created as PNGs with 1-bit to 8-bit colormap (up to 256 colors) and output
+on STDOUT.
+
+There are many options. Here are some examples to get you started:
+
+Create a map showing which metatiles exist on zoom level 10:
+
+ tirex-tiledir-map --zoom=10 tiles-foo.csv >z10.png
+
+Show which metatiles exist on zoom level 10 to 17:
+
+ tirex-tiledir-map --zoom=10-17 tiles-foo.csv >z10-17.png
+
+Show age of metatiles on zoom level 14 in red:
+
+ tirex-tiledir-map --zoom=14 --var=age --color=red tiles-foo.csv >age14.png
+
+Show size of metatiles on zoom level 12, sizes below 10k will
+appear blue, sizes above 1M will appear white, non-existent tiles
+in black:
+
+ tirex-tiledir-map --zoom=12 --var=size --min=10000 --max=1000000 --color=0 tiles-foo.csv >size12.png
+
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+#-- THE END ----------------------------------------------------------------------------
