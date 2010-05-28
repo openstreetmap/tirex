@@ -1,0 +1,198 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-tiledir-age-histogram
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use List::Util;
+
+#-----------------------------------------------------------------------------
+# Reading command line
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'zoom|z', 'bin-size|b=i' ) or exit(2);
+
+if ($opts{'help'})
+{
+    Pod::Usage::pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-tiledir-age-histogram - create histograms about metatile age\n",
+        -exitval => 0
+    );
+}
+
+#-----------------------------------------------------------------------------
+
+die("bin-size must be positive integer (seconds)\n") if (exists $opts{'bin-size'} && $opts{'bin-size'} !~ /^[1-9][0-9]+$/);
+
+# default for bin size: 1 hour == 3600 sec
+my $bin_size = $opts{'bin-size'} || 3600;
+
+#-----------------------------------------------------------------------------
+
+my $now = time();
+
+my %histogram_all;
+my @histogram_zoom;
+my $maxzoom = -1;
+while (<>)
+{
+    chomp;
+    my ($age, $size, $blocks, $metatile_desc) = split(',');
+    my %metatile = split(/[= ]/, $metatile_desc);
+    my $zoom = $metatile{'z'};
+
+    if ($zoom > $maxzoom)
+    {
+        $maxzoom = $zoom;
+        $histogram_zoom[$zoom] = {};
+    }
+
+    my $bin = int($age / $bin_size);
+
+    $histogram_all{$bin}++;
+    $histogram_zoom[$zoom]->{$bin}++;
+}
+
+my $min = List::Util::min(keys %histogram_all);
+my $max = List::Util::max(keys %histogram_all);
+
+if ($opts{'zoom'})
+{
+    printf("age,%s\n", join(',', map { "z$_" } (0..$maxzoom)));
+    foreach my $bin ($min..$max)
+    {
+        my @values = map { $histogram_zoom[$_]->{$bin} || 0 } (0..$maxzoom);
+        printf("%d,%s\n", $bin * $bin_size, join(',', @values));
+    }
+}
+else
+{
+    my $cumul = 0;
+    print("age,metatiles,cumulative\n");
+    foreach my $bin ($min..$max)
+    {
+        $cumul += $histogram_all{$bin} || 0;
+        printf("%d,%d,%d\n", $bin * $bin_size, $histogram_all{$bin} || 0, $cumul);
+    }
+}
+
+
+__END__
+
+=head1 NAME
+
+tirex-tiledir-age-histogram - create histograms about metatile age
+
+=head1 SYNOPSIS
+
+tirex-tiledir-age-histogram [OPTIONS] FILE
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--help>
+
+Display help message.
+
+=item B<-b>, B<--bin-size>
+
+Bin size for histogram in seconds (default 3600).
+
+=item B<-z>, B<--zoom>
+
+Create histogram per zoom level instead of just one for all zoom levels.
+
+=back
+
+=head1 DESCRIPTION
+
+Reads the CSV file created by the L<tirex-tiledir-check> --list option which
+contains all metatiles available in a tile directory and outputs a CSV file
+with a histogram of the ages of those tiles.
+
+The default bin size for the histogram is 1 hour (3600 seconds). It can be
+changed with the B<--bin-size> option.
+
+The output will have the following format: age,metatiles,cumulative
+
+=over 2
+
+=item * start of age bin (in seconds)
+
+=item * number of metatiles in this bin
+
+=item * cumulative number of metatiles
+
+=back
+
+The first line contains a header.
+
+Note that the output file will always contain the start of the age bin in
+seconds. You probably have to re-format this for display.
+
+If you use the B<--zoom> option the output changes. Instead of the histogram
+for all zoom levels together the data for each zoom level is shown.
+
+The output will have the following format: age,z0,z1,z2,...
+
+=over 2
+
+=item * start of age bin (in seconds)
+
+=item * number of tiles in this bin in zoom level 0
+
+=item * number of tiles in this bin in zoom level 1
+
+=item * ...
+
+=back
+
+Note that there is no cumulative number output in this case.
+
+=head1 DIAGNOSTICS
+
+Exits with exit code 1 if there was an error.
+
+=head1 SEE ALSO
+
+L<tirex-tiledir-check>,
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+#-- THE END ------------------------------------------------------------------
