@@ -1,0 +1,390 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-check-config
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Getopt::Long qw( :config gnu_getopt );
+use Pod::Usage qw();
+
+use Tirex;
+use Tirex::Renderer;
+use Tirex::Map;
+
+#-----------------------------------------------------------------------------
+# Reading command line
+#-----------------------------------------------------------------------------
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'config|c=s' ) or exit(2);
+
+if ($opts{'help'})
+{
+    Pod::Usage::pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-check-config - check Tirex config files\n",
+        -exitval => 0
+    );
+}
+
+#-----------------------------------------------------------------------------
+
+my $warn = 0;
+my $err  = 0;
+
+#-----------------------------------------------------------------------------
+
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+
+if (! -d $config_dir)
+{
+    print "X Not a directory: $config_dir\n";
+    exit(2);
+}
+
+print "  Reading config directory: $config_dir\n";
+
+my @extra_files_in_config_dir = sort grep { $_ !~ /^(renderer|tirex\.conf)$/ } map { $_ =~ s{^.*/}{}; $_ } glob("$config_dir/*");
+if (scalar(@extra_files_in_config_dir))
+{
+    print "\n  Found files in config directory that Tirex doesn't know about and will not read:\n";
+    foreach my $filename (@extra_files_in_config_dir)
+    {
+        print "!   $filename [unknown]\n";
+    }
+}
+
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
+
+if (! -f $config_file)
+{
+    print "X Main config file doesn't exist: $config_file\n";
+    exit(2);
+}
+
+print "\n  Reading config file: $config_file\n";
+
+Tirex::Config::init($config_file);
+
+my %known_config_options = (
+    'metatile_columns'                => [ $Tirex::METATILE_COLUMNS,                \&valid_metatile_size],
+    'metatile_rows'                   => [ $Tirex::METATILE_ROWS,                   \&valid_metatile_size],
+    'stats_dir'                       => [ $Tirex::STATS_DIR,                       \&valid_file],
+    'backend_manager_alive_timeout'   => [ $Tirex::BACKEND_MANAGER_ALIVE_TIMEOUT,   \&valid_positive_int],
+    'backend_manager_pidfile'         => [ $Tirex::BACKEND_MANAGER_PIDFILE,         \&valid_file],
+    'backend_manager_syslog_facility' => [ $Tirex::BACKEND_MANAGER_SYSLOG_FACILITY, \&valid_syslog_facility],
+    'bucket'                          => [ undef,                                   \&valid_bucket],
+    'master_logfile'                  => [ $Tirex::MASTER_LOGFILE,                  \&valid_file],
+    'master_pidfile'                  => [ $Tirex::MASTER_PIDFILE,                  \&valid_file],
+    'master_syslog_facility'          => [ $Tirex::MASTER_SYSLOG_FACILITY,          \&valid_syslog_facility],
+    'master_udp_port'                 => [ $Tirex::MASTER_UDP_PORT,                 \&valid_port],
+    'master_rendering_timeout'        => [ $Tirex::MASTER_RENDERING_TIMEOUT,        \&valid_positive_int],
+    'modtile_socket_name'             => [ $Tirex::MODTILE_SOCK,                    \&valid_file],
+    'sync_to_host'                    => [ undef,                                   \&valid_domain_name],
+    'syncd_pidfile'                   => [ $Tirex::SYNCD_PIDFILE ,                  \&valid_file],
+    'syncd_udp_port'                  => [ $Tirex::SYNCD_UDP_PORT,                  \&valid_port],
+);
+
+print "\n  Config options in config file:\n";
+foreach my $conf (sort keys %$Tirex::Config::confhash)
+{
+    my $value = $Tirex::Config::confhash->{$conf};
+
+    next if ($conf eq 'bucket');
+
+    if (! defined $known_config_options{$conf})
+    {
+        print "!   $conf=$value [unknown config option]\n";
+    }
+    else
+    {
+        my ($default, $valid) = @{$known_config_options{$conf}};
+        if (my ($indicator, $text) = &$valid($value))
+        {
+            print "$indicator   $conf=$value [$text]\n";
+            $err  = 1 if ($indicator eq 'X');
+            $warn = 1 if ($indicator eq '!');
+        }
+        else
+        {
+            print "    $conf=$value\n";
+        }
+    }
+}
+
+if ($Tirex::Config::confhash->{'bucket'})
+{
+    my $minprio = 999_999_999;
+    my $maxproc = 999;
+    my $maxload = 999;
+
+    print "\n  Buckets in config file:\n";
+
+    foreach my $bucket (sort { $a->{'minprio'} <=> $b->{'minprio'} } @{$Tirex::Config::confhash->{'bucket'}})
+    {
+        $minprio = $bucket->{'minprio'} if ($bucket->{'minprio'} < $minprio);
+
+        printf("    name=%s minprio=%d maxproc=%d maxload=%d\n", $bucket->{'name'}, $bucket->{'minprio'}, $bucket->{'maxproc'}, $bucket->{'maxload'});
+        if ($bucket->{'name'} !~ /^[a-z0-9_]+$/)
+        {
+            print "X     Illegal bucket name: ", $bucket->{'name'}, "\n";
+            $err = 1;
+        }
+        if ($bucket->{'minprio'} !~ /^[0-9]+$/)
+        {
+            print "X     Illegal minprio: ", $bucket->{'minprio'}, "\n";
+            $err = 1;
+        }
+        if ($bucket->{'maxproc'} !~ /^[1-9]?[0-9]$/)
+        {
+            print "X     Illegal maxproc: ", $bucket->{'maxproc'}, "\n";
+            $err = 1;
+        }
+        if ($bucket->{'maxload'} !~ /^[1-9]?[0-9]$/)
+        {
+            print "X     Illegal maxload: ", $bucket->{'maxload'}, "\n";
+            $err = 1;
+        }
+
+        if ($bucket->{'maxproc'} > $maxproc)
+        {
+            print "!     maxproc for this bucket larger then previous\n";
+            $warn = 1;
+        }
+        if ($bucket->{'maxload'} > $maxload)
+        {
+            print "!     maxload for this bucket larger then previous\n";
+            $warn = 1;
+        }
+
+        $maxproc = $bucket->{'maxproc'};
+        $maxload = $bucket->{'maxload'};
+    }
+    if ($minprio != 1)
+    {
+        print "X   Smallest minprio is not 1 but ", $minprio, "\n";
+        $err = 1;
+    }
+}
+else
+{
+    print "\nX No bucket configuration in config file!\n";
+    $err = 1;
+}
+
+print "\n  Config options not in config file:\n";
+foreach my $conf (sort keys %known_config_options)
+{
+    next if (defined $Tirex::Config::confhash->{$conf});
+
+    my ($default, $valid) = @{$known_config_options{$conf}};
+    if (defined $default)
+    {
+        print "    $conf=$default [default]\n";
+    }
+    else
+    {
+        $warn = 1;
+        print "!   $conf [missing option without default]\n";
+    }
+}
+
+
+print "\n  Renderer config:\n";
+
+Tirex::Renderer->read_config_dir($config_dir);
+my @renderer = Tirex::Renderer->all();
+my %renderer_dir = map { $_ => 1 } glob("$config_dir/renderer/*");
+
+foreach my $renderer (@renderer)
+{
+    my $name = $renderer->get_name();
+    print "    Renderer name=$name\n";
+    if (! -d "$config_dir/renderer/$name")
+    {
+        print "X     Missing directory $config_dir/renderer/$name\n";
+    }
+    delete $renderer_dir{"$config_dir/renderer/$name"};
+    delete $renderer_dir{"$config_dir/renderer/$name.conf"};
+}
+
+foreach my $file (sort keys %renderer_dir)
+{
+    printf("!   Found extra file '%s', will be ignored\n", $file);
+}
+
+print "\nAt this point this check program should read and check the\nrenderer and map configs but currently doesn't. Patched welcome.\n";
+
+
+#-----------------------------------------------------------------------------
+
+exit($err ? 2 : $warn ? 1 : 0);
+
+#-----------------------------------------------------------------------------
+
+sub valid_port
+{
+    my $port = shift;
+
+    return if ($port =~ /^[0-9]+$/ && $port >= 1025 && $port <= 65535);
+    return('X', 'must be integer between 1025 and 65535');
+}
+
+sub valid_syslog_facility
+{
+    my $facility = shift;
+
+    return if ($facility =~ /(daemon|user|local[0-7])/);
+    return('X', 'must be one of these: daemon, user, local[0-7]');
+}
+
+sub valid_file
+{
+    my $filename = shift;
+
+    return('X', 'must be absolute path name') if ($filename !~ qr{^/});
+
+    (my $dirname = $filename) =~ s{/[^/]*$}{};
+    return('X', 'directory does not exist') if (! -d $dirname);
+
+    return;
+}
+
+sub valid_domain_name
+{
+    my $name = shift;
+
+    return('X', 'must be valid domain/host name') if ($name !~ /^(([A-Za-z0-9]+)\.)+([A-Za-z0-9]+)$/);
+
+    return;
+}
+
+sub valid_string
+{
+    return;
+}
+
+sub valid_positive_int
+{
+    my $val = shift;
+
+    return('X', 'must be positive integer') if ($val !~ /^[0-9]+$/);
+
+    return;
+}
+
+sub valid_metatile_size
+{
+    my $val = shift;
+
+    return('X', 'must be positive integer') if ($val !~ /^[0-9]+$/);
+    return('!', 'values other than 8 are experimental and might not work') if ($val ne '8');
+
+    return;
+}
+
+sub valid_bucket
+{
+    return;
+}
+
+
+#-----------------------------------------------------------------------------
+
+__END__
+
+=head1 NAME
+
+tirex-check-config - check Tirex config files
+
+=head1 SYNOPSIS
+
+tirex-check-config [OPTIONS]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-c>, B<--config=DIR>
+
+Use the config directory DIR instead of /etc/tirex.
+
+=back
+
+=head1 DESCRIPTION
+
+Checks the Tirex config files and outputs errors and warnings. All lines
+beginning with 'X' are errors, all warnings begin with '!'.
+
+Note that this program is intended to help the admin. It can't detect
+all errors.
+
+Currently only the main config file is checked. Checking of renderer
+and map config should be added. Patches welcome!
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file.
+
+=back
+
+=head1 DIAGNOSTICS
+
+tirex-check-config returns
+
+=over 8
+
+=item 0 if the config looks ok
+
+=item 1 if warnings were found
+
+=item 2 if errors were found
+
+=back
+
+=head1 SEE ALSO
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+#-- THE END ----------------------------------------------------------------------------
