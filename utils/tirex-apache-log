@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+#
+#  tirex-apache-log LOGFILE
+#
+#  XXX unfinished script to analyze apache tileserver logfiles
+#
+
+use strict;
+use warnings;
+
+use JSON;
+
+my $pat_ip_address = qr/(\d{1,3} \.
+        \d{1,3} \.
+        \d{1,3} \.
+        \d{1,3})/x;
+
+my $pat_quoted_field = qr/"((?:(?:(?:(?:    # It can be...
+    [^"\\])* |  # ...zero or more characters not quote or backslash...
+    (?:\\x[0-9a-fA-F][0-9a-fA-F])* | # ...a backslash quoted hexadecimal character...
+    (?:\\.*)                         # ...or a backslash escape.
+   ))*))"/x;
+
+my $parse_combined = qr/^       # Start at the beginning
+     $pat_ip_address \s+        # IP address
+     (\S+) \s+                  # Ident
+     (\S+) \s+                  # Userid
+     \[([^\]]*)\] \s+           # Date and time
+     $pat_quoted_field \s+      # Request
+     (\d+) \s+                  # Status
+     (\-|[\d]+) \s+             # Length of reply or "-"
+     $pat_quoted_field \s+      # Referer
+     $pat_quoted_field          # User agent
+     $                          # End at the end
+   /x;
+
+my $stats = {
+    'map' => {},
+    'ip'  => {},
+};
+
+while (my $line = <>)
+{
+    chomp $line;
+    next unless ($line =~ qr{$parse_combined});
+    my ($ip, $ident, $userid, $timestamp, $request, $status, $length, $referer, $ua) = ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+    my ($method, $url, $version) = split(' ', $request, 3);
+    (my $path = $referer) =~ s/\?.*//;
+    $ua =~ s/ .*//;
+
+    next unless ($url =~ qr{^/tiles/([^/]+)/([0-9]+)/([0-9]+)/([0-9]+)\.png$});
+    my ($map, $zoom, $x, $y) = ($1, $2, $3, $4);
+
+    if (! defined $stats->{'map'}->{$map})
+    {
+        $stats->{'map'}->{$map} = {
+            'count'   => 0,
+            'status'  => {},
+            'zoom'    => {},
+            'tile'    => {},
+            'referer' => {},
+            'path'    => {},
+            'ua'      => {},
+        };
+    }
+
+    my $s = $stats->{'map'}->{$map};
+
+    $s->{'count'}++;
+    $s->{'zoom'}->{$zoom}++;
+    $s->{'status'}->{$status}++;
+    $s->{'tile'}->{"$zoom/$x/$y"}++;
+    $s->{'referer'}->{$referer}++;
+    $s->{'path'}->{$path}++;
+    $s->{'ua'}->{$ua}++;
+
+    $stats->{'ip'}->{$ip}++;
+}
+
+foreach my $ip (keys %{$stats->{'ip'}})
+{
+    delete $stats->{'ip'}->{$ip} if ($stats->{'ip'}->{$ip} <= 5000);
+}
+
+print JSON::to_json($stats, { pretty => 1 }), "\n";
+
