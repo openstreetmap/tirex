@@ -301,11 +301,11 @@ sub main_loop
                     $source->reply({ type => 'nodebug', result => 'ok' });
                     $Tirex::DEBUG=0;
                 } elsif ($msg_type eq 'stop_rendering_bucket') {
-                    syslog('info', 'got stop_rendering_bucket message');
+                    syslog('info', 'got stop_rendering_bucket message (bucket=%s)', $source->{'bucket'} || '');
                     my $res = defined($source->{'bucket'}) ? $rendering_manager->set_active_flag_on_bucket(0, $source->{'bucket'}) : undef;
                     $source->reply({ type => $msg_type, result => $res ? 'ok' : 'error_bucket_not_found' });
                 } elsif ($msg_type eq 'continue_rendering_bucket') {
-                    syslog('info', 'got continue_rendering_bucket message');
+                    syslog('info', 'got continue_rendering_bucket message (bucket=%s)', $source->{'bucket'} || '');
                     my $res = defined($source->{'bucket'}) ? $rendering_manager->set_active_flag_on_bucket(1, $source->{'bucket'}) : undef;
                     $source->reply({ type => $msg_type, result => $res ? 'ok' : 'error_bucket_not_found' });
                 } elsif ($msg_type eq 'reload_config') {
@@ -579,7 +579,8 @@ Display help message.
 
 =item B<-d>, B<--debug>
 
-Run in debug mode. You'll see the actual messages sent and received.
+Run in debug mode. You'll see the actual messages sent and received and other
+debug messages.
 
 =item B<-c>, B<--config=DIR>
 
@@ -605,22 +606,24 @@ terminal.
 
 The configuration file.
 
-=item F</etc/tirex/renderer/*>
+=item F</etc/tirex/renderer/*.conf>
 
 The renderer configuration files.
 
-=item F</etc/tirex/maps/*>
+=item F</etc/tirex/renderer/*/*.conf>
 
 The map configuration files.
 
-=item F</var/log/tirex/master.log>
+=item F</var/log/tirex/jobs.log>
 
-Default location for master logfile. It contains one line for each
+Default location for jobs logfile. It contains one line for each
 metatile rendered.
 
 =back
 
 =head1 SEE ALSO
+
+See the tirex-send manpage for the list of commands you can send to a running tirex-master.
 
 L<http://wiki.openstreetmap.org/wiki/Tirex>
 
