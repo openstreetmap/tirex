@@ -115,12 +115,17 @@ my @directories = (
     glob("$mtdir/[0-9]"), 
     glob("$mtdir/[1-9][0-9]"), 
 );
-find({ wanted => \&process, follow_fast => 1, no_chdir => 1 }, @directories);
 
-if ($fh_list)
+foreach my $dir (@directories)
 {
-    $fh_list->print($list);
+    find({ wanted => \&process, follow_fast => 1, no_chdir => 1 }, $dir);
+    if ($fh_list)
+    {
+        $fh_list->print($list);
+    }
+    $list = '';
 }
+
 if ($fh_stats)
 {
     my $json = JSON::to_json(\%stats, { pretty => 1 });
