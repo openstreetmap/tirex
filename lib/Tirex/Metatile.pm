@@ -304,7 +304,6 @@ sub exists
     return 1;
 }
 
-
 =head2 $mt->older($time)
 
 Is the metatile file older than the given time?
@@ -321,6 +320,24 @@ sub older
     my $s = $self->_stat() or return 2;
 
     return $s->mtime() < $time;
+}
+
+=head2 $mt->newer($time)
+
+Is the metatile file newer than the given time?
+
+Returns 2 if the file doesn't exist.
+
+=cut
+
+sub newer
+{
+    my $self = shift;
+    my $time = shift;
+
+    my $s = $self->_stat() or return 2;
+
+    return $s->mtime() > $time;
 }
 
 =head2 $mt->size()
@@ -343,7 +360,8 @@ sub _stat
 {
     my $self = shift;
 
-    $self->{'stat'} = File::stat::stat($self->filename()) unless (defined $self->{'stat'});
+    my $fn =  Tirex::Map->get($self->get_map())->get_tiledir() . '/' . $self->get_filename();
+    $self->{'stat'} = File::stat::stat($fn) unless (defined $self->{'stat'});
 
     return $self->{'stat'};
 }

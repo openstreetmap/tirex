@@ -40,6 +40,8 @@ use Time::HiRes;
 
 use Tirex;
 use Tirex::Status;
+use Tirex::Renderer;
+use Tirex::Map;
 
 #-----------------------------------------------------------------------------
 # Reading command line and config
@@ -67,7 +69,7 @@ my @filters;
 
 foreach my $filter (@filters)
 {
-    if ($filter !~ qr{^(exists|not-exists|older\(([^)]+)\)|multi\(2,[01]\))$})
+    if ($filter !~ qr{^(exists|not-exists|older\(([^)]+)\)|newer\(([^)]+)\)|multi\(2,[01]\))$})
     {
         print STDERR "unknown filter: $filter\n";
         exit(2);
@@ -84,6 +86,8 @@ if ($Tirex::DEBUG)
 my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
+
+Tirex::Renderer->read_config_dir($config_dir);
 
 #-----------------------------------------------------------------------------
 
@@ -210,6 +214,8 @@ sub handle_init
                 elsif ($filter eq 'not-exists')                     { next METATILE if     ($metatile->exists()); }
                 elsif ($filter =~ qr{^older\(([0-9]+)\)$})          { next METATILE unless ($metatile->older($1)); } # seconds since epoch
                 elsif ($filter =~ qr{^older\(([^)]+)\)$})           { next METATILE unless ($metatile->older(get_mtime($1))); } # filename
+                elsif ($filter =~ qr{^newer\(([0-9]+)\)$})          { next METATILE unless ($metatile->newer($1)); } # seconds since epoch
+                elsif ($filter =~ qr{^newer\(([^)]+)\)$})           { next METATILE unless ($metatile->newer(get_mtime($1))); } # filename
                 elsif ($filter =~ qr{^multi\(([0-9]+),([0-9]+)\)$}) { next METATILE if     (($metatile->get_x()/$mx + $metatile->get_y()/$my) % $1 != $2); }
             }
 
@@ -376,6 +382,19 @@ tile does not exist on disk. If you want to match only files older than the
 given date which do actually exist, add the I<exists> filter.
 
 =item B<older(filename)>
+
+Instead of the time in seconds since the epoch you can also enter a filename
+here. The mtime (last modified) of this file will be used. tirex-batch will
+exit with return code 2 if the file does not exist.
+
+=item B<newer(time)>
+
+Matches if the meta tile's last modification time is after the given Unix time
+stamp (seconds since the epoch, 1970-01-01 00:00:00). Also matches if the meta
+tile does not exist on disk. If you want to match only files newer than the
+given date which do actually exist, add the I<exists> filter.
+
+=item B<newer(filename)>
 
 Instead of the time in seconds since the epoch you can also enter a filename
 here. The mtime (last modified) of this file will be used. tirex-batch will
