@@ -16,6 +16,9 @@
 #  The name of the UNIX domain socket for communicating with ModTile.
 #modtile_socket_name=/var/lib/tirex/modtile.sock
 
+#  Directory where UNIX domain sockets are created
+#socket_dir=/var/run/tirex
+
 #-----------------------------------------------------------------------------
 #  MASTER
 #-----------------------------------------------------------------------------

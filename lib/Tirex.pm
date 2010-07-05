@@ -60,7 +60,8 @@ our $TIREX_CONFIGDIR                 = '/etc/tirex';
 our $TIREX_CONFIGFILENAME            = 'tirex.conf';
 our $TIREX_CONFIGFILE                = $TIREX_CONFIGDIR . '/' . $TIREX_CONFIGFILENAME;
 
-our $MASTER_UDP_PORT                 = 9322;
+our $SOCKET_DIR                      = '/var/run/tirex';
+
 our $MASTER_SYSLOG_FACILITY          = 'daemon';
 our $MASTER_PIDFILE                  = '/var/run/tirex/tirex-master.pid';
 our $MASTER_LOGFILE                  = '/var/log/tirex/jobs.log';

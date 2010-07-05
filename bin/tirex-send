@@ -62,22 +62,25 @@ Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
-my %ports = (
-    'master'  => $Tirex::MASTER_UDP_PORT,
-    'syncd'   => $Tirex::SYNCD_UDP_PORT,
-);
-
-$opts{'to'} ||= 'master';
-my $port = ($opts{'to'} =~ /^[0-9]+$/) ? $opts{'to'} : $ports{$opts{'to'}};
-
-if (!$port)
+my $socket;
+if ($opts{'to'} eq 'master')
 {
+    my $master_socket_name = Tirex::Config::get('socket_dir', $Tirex::SOCKET_DIR) . '/master.sock';
+    $socket = IO::Socket::UNIX->new(
+        Type  => SOCK_DGRAM,
+        Local => '',
+        Peer  => $master_socket_name,
+    ) or die("Cannot open connection to master: $!\n");
+} elsif ($opts{'to'} eq 'syncd') {
+    $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
+    $socket->connect( Socket::pack_sockaddr_in($Tirex::SYNCD_UDP_PORT, Socket::inet_aton('localhost')) );
+} elsif ($opts{'to'} =~ /^[0-9]+$/) {
+    $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
+    $socket->connect( Socket::pack_sockaddr_in($opts{'to'}, Socket::inet_aton('localhost')) );
+} else {
     print STDERR "Unknown destination for --to option: $opts{'to'}\n";
     exit(4);
 }
-
-my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' );
-$socket->connect( Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost')) );
 
 #-----------------------------------------------------------------------------
 

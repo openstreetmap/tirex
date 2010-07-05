@@ -121,10 +121,12 @@ printf STDERR "Buckets cmdline: (%s), all: (%s), live: (%s), want: (%s)\n", join
 
 #-----------------------------------------------------------------------------
 
-my $port = Tirex::Config::get('master_udp_port', $Tirex::MASTER_UDP_PORT);
-
-my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', Proto => 'udp' ) or die("Cannot open socket: $!");
-$socket->connect( Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost')) ) or die("Cannot connect socket: $!");
+my $master_socket_name = Tirex::Config::get('socket_dir', $Tirex::SOCKET_DIR) . '/master.sock';
+my $socket = IO::Socket::UNIX->new(
+    Type  => SOCK_DGRAM,
+    Local => '',
+    Peer  => $master_socket_name,
+) or die("Cannot open connection to master: $!\n");
 
 #-----------------------------------------------------------------------------
 

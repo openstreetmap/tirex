@@ -99,16 +99,17 @@ my $want_write = IO::Select->new();
 
 # Set up the master socket. This is where we receive render requests using
 # the Tirex protocol.
-# This is a datagram socket.
-my $master_udp_port = Tirex::Config::get('master_udp_port', $Tirex::MASTER_UDP_PORT, qr{^[1-9][0-9]{1,4}$});
-my $master_socket = IO::Socket::INET->new(
-    LocalAddr => 'localhost',
-    LocalPort => $master_udp_port,
-    Proto     => 'udp',
-) or die("Cannot open master UDP socket: $!\n");
+# This is a UNIX domain datagram socket.
+my $master_socket_name = Tirex::Config::get('socket_dir', $Tirex::SOCKET_DIR) . '/master.sock';
+unlink($master_socket_name); # remove if left over from last run
+my $master_socket = IO::Socket::UNIX->new(
+    Type  => SOCK_DGRAM,
+    Local => $master_socket_name,
+) or die("Cannot open master UNIX domain socket: $!\n");
+chmod(0777, $master_socket_name); # make sure everybody can write to socket
 
 $want_read->add([$master_socket, undef]);
-syslog('info', 'Listening for commands on port %d/UDP', $master_udp_port);
+syslog('info', 'Listening for commands on socket %s', $master_socket_name);
 
 # Set up the mod_tile socket. This is where mod_tile requests come in.
 # This is a stream socket.
@@ -262,7 +263,7 @@ sub main_loop
             {
                 my $source = Tirex::Source::Command->new( socket => $master_socket );
                 $source->readable($sock);
-                syslog('debug', "got msg from ". $sock->peerport(). ": ". join(' ', map { "$_=$source->{$_}" } sort(keys %$source))) if ($Tirex::DEBUG);
+                syslog('debug', "got msg: ". join(' ', map { "$_=$source->{$_}" } sort(keys %$source))) if ($Tirex::DEBUG);
                 my $msg_type = $source->get_msg_type();
                 if ($msg_type eq 'metatile_enqueue_request') {
                     my $job = $source->make_job();
@@ -533,6 +534,7 @@ sub cleanup
 {
     defined($rendering_manager) && $rendering_manager->log_stats();
     unlink($modtile_socket_name);
+    unlink($master_socket_name);
     unlink($pidfile);
     $status->destroy();
     syslog('info', 'tirex-master shutting down');

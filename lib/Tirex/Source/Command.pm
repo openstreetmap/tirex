@@ -57,9 +57,6 @@ sub readable
 
     foreach (keys %$args) { $self->{$_} = $args->{$_}; };
 
-    $self->{peerhost} = $sock->peerhost();
-    $self->{peerport} = $sock->peerport();
-
     return &Tirex::Source::STATUS_MESSAGE_COMPLETE;
 }
 
@@ -166,10 +163,7 @@ sub reply
 
     $msg->{'id'} = $self->{'id'} if (defined $self->{'id'});
 
-    return $self->{'socket'}->send(
-        Tirex::create_msg($msg), 
-        Socket::pack_sockaddr_in($Tirex::MASTER_UDP_PORT, Socket::inet_aton('localhost'))
-    );
+    return $self->{'socket'}->send( Tirex::create_msg($msg) );
 }
 
 sub name
