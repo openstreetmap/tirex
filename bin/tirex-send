@@ -62,6 +62,8 @@ Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
+$opts{'to'} ||= 'master';
+
 my $socket;
 if ($opts{'to'} eq 'master')
 {

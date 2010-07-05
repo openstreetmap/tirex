@@ -23,9 +23,6 @@
 #  MASTER
 #-----------------------------------------------------------------------------
 
-#  This is the UDP port where the tirex-master waits for requests.
-#master_udp_port=9322
-
 #  The master writes its process ID into this file.
 #master_pidfile=/var/run/tirex/tirex-master.pid
 
