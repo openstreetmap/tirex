@@ -58,10 +58,15 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
         char *eq = strchr(line, '=');
         if (eq)
         {
+            char *last = eq-1;
+            // trim space before equal sign
+            while (last > line && isspace(*last)) *last-- = 0;
             *eq++ = 0;
-            char *last = eq + strlen(eq) - 1;
+            // trim space after equal sign
+            while (isspace(*eq)) eq++;
+            // trim space at end of line
+            last = eq + strlen(eq) - 1;
             while (last > eq && isspace(*last)) *last-- = 0;
-            printf("_%s_%s_\n", line, eq);
             if (!strcmp(line, "tiledir"))
             {
                 tiledir.assign(eq);
@@ -84,9 +89,21 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
         return rv;
     }
 
+    if (euidaccess(mapfile.c_str(), R_OK) == -1)
+    {
+        warning("cannot add %s: map file '%s' not accessible", configfile, mapfile.c_str());
+        return rv;
+    }
+
     if (tiledir.empty())
     {
         warning("cannot add %s: missing tiledir option", configfile);
+        return rv;
+    }
+
+    if (euidaccess(tiledir.c_str(), W_OK) == -1)
+    {
+        warning("cannot add %s: tile directory '%s' not accessible", configfile, tiledir.c_str());
         return rv;
     }
 
