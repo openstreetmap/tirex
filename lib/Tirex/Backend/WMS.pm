@@ -55,6 +55,10 @@ sub init
 
     $self->{'ua'} = LWP::UserAgent->new();
     $self->{'ua'}->agent('tirex-backend-wms/' . $Tirex::VERSION);
+
+    my $timeout = $ENV{'TIREX_BACKEND_ALIVE_TIMEOUT'} - 10; # timeout from backend-manager minus 10 seconds
+
+    $self->{'ua'}->timeout($timeout);
 }
 
 =head2 $backend->create_metatile()
