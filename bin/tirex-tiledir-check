@@ -94,7 +94,7 @@ Tirex::Config::init($config_file);
 Tirex::Renderer->read_config_dir($config_dir);
 
 my $map = Tirex::Map->get($mapname);
-die("unknown map: $map\n") unless (defined $map);
+die("unknown map: $mapname\n") unless (defined $map);
 
 #-----------------------------------------------------------------------------
 
