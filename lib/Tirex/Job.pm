@@ -141,7 +141,7 @@ sub to_msg
     my $self = shift;
     my %args = @_;
 
-    $args{'id'}     = $self->get_id() unless (defined $args{'id'});
+    $args{'id'}     = $self->get_id() unless (exists $args{'id'});
     $args{'map'}    = $self->get_map();
     $args{'x'}      = $self->get_x();
     $args{'y'}      = $self->get_y();

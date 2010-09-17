@@ -242,7 +242,7 @@ sub handle_init
                 }
                 my $job = Tirex::Job->new(%jobparams);
 
-                my $request = $job->to_msg( type => $opts{'remove'} ? 'metatile_remove_request' : 'metatile_enqueue_request' );
+                my $request = $job->to_msg( id => undef, type => $opts{'remove'} ? 'metatile_remove_request' : 'metatile_enqueue_request' );
                 print STDERR " sending: ", $request->to_s(), "\n" if ($Tirex::DEBUG);
                 my $ret = $request->send($socket);
                 if (! defined $ret)
