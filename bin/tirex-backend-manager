@@ -365,8 +365,15 @@ sub cleanup_dead_workers
         if ($exit_code != $Tirex::EXIT_CODE_RESTART && ! defined $workers->{$pid}->{'hungup'})
         {
             my $renderer = $workers->{$pid}->{'renderer'};
-            $renderer->disable();
-            syslog('err', 'disabled renderer %s', $renderer->get_name());
+            if ($renderer->get-debug())
+            {
+                syslog('debug', 'renderer %s not disabled because we are in debug mode', $renderer->get_name());
+            }
+            else
+            {
+                $renderer->disable();
+                syslog('err', 'disabled renderer %s', $renderer->get_name());
+            }
         }
 
         $workers->{$pid}->{'handle'}->close();
