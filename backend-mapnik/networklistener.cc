@@ -16,6 +16,7 @@
 #include <errno.h>
 #include <iostream>
 #include <signal.h>
+#include <strings.h>
 
 #include "networklistener.h"
 #include "networkrequest.h"

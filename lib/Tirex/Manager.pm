@@ -381,6 +381,22 @@ sub status
     return $status;
 }
 
+=head2 $rm->get_load_from_uptime()
+
+Get system load by calling the 'uptime' command. This is called by get_load() if /proc/loadavg is not
+available.
+
+=cut
+
+sub get_load_from_uptime
+{
+    my $uptime = `uptime`;
+    if ($uptime =~ m/load average: ([0-9\.]+), ([0-9\.]+), ([0-9\.]+)/) {
+        return $2;
+    }
+    return 0;
+}
+
 =head2 $rm->get_load()
 
 Get current load on the machine. If /proc/loadavg is not readable for some reason, it always returns 0.
@@ -393,7 +409,7 @@ sub get_load
 
     return $self->{'load'} if ($self->{'last_load_check'} == time());
 
-    open(my $loadavg, '<', '/proc/loadavg') or return 0;
+    open(my $loadavg, '<', '/proc/loadavg') or return $self->get_load_from_uptime();
     ($self->{'load'} = <$loadavg>) =~ s/ .*\n//;
     close($loadavg);
 
