@@ -14,14 +14,14 @@ use Tirex::Munin::Status::RequestsRendered;
 
 #-----------------------------------------------------------------------------
 
-my $config_file = $Tirex::TIREX_CONFIGFILE;
+my $config_file = exists($ENV{'TIREX_CONFIGFILE'}) ? $ENV{'TIREX_CONFIGFILE'} : $Tirex::TIREX_CONFIGFILE;
 Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
 
 (my $execname = $0) =~ s{^.*/}{};
 
-my $map = 'default';
+my $map = '*';
 if ($execname =~ /^tirex-status-requests-rendered-(.*)$/)
 {
     $map = $1;

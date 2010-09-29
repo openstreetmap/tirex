@@ -29,14 +29,32 @@ sub config
     my $self = shift;
     my $map = $self->{'map'};
 
-    my $config = <<EOF;
-graph_title Render time for map $map
+    my $config = '';
+
+    if ($map eq '*')
+    {
+        $config .= "graph_title Render time\n";
+    }
+    else
+    {
+        $config .= sprintf("graph_title Render time for map %s\n", $map);
+    }
+
+    $config .= <<EOF;
 graph_vlabel millisecond/second
 graph_category tirex
 graph_args --lower-limit 0
 graph_scale no
-graph_info Milliseconds each second spend rendering tiles for map $map.
 EOF
+
+    if ($map eq '*')
+    {
+        $config .= "graph_info Milliseconds each second spend rendering tiles\n";
+    }
+    else
+    {
+        $config .= sprintf("graph_info Milliseconds each second spend rendering tiles for map %s\n", $map);
+    }
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})
     {
@@ -60,7 +78,18 @@ sub fetch
         my $sum = 0;
         foreach my $z ($zoomrange->get_min() .. $zoomrange->get_max())
         {
-            $sum += ($self->{'status'}->{'rm'}->{'stats'}->{'sum_render_time'}->{$self->{'map'}}->[$z] // 0);
+            if ($self->{'map'} eq '*')
+            {
+                my $maps = $self->{'status'}->{'rm'}->{'stats'}->{'sum_render_time'};
+                while ( my ($map, $stats) = each( %$maps ) )
+                {
+                    $sum += ($stats->[$z] // 0);
+                }
+            }
+            else
+            {
+                $sum += ($self->{'status'}->{'rm'}->{'stats'}->{'sum_render_time'}->{$self->{'map'}}->[$z] // 0);
+            }
         }
         $data .= sprintf("%s.value %d\n", $zoomrange->get_id(), $sum);
     }

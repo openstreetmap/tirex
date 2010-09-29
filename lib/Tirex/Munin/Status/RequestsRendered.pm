@@ -31,15 +31,33 @@ sub config
     my $map = $self->{'map'};
     my $per = $self->{'per'} // 'second';
 
-    my $config = <<EOF;
-graph_title Requests rendered for map $map
+    my $config = '';
+    
+    if ($map eq '*')
+    {
+        $config .= "graph_title Requests rendered\n";
+    }
+    else
+    {
+        $config .= sprintf("graph_title Requests rendered for map %s\n", $map);
+    }
+
+    $config .= <<EOF;
 graph_vlabel requests/$per
 graph_category tirex
 graph_args --lower-limit 0
 graph_scale no
 graph_period $per
-graph_info Number of metatile requests rendered per $per for map $map.
 EOF
+
+    if ($map eq '*')
+    {
+        $config .= "graph_info Number of metatile requests rendered per $per\n";
+    }
+    else
+    {
+        $config .= sprintf("graph_info Number of metatile requests rendered per $per for map %s\n", $map);
+    }
 
     foreach my $zoomrange (@{$self->{'zoomranges'}})
     {
@@ -66,7 +84,18 @@ sub fetch
         my $sum = 0;
         foreach my $z ($zoomrange->get_min() .. $zoomrange->get_max())
         {
-            $sum += ($self->{'status'}->{'rm'}->{'stats'}->{'count_rendered'}->{$self->{'map'}}->[$z] // 0);
+            if ($self->{'map'} eq '*')
+            {
+                my $maps = $self->{'status'}->{'rm'}->{'stats'}->{'count_rendered'};
+                while ( my ($map, $stats) = each( %$maps ) )
+                {
+                    $sum += ($stats->[$z] // 0);
+                }
+            }
+            else
+            {
+                $sum += ($self->{'status'}->{'rm'}->{'stats'}->{'count_rendered'}->{$self->{'map'}}->[$z] // 0);
+            }
         }
         $data .= sprintf("%s.value %d\n", $zoomrange->get_id(), $sum);
     }

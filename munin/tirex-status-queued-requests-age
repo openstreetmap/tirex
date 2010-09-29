@@ -14,7 +14,7 @@ use Tirex::Munin::Status::QueuedRequestsAge;
 
 #-----------------------------------------------------------------------------
 
-my $config_file = $Tirex::TIREX_CONFIGFILE;
+my $config_file = exists($ENV{'TIREX_CONFIGFILE'}) ? $ENV{'TIREX_CONFIGFILE'} : $Tirex::TIREX_CONFIGFILE;
 Tirex::Config::init($config_file);
 
 #-----------------------------------------------------------------------------
