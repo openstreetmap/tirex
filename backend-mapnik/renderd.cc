@@ -89,7 +89,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
         return rv;
     }
 
-    if (euidaccess(mapfile.c_str(), R_OK) == -1)
+    if (access(mapfile.c_str(), R_OK) == -1)
     {
         warning("cannot add %s: map file '%s' not accessible", configfile, mapfile.c_str());
         return rv;
@@ -101,7 +101,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
         return rv;
     }
 
-    if (euidaccess(tiledir.c_str(), W_OK) == -1)
+    if (access(tiledir.c_str(), W_OK) == -1)
     {
         warning("cannot add %s: tile directory '%s' not accessible", configfile, tiledir.c_str());
         return rv;
