@@ -29,6 +29,21 @@
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 
+#if MAPNIK_VERSION >= 800
+   #include <mapnik/box2d.hpp>
+   #define Image32 image_32
+   #define ImageData32 image_data_32
+   #define Envelope box2d
+#else
+   #include <mapnik/envelope.hpp>
+   #define get_current_extent getCurrentExtent
+   #define zoom_to_box zoomToBox
+   #define image_32 Image32
+   #define image_data_32 ImageData32
+   #define box2d Envelope
+   #define set_background setBackground
+#endif
+
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
@@ -150,13 +165,8 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             {
                 if ((col < mtc) && (row < mtr))
                 {
-#if MAPNIK_VERSION >= 800
                     mapnik::image_view<mapnik::image_data_32> view(col * mTileWidth, 
                         row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
-#else
-                    mapnik::image_view<mapnik::ImageData32> view(col * mTileWidth, 
-                        row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
-#endif
                     rawpng[index] = mapnik::save_to_string(view, "png256");
                     offsets[index].offset = offset;
                     offset += offsets[index].size = rawpng[index].length();
@@ -278,24 +288,15 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
             west, south, east, north, rr->srs, rr->width, rr->height);
     }
 
-#if MAPNIK_VERSION >= 800
     mapnik::box2d<double> bbox(west, south, east, north);
-#else
-    mapnik::Envelope<double> bbox(west, south, east, north);
-#endif
     mMap.resize(rr->width, rr->height);
-    mMap.zoomToBox(bbox);
+    mMap.zoom_to_box(bbox);
     mMap.set_buffer_size(128);
 
     debug("width: %d, height:%d", rr->width, rr->height);
     RenderResponse *resp = new RenderResponse();
-#if MAPNIK_VERSION >= 800
     resp->image = new mapnik::image_32(rr->width, rr->height);
     mapnik::agg_renderer<mapnik::image_32> renderer(mMap, *(resp->image));
-#else
-    resp->image = new mapnik::Image32(rr->width, rr->height);
-    mapnik::agg_renderer<mapnik::Image32> renderer(mMap, *(resp->image));
-#endif
     try
     {
         renderer.apply();
