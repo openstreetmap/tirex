@@ -291,7 +291,8 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
     mapnik::box2d<double> bbox(west, south, east, north);
     mMap.resize(rr->width, rr->height);
     mMap.zoom_to_box(bbox);
-    mMap.set_buffer_size(128);
+    if(mMap.buffer_size() < 128)
+        mMap.set_buffer_size(128);
 
     debug("width: %d, height:%d", rr->width, rr->height);
     RenderResponse *resp = new RenderResponse();
