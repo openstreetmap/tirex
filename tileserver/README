@@ -7,7 +7,7 @@ tile server and does seem to work, but lacks things such as proper logging.
 And its pretty new and basically untested.
 
 See http://www.nodejs.org/ for downloading and installing NodeJS. You need a
-reasonably new version that supports UDP. Ther version in Ubuntu 10.10 doesn't
+reasonably new version that supports UDP. The version in Ubuntu 10.10 doesn't
 work.
 
 Start it with
