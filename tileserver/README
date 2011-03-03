@@ -1,0 +1,30 @@
+
+This is a tileserver written for Node.JS that works with the rest of the Tirex
+system.
+
+This is not recommended for production system. It just has the basics for a
+tile server and does seem to work, but lacks things such as proper logging.
+And its pretty new and basically untested.
+
+See http://www.nodejs.org/ for downloading and installing NodeJS. You need a
+reasonably new version that supports UDP. Ther version in Ubuntu 10.10 doesn't
+work.
+
+Start it with
+    node tileserver.js
+
+It will read your Tirex configuration in /etc/tirex and look for maps there.
+It will then open port 9320 and listen for map requests. URLs have the form
+
+    http://HOST:9320/tiles/MAP/Z/X/Y.png
+
+You can ask
+
+    http://HOST:9320/maps
+
+for a list of maps it knows about and
+
+    http://HOST:9320/stats
+
+for statistics.
+
