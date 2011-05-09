@@ -37,6 +37,7 @@ use Pod::Usage qw();
 use Socket;
 
 use Tirex;
+use Tirex::Map;
 
 #-----------------------------------------------------------------------------
 
@@ -59,6 +60,7 @@ my $dryrun = $opts{'dry-run'};
 my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
+Tirex::Renderer->read_config_dir($config_dir);
 
 my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', LocalPort => $Tirex::SYNCD_UDP_PORT, Proto => 'udp', ReuseAddr => 1 ) or die("Can't open UDP socket: :$!\n");
 
@@ -98,7 +100,8 @@ while (1)
     syslog('debug', 'got request: %s', $msg->to_s()) if ($Tirex::DEBUG);
 
     my $metatile = $msg->to_metatile();
-    my $filename = $metatile->filename();
+    my $filename = Tirex::Map->get_map_for_metatile($metatile)->get_tiledir() . '/' . $metatile->get_filename();
+    $filename = $1 if ($filename =~ m!^/(.*)!);
 
     # fixme make this configurable
     my $command = 'tar -C/ -cf - %f | ssh %h -Tq "tar -C/ -xf -"';
