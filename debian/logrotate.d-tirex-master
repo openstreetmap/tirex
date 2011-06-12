@@ -6,4 +6,5 @@
   compress
   missingok
   notifempty
+  create 0644 tirex tirex
 }
