@@ -1,4 +1,4 @@
-CFLAGS += -g -O2 -Wall -Wextra -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I /usr/include/freetype2/ 
+CFLAGS += -g -O2 -Wall -Wextra -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -I /usr/include/freetype2/ -DBOOST_FILESYSTEM_VERSION=2
 CXXFLAGS = $(CFLAGS) 
 LDFLAGS=-lmapnik -lboost_filesystem -lboost_system -licuuc -lboost_regex
 
