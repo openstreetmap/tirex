@@ -70,7 +70,7 @@ if ($opts{'to'} eq 'master')
     my $master_socket_name = Tirex::Config::get('socket_dir', $Tirex::SOCKET_DIR) . '/master.sock';
     $socket = IO::Socket::UNIX->new(
         Type  => SOCK_DGRAM,
-        Local => '',
+#        Local => '',
         Peer  => $master_socket_name,
     ) or die("Cannot open connection to master: $!\n");
 } elsif ($opts{'to'} eq 'syncd') {

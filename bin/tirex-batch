@@ -48,7 +48,7 @@ use Tirex::Map;
 #-----------------------------------------------------------------------------
 
 my %opts = ();
-GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'num|n=i', 'prio|p=i', 'expire|e=s', 'filter|f=s', 'remove', 'count-only' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s', 'quit|q', 'num|n=i', 'prio|p=i', 'expire|e=s', 'filter|f=s', 'remove', 'count-only' ) or exit(2);
 
 if ($opts{'help'})
 {
@@ -94,7 +94,7 @@ Tirex::Renderer->read_config_dir($config_dir);
 my $master_socket_name = Tirex::Config::get('socket_dir', $Tirex::SOCKET_DIR) . '/master.sock';
 my $socket = IO::Socket::UNIX->new(
     Type  => SOCK_DGRAM,
-    Local => '',
+#    Local => '',
     Peer  => $master_socket_name,
 ) or die("Cannot open connection to master: $!\n");
 
@@ -103,6 +103,10 @@ if ($opts{'num'})
 {
     $status = eval { Tirex::Status->new(); };
     die("Can't connect to shared memory. Is the tirex-master running?\n") if ($@);
+}
+if ($opts{'quit'} && !$opts{'num'})
+{
+    die("--quit can only be used in conjunction with --num");
 }
 
 #-----------------------------------------------------------------------------
@@ -196,6 +200,11 @@ sub handle_init
             # wait for queue to have some space
             while (($queue_size = queue_size($prio)) >= $opts{'num'})
             {
+                if ($opts{'quit'})
+                {
+                    print STDERR " queue size $queue_size >= max queue size $opts{'num'}; terminating (--quit set)\n" if ($Tirex::DEBUG);
+                    exit(0);
+                }
                 print STDERR " queue size $queue_size >= max queue size $opts{'num'}. waiting...\n" if ($Tirex::DEBUG);
                 sleep(1);
             }
@@ -301,6 +310,12 @@ Use the config directory DIR instead of /etc/tirex.
 
 Try to keep the number of jobs in the queue below this number (Only checked
 once per second). Disable with NUM=0.
+
+=item B<-q>, B<--quit>
+
+Quit if the number of jobs in the queue is higher than the number given 
+with -n. Without -q, tirex-batch would wait, and continue to fill the queue
+once it has gone below the threshold.
 
 =item B<-p>, B<--prio=PRIO>
 
