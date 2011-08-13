@@ -227,7 +227,7 @@ sub format_rendering
 {
     my $rm = shift;
 
-    my $text = " Currently rendering: (num=" . $rm->{'num_rendering'} . ")\n  " . UNDERLINE . "Map                           X          Y   Z Prio Age \n" . RESET;
+    my $text = " Currently rendering: (num=" . $rm->{'num_rendering'} . ")\n  " . UNDERLINE . "Map                           X          Y   Z Prio  Age\n" . RESET;
 
     foreach my $r (@{$rm->{'rendering'}}) {
         $text .= '  ' . field("%-20s", $r->{'map'}) . ' '
