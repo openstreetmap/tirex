@@ -271,7 +271,7 @@ sub main_loop
                     {
                         if (my $already_rendering_job = $rendering_manager->requests_by_metatile($job))
                         {
-                            $already_rendering_job->add_notify($source);
+                            $already_rendering_job->add_notify($source) if (defined $source->{id}); 
                         }
                         else
                         {
