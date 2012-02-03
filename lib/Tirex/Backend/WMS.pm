@@ -126,9 +126,28 @@ sub create_metatile
 
     if ($response->is_success() && $response->header('Content-type') eq 'image/png')
     {
-        if (my $image = GD::Image->newFromPngData($response->content()))
+        # Bit 0 af Byte 25 in the png header is 1 for palette image, 0 for truecolor image:
+        # http://en.wikipedia.org/wiki/Portable_Network_Graphics#File_header
+        my $palette_bit = unpack("x25 c1", $response->content()) & 1;
+        my $palette_name;
+        my $image;
+        # Despite the description at http://search.cpan.org/~lds/GD-2.46/GD.pm
+        # "Images created by reading PNG images will be truecolor if the image file itself is truecolor."
+        #
+        # auto-detection of input png does not seem to work so (at least for now) we need to do this manually by looking at the png header        
+        if ($palette_bit)
         {
-            ::syslog('debug', 'WMS request was successful') if ($Tirex::DEBUG);
+            $image = GD::Image->newFromPngData($response->content(),0);
+            $palette_name = "palette";
+        }
+        else
+        {
+            $image = GD::Image->newFromPngData($response->content(),1);
+            $palette_name = "truecolor";
+        }
+        if ($image)
+        {
+            ::syslog('debug', 'WMS request was successful (got %s image)',$palette_name) if ($Tirex::DEBUG);
             return $image;
         }
     }

@@ -261,12 +261,20 @@ sub write_metatile
                                      $metatile->get_z());
 
     # cut metatile into tiles and create pngs for each
-    my @pngs = ();
+    my @pngs = ();    
     foreach my $x (0..$Tirex::METATILE_COLUMNS-1)
     {
         foreach my $y (0..$Tirex::METATILE_ROWS-1)
         {
-            my $tile = GD::Image->new($Tirex::PIXEL_PER_TILE, $Tirex::PIXEL_PER_TILE);
+            my $tile;
+            if ($image->isTrueColor())
+            {
+                $tile = GD::Image->newTrueColor($Tirex::PIXEL_PER_TILE, $Tirex::PIXEL_PER_TILE);
+            }
+            else
+            {
+                $tile = GD::Image->newPalette($Tirex::PIXEL_PER_TILE, $Tirex::PIXEL_PER_TILE);
+            }
             $tile->copy($image, 0, 0, $x * $Tirex::PIXEL_PER_TILE, $y * $Tirex::PIXEL_PER_TILE, $Tirex::PIXEL_PER_TILE, $Tirex::PIXEL_PER_TILE);
             push(@pngs, $tile->png());
         }
