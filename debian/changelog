@@ -1,3 +1,9 @@
+tirex (0.3.0) jaunty; urgency=low
+
+  * add mapserver backend
+
+ -- Sven Geggus <sven-osm@geggus.net>  Fri, 03 Feb 2012 19:43:24 +0100
+
 tirex (0.2.0) jaunty; urgency=low
 
   * new renderd architecture allows several different renderers at the same time

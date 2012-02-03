@@ -67,6 +67,7 @@ directory:
   tirex-core
   tirex-backend-mapnik
   tirex-backend-wms
+  tirex-backend-mapserver
   tirex-example-map
   tirex-munin-plugin
   tirex-nagios-plugin

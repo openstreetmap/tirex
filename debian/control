@@ -2,7 +2,7 @@ Source: tirex
 Section: web
 Priority: extra
 Maintainer: Frederik Ramm <frederik.ramm@geofabrik.de>
-Build-Depends: debhelper (>= 7), libboost-program-options-dev, libboost-program-options1.34.1
+Build-Depends: debhelper (>= 7), libboost-program-options-dev
 Homepage: http://wiki.openstreetmap.org/wiki/Tirex
 Standards-Version: 3.8.0
 
@@ -37,6 +37,13 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl
 Description: WMS backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the WMS backend for fetching maps from a WMS server.
+
+Package: tirex-backend-mapserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl, libmapscript-perl, ttf-dejavu-core
+Description: Mapserver backend for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the Mapserver backend for rendering maps with Mapserver.
 
 Package: tirex-backend-mapnik
 Architecture: any

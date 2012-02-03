@@ -35,6 +35,7 @@ install: build
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 -g root -o root backends/test                            $(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 -g root -o root backends/wms                             $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 -g root -o root backends/mapserver			$(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex
 	install -m 644 -g root -o root etc/tirex.conf.dist                      $(DESTDIR)/etc/tirex/tirex.conf
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer
@@ -42,8 +43,13 @@ install: build
 	install -m 644 -g root -o root etc/renderer/test.conf.dist              $(DESTDIR)/etc/tirex/renderer/test.conf
 	install -m 644 -g root -o root etc/renderer/test/checkerboard.conf.dist $(DESTDIR)/etc/tirex/renderer/test/checkerboard.conf
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/wms
+	install -m 755 -g root -o root -d					$(DESTDIR)/etc/tirex/renderer/mapserver
 	install -m 644 -g root -o root etc/renderer/wms.conf.dist               $(DESTDIR)/etc/tirex/renderer/wms.conf
+	install -m 644 -g root -o root etc/renderer/mapserver.conf.dist		$(DESTDIR)/etc/tirex/renderer/mapserver.conf
 	install -m 644 -g root -o root etc/renderer/wms/demowms.conf.dist       $(DESTDIR)/etc/tirex/renderer/wms/demowms.conf
+	install -m 644 -g root -o root etc/renderer/mapserver/msdemo.conf.dist	$(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.conf
+	install -m 644 -g root -o root etc/renderer/mapserver/msdemo.map	$(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.map
+	install -m 644 -g root -o root etc/renderer/mapserver/fonts.lst		$(DESTDIR)/etc/tirex/renderer/mapserver/fonts.lst
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/mapnik
 	install -m 644 -g root -o root etc/renderer/mapnik.conf.dist            $(DESTDIR)/etc/tirex/renderer/mapnik.conf
 	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/logrotate.d
