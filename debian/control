@@ -47,7 +47,7 @@ Description: Mapserver backend for the Tirex tile rendering system
 
 Package: tirex-backend-mapnik
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libmapnik0.6|libmapnik0.7
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core
 Description: Mapnik backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the Mapnik backend for creating maps with the Mapnik renderer.

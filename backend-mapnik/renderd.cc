@@ -14,6 +14,7 @@
 
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
+#include <mapnik/config_error.hpp>
 
 #include "networklistener.h"
 
@@ -50,6 +51,9 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     std::string tiledir;
     std::string mapfile;
     std::string stylename;
+    unsigned int tilesize = 256;
+    unsigned int mtrowcol = 8;
+    double scalefactor = 1.0;
     
     while (char *line = fgets(linebuf, sizeof(linebuf), f))
     {
@@ -74,6 +78,18 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
             else if (!strcmp(line, "mapfile"))
             {
                 mapfile.assign(eq);
+            }
+            else if (!strcmp(line, "scalefactor"))
+            {
+                scalefactor = atof(eq);
+            }
+            else if (!strcmp(line, "tilesize"))
+            {
+                tilesize = atoi(eq);
+            }
+            else if (!strcmp(line, "metarowscols"))
+            {
+                mtrowcol = atoi(eq);
             }
             else if (!strcmp(line, "name"))
             {
@@ -115,7 +131,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
 
     try
     {
-        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile);
+        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile, tilesize, scalefactor, mtrowcol);
         mHandlerMap[stylename]->setStatusReceiver(this);
         debug("added style '%s' from map %s", stylename.c_str(), configfile);
         rv = true;

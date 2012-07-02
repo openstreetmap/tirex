@@ -1,3 +1,16 @@
+tirex (0.4.1precise1) precise; urgency=low
+
+  * support (alomst) arbitrary sized meta tiles
+  * support for Mapnik2 
+
+ -- root <root@craig.geofabrik.de>  Tue, 26 Jun 2012 21:45:22 +0000
+
+tirex (0.3.1debian1) precise; urgency=low
+
+  * fix epsg3857 bug
+
+ -- root <root@craig.geofabrik.de>  Tue, 08 May 2012 20:27:04 +0000
+
 tirex (0.3.0) jaunty; urgency=low
 
   * add mapserver backend

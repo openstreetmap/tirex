@@ -14,6 +14,7 @@ WriteMakefile(
     'AUTHOR'       => 'Jochen Topf',
     'LICENSE'      => 'GPL',
     'INSTALLDIRS'  => 'vendor',
+    'FIRST_MAKEFILE'  => 'Makefile.perl',
     'VERSION_FROM' => 'lib/Tirex.pm', # finds $VERSION
     'ABSTRACT'     => "Modules for the Tirex tile server",
     'PREREQ_PM'    => { 'IPC::ShareLite' => 0, 'JSON' => 0 },

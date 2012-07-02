@@ -23,37 +23,24 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/filter_factory.hpp>
+#include <mapnik/expression.hpp>
 #include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
-
-#if MAPNIK_VERSION >= 800
-   #include <mapnik/box2d.hpp>
-   #define Image32 image_32
-   #define ImageData32 image_data_32
-   #define Envelope box2d
-#else
-   #include <mapnik/envelope.hpp>
-   #define get_current_extent getCurrentExtent
-   #define zoom_to_box zoomToBox
-   #define image_32 Image32
-   #define image_data_32 ImageData32
-   #define box2d Envelope
-   #define set_background setBackground
-#endif
+#include <mapnik/box2d.hpp>
 
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
-MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile)
+MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, unsigned int mtrowcol)
 {
     mTileDir = tiledir;
-    mTileWidth = 256;
-    mTileHeight = 256;
-    mMetaTileRows = 8;
-    mMetaTileColumns = 8;
+    mTileWidth = tilesize;
+    mTileHeight = tilesize;
+    mMetaTileRows = mtrowcol;
+    mMetaTileColumns = mtrowcol;
+    mScaleFactor = scalefactor;
     load_map(mMap, stylefile);
 
     fourpow[0] = 1;
@@ -106,6 +93,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     rr.east = (x + mtc) * MERCATOR_WIDTH / twopow[z] - MERCATOR_OFFSET;
     rr.north = (twopow[z] - y) * MERCATOR_WIDTH / twopow[z] - MERCATOR_OFFSET;
     rr.south = (twopow[z] - y - mtr) * MERCATOR_WIDTH / twopow[z] - MERCATOR_OFFSET;
+    rr.scale_factor = mScaleFactor;
 
     // we specify the bbox in epsg:3857, and we also want our image returned
     // in this projection. 
@@ -249,19 +237,9 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
     debug(">> MetatileHandler::render");
     char init[255];
 
-    // we hard-code the parameters for SRS 3857 since this is the only one used internally,
-    // and not guaranteed to be available in user's /usr/share/proj/epsg file. Any other
-    // projection will have been configured by the user, so if they configure a projection
-    // not known on their system it is their fault.
-    if (rr->srs == 3857)
-    {
-        strcpy(init, "+proj=merc +a=6378137 +b=6378137 +lat_ts=0.0 +lon_0=0.0 +x_0=0.0 +y_0=0 +k=1.0 +units=m +nadgrids=@null +wktext  +no_defs");
-    }
-    else
-    {
-        sprintf(init, "+init=epsg:%d", rr->srs);
-    }
-    mMap.set_srs(init);
+    sprintf(init, "+init=epsg:%d", rr->srs);
+    // commented out - rely on proper SRS specification in map.xml
+    // mMap.set_srs(init);
 
     double west = rr->west;
     double south = rr->south;
@@ -297,7 +275,7 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
     debug("width: %d, height:%d", rr->width, rr->height);
     RenderResponse *resp = new RenderResponse();
     resp->image = new mapnik::image_32(rr->width, rr->height);
-    mapnik::agg_renderer<mapnik::image_32> renderer(mMap, *(resp->image));
+    mapnik::agg_renderer<mapnik::image_32> renderer(mMap, *(resp->image), rr->scale_factor, 0u, 0u);
     try
     {
         renderer.apply();
