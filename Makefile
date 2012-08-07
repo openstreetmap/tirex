@@ -1,3 +1,4 @@
+INSTALLOPTS=-g root -o root
 build: Makefile.perl
 	cd backend-mapnik; $(MAKE) $(MFLAGS)
 	$(MAKE) -f Makefile.perl
@@ -9,58 +10,58 @@ Makefile.perl: Makefile.PL
 install-all: install install-example-map install-munin install-nagios
 
 install-example-map:
-	install -m 755 -g root -o root -d                              $(DESTDIR)/usr/share/tirex
-	install -m 755 -g root -o root -d                              $(DESTDIR)/usr/share/tirex/example-map
-	install -m 644 -g root -o root example-map/example.xml         $(DESTDIR)/usr/share/tirex/example-map
-	install -m 644 -g root -o root example-map/ocean.*             $(DESTDIR)/usr/share/tirex/example-map
-	install -m 644 -g root -o root example-map/README              $(DESTDIR)/usr/share/tirex/example-map
-	install -m 755 -g root -o root -d                              $(DESTDIR)/etc/tirex/renderer/mapnik
-	install -m 644 -g root -o root example-map/mapnik-example.conf $(DESTDIR)/etc/tirex/renderer/mapnik/example.conf
+	install -m 755 ${INSTALLOPTS} -d                              $(DESTDIR)/usr/share/tirex
+	install -m 755 ${INSTALLOPTS} -d                              $(DESTDIR)/usr/share/tirex/example-map
+	install -m 644 ${INSTALLOPTS} example-map/example.xml         $(DESTDIR)/usr/share/tirex/example-map
+	install -m 644 ${INSTALLOPTS} example-map/ocean.*             $(DESTDIR)/usr/share/tirex/example-map
+	install -m 644 ${INSTALLOPTS} example-map/README              $(DESTDIR)/usr/share/tirex/example-map
+	install -m 755 ${INSTALLOPTS} -d                              $(DESTDIR)/etc/tirex/renderer/mapnik
+	install -m 644 ${INSTALLOPTS} example-map/mapnik-example.conf $(DESTDIR)/etc/tirex/renderer/mapnik/example.conf
 
 install-munin:
-	install -m 755 -g root -o root -d                              $(DESTDIR)/usr/share/munin/plugins
-	install -m 755 -g root -o root munin/*                         $(DESTDIR)/usr/share/munin/plugins
+	install -m 755 ${INSTALLOPTS} -d                              $(DESTDIR)/usr/share/munin/plugins
+	install -m 755 ${INSTALLOPTS} munin/*                         $(DESTDIR)/usr/share/munin/plugins
 
 install-nagios:
-	install -m 755 -g root -o root -d                              $(DESTDIR)/usr/lib/nagios/plugins
-	install -m 755 -g root -o root -d                              $(DESTDIR)/etc/nagios/nrpe.d
-	install -m 755 -g root -o root nagios/tirex*                   $(DESTDIR)/usr/lib/nagios/plugins
-	install -m 644 -g root -o root nagios/cfg/*.cfg                $(DESTDIR)/etc/nagios/nrpe.d
+	install -m 755 ${INSTALLOPTS} -d                              $(DESTDIR)/usr/lib/nagios/plugins
+	install -m 755 ${INSTALLOPTS} -d                              $(DESTDIR)/etc/nagios/nrpe.d
+	install -m 755 ${INSTALLOPTS} nagios/tirex*                   $(DESTDIR)/usr/lib/nagios/plugins
+	install -m 644 ${INSTALLOPTS} nagios/cfg/*.cfg                $(DESTDIR)/etc/nagios/nrpe.d
 
 install: build
-	install -m 755 -g root -o root -d $(DESTDIR)/usr/bin/
+	install -m 755 ${INSTALLOPTS} -d $(DESTDIR)/usr/bin/
 	for program in bin/*; do \
-	    install -m 755 -g root -o root $$program $(DESTDIR)/usr/bin/; \
+	    install -m 755 ${INSTALLOPTS} $$program $(DESTDIR)/usr/bin/; \
     done
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 -g root -o root backends/test                            $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 -g root -o root backends/wms                             $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 -g root -o root backends/mapserver			$(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex
-	install -m 644 -g root -o root etc/tirex.conf.dist                      $(DESTDIR)/etc/tirex/tirex.conf
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/test
-	install -m 644 -g root -o root etc/renderer/test.conf.dist              $(DESTDIR)/etc/tirex/renderer/test.conf
-	install -m 644 -g root -o root etc/renderer/test/checkerboard.conf.dist $(DESTDIR)/etc/tirex/renderer/test/checkerboard.conf
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/wms
-	install -m 755 -g root -o root -d					$(DESTDIR)/etc/tirex/renderer/mapserver
-	install -m 644 -g root -o root etc/renderer/wms.conf.dist               $(DESTDIR)/etc/tirex/renderer/wms.conf
-	install -m 644 -g root -o root etc/renderer/mapserver.conf.dist		$(DESTDIR)/etc/tirex/renderer/mapserver.conf
-	install -m 644 -g root -o root etc/renderer/wms/demowms.conf.dist       $(DESTDIR)/etc/tirex/renderer/wms/demowms.conf
-	install -m 644 -g root -o root etc/renderer/mapserver/msdemo.conf.dist	$(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.conf
-	install -m 644 -g root -o root etc/renderer/mapserver/msdemo.map	$(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.map
-	install -m 644 -g root -o root etc/renderer/mapserver/fonts.lst		$(DESTDIR)/etc/tirex/renderer/mapserver/fonts.lst
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/tirex/renderer/mapnik
-	install -m 644 -g root -o root etc/renderer/mapnik.conf.dist            $(DESTDIR)/etc/tirex/renderer/mapnik.conf
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/etc/logrotate.d
-	install -m 644 -g root -o root debian/logrotate.d-tirex-master          $(DESTDIR)/etc/logrotate.d/tirex-master
-	install -m 755 -g root -o root -d                                       $(DESTDIR)/usr/share/man/man1/
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 ${INSTALLOPTS} backends/test                            $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 ${INSTALLOPTS} backends/wms                             $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 ${INSTALLOPTS} backends/mapserver                       $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex
+	install -m 644 ${INSTALLOPTS} etc/tirex.conf.dist                      $(DESTDIR)/etc/tirex/tirex.conf
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/test
+	install -m 644 ${INSTALLOPTS} etc/renderer/test.conf.dist              $(DESTDIR)/etc/tirex/renderer/test.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/test/checkerboard.conf.dist $(DESTDIR)/etc/tirex/renderer/test/checkerboard.conf
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/wms
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/mapserver
+	install -m 644 ${INSTALLOPTS} etc/renderer/wms.conf.dist               $(DESTDIR)/etc/tirex/renderer/wms.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver.conf.dist         $(DESTDIR)/etc/tirex/renderer/mapserver.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/wms/demowms.conf.dist       $(DESTDIR)/etc/tirex/renderer/wms/demowms.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/msdemo.conf.dist  $(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/msdemo.map        $(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.map
+	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/fonts.lst         $(DESTDIR)/etc/tirex/renderer/mapserver/fonts.lst
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/mapnik
+	install -m 644 ${INSTALLOPTS} etc/renderer/mapnik.conf.dist            $(DESTDIR)/etc/tirex/renderer/mapnik.conf
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/logrotate.d
+	install -m 644 ${INSTALLOPTS} debian/logrotate.d-tirex-master          $(DESTDIR)/etc/logrotate.d/tirex-master
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/share/man/man1/
 	for program in bin/*; do \
         if grep -q "=head" $$program; then \
             pod2man $$program > $(DESTDIR)/usr/share/man/man1/`basename $$program`.1; \
         fi; \
     done
-	cd backend-mapnik; $(MAKE) DESTDIR=$(DESTDIR) install
+	cd backend-mapnik; $(MAKE) DESTDIR=$(DESTDIR) "INSTALLOPTS=${INSTALLOPTS}" install
 	$(MAKE) -f Makefile.perl install
 
 clean: Makefile.perl
@@ -93,4 +94,3 @@ htmldoc:
         mkdir -p htmldoc/`dirname $$pod` ;\
 	    pod2html --htmldir=htmldoc --podpath=lib:bin:doc --infile=$$pod --outfile=htmldoc/$${pod%.pm}.html; \
 	done
-
