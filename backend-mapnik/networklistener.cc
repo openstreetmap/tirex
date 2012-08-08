@@ -17,6 +17,7 @@
 #include <iostream>
 #include <signal.h>
 #include <strings.h>
+#include <unistd.h>
 
 #include "networklistener.h"
 #include "networkrequest.h"
