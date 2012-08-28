@@ -17,6 +17,7 @@ name=mapnik
 path=/usr/lib/tirex/backends/mapnik
 
 #  UDP port where the master can contact this renderer
+#  must be individual for each renderer
 port=9331
 
 #  number of processes that should be started

@@ -17,6 +17,7 @@ name=test
 path=/usr/lib/tirex/backends/test
 
 #  UDP port where the master can contact this renderer
+#  must be individual for each renderer
 port=9330
 
 #  number of processes that should be started
