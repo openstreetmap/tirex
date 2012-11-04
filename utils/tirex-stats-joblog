@@ -14,7 +14,7 @@ use Data::Dumper;
 
 my %opts = ();
 # Option bin-size: how many seconds each bin has in the time-histogram, default=10
-GetOptions( \%opts, 'bin-size|b=i' ) or exit(2);
+GetOptions( \%opts, 'bin-size|b=f' ) or exit(2);
 my $binsize = $opts{'bin-size'} || 10;
 
 my $stats = {
@@ -91,7 +91,7 @@ foreach my $map (keys %{$stats->{'map'}})
     print "\nRendering time histogram:\n";
     foreach my $rt (sort { $a <=> $b } keys %{$s->{'render_time'}})
     {
-        printf("  %3d-%3ds %8d\n", $rt*$binsize, ($rt+1)*$binsize, $s->{'render_time'}->{$rt});
+        printf("  %3.2f-%3.2fs %8d\n", $rt*$binsize, ($rt+1)*$binsize, $s->{'render_time'}->{$rt});
     }
 
 }
