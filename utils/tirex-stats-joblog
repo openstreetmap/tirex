@@ -6,10 +6,16 @@
 use strict;
 use warnings;
 
+use Getopt::Long qw( :config gnu_getopt );
 use List::Util;
 use JSON;
 
 use Data::Dumper;
+
+my %opts = ();
+# Option bin-size: how many seconds each bin has in the time-histogram, default=10
+GetOptions( \%opts, 'bin-size|b=i' ) or exit(2);
+my $binsize = $opts{'bin-size'} || 10;
 
 my $stats = {
     'map' => {},
@@ -47,9 +53,9 @@ while (<>)
     $s->{'zoom'}->{$fields{'z'}}++;
     $s->{'maxzoom'} = List::Util::max($s->{'maxzoom'}, 0 + $fields{'z'});
 
-    $s->{'render_time'}->{int($fields{'render_time'}/10_000)}++;
+    $s->{'render_time'}->{int($fields{'render_time'}/(1000*$binsize))}++;
 
-    if ($fields{'render_time'} > 10_000)
+    if ($fields{'render_time'} > (1000*$binsize))
     {
         $s->{'long_render_time'}->{$fields{'z'}}++;
     }
@@ -85,7 +91,7 @@ foreach my $map (keys %{$stats->{'map'}})
     print "\nRendering time histogram:\n";
     foreach my $rt (sort { $a <=> $b } keys %{$s->{'render_time'}})
     {
-        printf("  %3d-%3ds %8d\n", $rt*10, ($rt+1)*10, $s->{'render_time'}->{$rt});
+        printf("  %3d-%3ds %8d\n", $rt*$binsize, ($rt+1)*$binsize, $s->{'render_time'}->{$rt});
     }
 
 }
