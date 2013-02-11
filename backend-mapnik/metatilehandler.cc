@@ -24,9 +24,7 @@
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/expression.hpp>
-#include <mapnik/color_factory.hpp>
 #include <mapnik/image_util.hpp>
-#include <mapnik/config_error.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/box2d.hpp>
 
@@ -224,9 +222,9 @@ bool MetatileHandler::mkdirp(const char *tile_dir, int x, int y, int z) const
     {
         boost::filesystem::create_directories(path);
     }
-    catch(boost::filesystem::basic_filesystem_error<boost::filesystem::path> bfe)
+    catch(std::exception const& ex)
     {
-        error("cannot create directory %s: %s", path, bfe.what());
+        error("cannot create directory %s: %s", path, ex.what());
         return false;
     }
     return true;
@@ -286,11 +284,11 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
         resp = NULL;
         error("Mapnik datasource exception: %s", dex.what());
     }
-    catch (mapnik::config_error cer)
+    catch (std::exception const& ex)
     {
         delete resp;
         resp = NULL;
-        error("Mapnik config error: %s", cer.what());
+        error("Mapnik config error: %s", ex.what());
     }
     debug("<< MetatileHandler::render");
 
