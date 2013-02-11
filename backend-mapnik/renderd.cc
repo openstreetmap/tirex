@@ -12,9 +12,10 @@
 #include <iostream>
 #include <syslog.h>
 
+#include <mapnik/version.hpp>
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
-#include <mapnik/config_error.hpp>
+#include <exception>
 
 #include "networklistener.h"
 
@@ -30,7 +31,11 @@ bool RenderDaemon::loadFonts(const boost::filesystem::path &dir, bool recurse)
         }
         else 
         {
+#if (BOOST_FILESYSTEM_VERSION == 3)
+            mapnik::freetype_engine::register_font(itr->path().filename().string());
+#else // v2
             mapnik::freetype_engine::register_font(itr->string());
+#endif
         }
     }
     return true;
@@ -136,10 +141,10 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
         debug("added style '%s' from map %s", stylename.c_str(), configfile);
         rv = true;
     }
-    catch (mapnik::config_error cfgerr)
+    catch (std::exception const& ex)
     {
         warning("cannot add %s", configfile);
-        warning("%s", cfgerr.what());
+        warning("%s", ex.what());
     }
     return rv;
 }
@@ -187,7 +192,11 @@ RenderDaemon::RenderDaemon(int argc, char **argv)
     mPort = tmp ? atoi(tmp) : 9320;
 
     tmp = getenv("TIREX_BACKEND_CFG_plugindir");
+#if MAPNIK_VERSION >= 200200
+    if (tmp) mapnik::datasource_cache::instance().register_datasources(tmp);
+#else
     if (tmp) mapnik::datasource_cache::instance()->register_datasources(tmp);
+#endif
 
     tmp = getenv("TIREX_BACKEND_CFG_fontdir_recurse");
     bool fr = tmp ? atoi(tmp) : false;
