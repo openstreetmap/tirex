@@ -167,6 +167,7 @@ sub notify
     $self->{write_buffer} .= chr(0) x 64;
     $self->{write_buffer} = substr($self->{write_buffer}, 0, 64);
     &{$self->{request_write_callback}}();
+    delete $self->{request_write_callback};
     return 1;
 }
 
