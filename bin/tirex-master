@@ -338,20 +338,21 @@ sub main_loop
             }
             elsif ($sock == $modtile_socket)
             {
+                my $count = 0;
                 # readability on a stream socket means we can accept, but not
                 # necessarily read.
-                my $newsock = $sock->accept();
-                if (!$newsock)
-                {
-                    syslog('err', "could not accept() from mod_tile: $!");
-                }
-                else
+                while(my $newsock = $sock->accept())
                 {
                     syslog('debug', 'connection from mod_tile accepted') if ($Tirex::DEBUG);
                     $newsock->blocking(0);
                     my $source = Tirex::Source::ModTile->new($newsock);
                     $want_read->add([$newsock, $source]);
                     $source->set_timeout($now + $accept_timeout);
+                    ++$count;
+                }
+                if (!$count)
+                {
+                    syslog('err', "could not accept() from mod_tile: $!");
                 }
             }
             else 
