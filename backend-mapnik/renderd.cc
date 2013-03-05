@@ -32,7 +32,7 @@ bool RenderDaemon::loadFonts(const boost::filesystem::path &dir, bool recurse)
         else 
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
-            mapnik::freetype_engine::register_font(itr->path().filename().string());
+            mapnik::freetype_engine::register_font(itr->path().string());
 #else // v2
             mapnik::freetype_engine::register_font(itr->string());
 #endif
