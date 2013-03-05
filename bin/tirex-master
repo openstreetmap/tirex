@@ -121,6 +121,7 @@ my $modtile_socket = IO::Socket::UNIX->new(
     Local    => $modtile_socket_name,
     Blocking => 0,
 ) or die("Cannot open modtile socket: $!\n");
+$modtile_socket->blocking(0); # seems necessary sometimes, is Blocking=>0 sometimes ignored?
 chmod($Tirex::MODTILE_PERM, $modtile_socket_name) or die("can't chmod socket '$modtile_socket_name': $!");
 $want_read->add([$modtile_socket, undef]);
 syslog('info', 'Listening for mod_tile connections on %s (UNIX)', $modtile_socket_name);
