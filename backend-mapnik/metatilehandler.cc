@@ -23,7 +23,6 @@
 #include <mapnik/datasource_cache.hpp>
 #include <mapnik/font_engine_freetype.hpp>
 #include <mapnik/agg_renderer.hpp>
-#include <mapnik/expression.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
 #include <mapnik/box2d.hpp>
