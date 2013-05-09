@@ -329,36 +329,35 @@ sub next
         z   => $self->{'current_z'}
     );
 
-    $self->{'current_x'} += $self->{'mtx'};
+    $self->{'current_map_pos'}++;
 
-    if ($self->{'current_x'} > $self->{'xmax_for_current_z'})
+    if ($self->{'current_map_pos'} >= scalar(@{$self->{'maps'}}))
     {
-        $self->{'current_y'} += $self->{'mty'};
+        $self->{'current_x'} += $self->{'mtx'};
 
-        if ($self->{'current_y'} > $self->{'ymax_for_current_z'})
+        if ($self->{'current_x'} > $self->{'xmax_for_current_z'})
         {
-            $self->{'current_z'}++;
+            $self->{'current_y'} += $self->{'mty'};
 
-            if ($self->{'current_z'} > $self->{'zmax'})
+            if ($self->{'current_y'} > $self->{'ymax_for_current_z'})
             {
-                $self->{'current_map_pos'}++;
+                $self->{'current_z'}++;
 
-                if ($self->{'current_map_pos'} >= scalar(@{$self->{'maps'}}))
+                if ($self->{'current_z'} > $self->{'zmax'})
                 {
                     $self->{'finished'} = 1;
                     return $metatile;
                 }
 
-                $self->{'current_z'} = $self->{'zmin'};
+                ($self->{'ymin_for_current_z'}, $self->{'ymax_for_current_z'}) = $self->_get_range_y($self->{'current_z'});
+                ($self->{'xmin_for_current_z'}, $self->{'xmax_for_current_z'}) = $self->_get_range_x($self->{'current_z'});
+
+                $self->{'current_y'} = $self->{'ymin_for_current_z'};
             }
 
-            ($self->{'ymin_for_current_z'}, $self->{'ymax_for_current_z'}) = $self->_get_range_y($self->{'current_z'});
-            ($self->{'xmin_for_current_z'}, $self->{'xmax_for_current_z'}) = $self->_get_range_x($self->{'current_z'});
-
-            $self->{'current_y'} = $self->{'ymin_for_current_z'};
+            $self->{'current_x'} = $self->{'xmin_for_current_z'};
         }
-
-        $self->{'current_x'} = $self->{'xmin_for_current_z'};
+        $self->{'current_map_pos'} = 0;
     }
 
     $self->{'metatiles'}++;
