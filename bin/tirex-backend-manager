@@ -174,6 +174,8 @@ my $SELECT_TIMEOUT = 10;
                 unlink($pidfile); # ignore return code
                 exit(0);
             }
+
+            sleep 1;
         }
 
         syslog('info', 'HUP received, forwarding to children: %s', join(' ', keys %$workers));
@@ -362,19 +364,19 @@ sub cleanup_dead_workers
 
         # if the return code of the child is something other than $EXIT_CODE_RESTART, the renderer is disabled
         # this does not happen if the worker child was killed because of a timeout
-        if ($exit_code != $Tirex::EXIT_CODE_RESTART && ! defined $workers->{$pid}->{'hungup'})
-        {
-            my $renderer = $workers->{$pid}->{'renderer'};
-            if ($renderer->get_debug())
-            {
-                syslog('debug', 'renderer %s not disabled because we are in debug mode', $renderer->get_name());
-            }
-            else
-            {
-                $renderer->disable();
-                syslog('err', 'disabled renderer %s', $renderer->get_name());
-            }
-        }
+        #if ($exit_code != $Tirex::EXIT_CODE_RESTART && ! defined $workers->{$pid}->{'hungup'})
+        #{
+        #    my $renderer = $workers->{$pid}->{'renderer'};
+        #    if ($renderer->get_debug())
+        #    {
+        #        syslog('debug', 'renderer %s not disabled because we are in debug mode', $renderer->get_name());
+        #    }
+        #    else
+        #    {
+        #        $renderer->disable();
+        #        syslog('err', 'disabled renderer %s', $renderer->get_name());
+        #    }
+        #}
 
         $workers->{$pid}->{'handle'}->close();
         $workers->{$pid}->{'renderer'}->remove_worker($pid);
