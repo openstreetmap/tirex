@@ -10,6 +10,7 @@ use warnings;
 use Carp;
 
 use IO::Socket;
+use IO::Socket::UNIX;
 
 #-----------------------------------------------------------------------------
 package Tirex::Source::Command;
@@ -53,6 +54,7 @@ sub readable
 
     my $buf;
     my $peer = $sock->recv($buf, $Tirex::MAX_PACKET_SIZE);
+    $self->{'peer'} = $peer;
     my $args = Tirex::parse_msg($buf);
 
     foreach (keys %$args) { $self->{$_} = $args->{$_}; };
@@ -162,8 +164,9 @@ sub reply
     my $msg  = shift;
 
     $msg->{'id'} = $self->{'id'} if (defined $self->{'id'});
+    my $peer = $self->{'peer'};
 
-    return $self->{'socket'}->send( Tirex::create_msg($msg) );
+    return $self->{'socket'}->send( Tirex::create_msg($msg), 0, $peer );
 }
 
 sub name
