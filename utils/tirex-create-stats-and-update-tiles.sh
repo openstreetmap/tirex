@@ -74,7 +74,7 @@ date
 
 # stop background rendering
 if [ $STOPRENDERING != "false" ]; then
-    tirex-rendering-control --debug --stop
+    tirex-rendering-control --stop
 fi
 
 # find old statistics files (from earlier runs of this script) and remove them
@@ -114,7 +114,7 @@ fi
 
 # re-start background rendering
 if [ $STOPRENDERING != "false" ]; then
-    tirex-rendering-control --debug --continue
+    tirex-rendering-control --continue
 fi
 
 echo -n "Done "
