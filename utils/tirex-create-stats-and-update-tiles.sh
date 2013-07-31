@@ -35,7 +35,7 @@ fi
 
 # pass data to tirex
 if [ -z "$ENABLED" ]; then
-    ENABLED="true"
+    ENABLED="false"
 fi
 
 # join data from all maps instead of handling them individual
