@@ -168,24 +168,24 @@ sub format_queue
 {
     my $q = shift;
 
-    my $text = " Queue:\n  " . UNDERLINE . "Prio   Size Maxsize           Age\n" . RESET;
+    my $text = " Queue:\n  " . UNDERLINE . "Prio   Size Maxsize             Age\n" . RESET;
 
     foreach my $pq (@{$q->{'prioqueues'}})
     {
         $text .= '  ' . field('%4d', $pq->{'prio'}) . ' '
                       . field('%6d', $pq->{'size'}) . ' '
                       . field('%7d', $pq->{'maxsize'});
-        $text .= ' '  . field('%13s', duration($pq->{'age_last'}) . '-' . duration($pq->{'age_first'})) if (defined $pq->{'age_last'});
+        $text .= ' '  . field('%15s', duration($pq->{'age_last'}) . '-' . duration($pq->{'age_first'})) if (defined $pq->{'age_last'});
         $text .= "\n";
     }
 
-    $text .= '  ' . UNDERLINE . "                                 \n" . RESET;
+    $text .= '  ' . UNDERLINE . "                                   \n" . RESET;
     $text .= '   all ' . field('%6d', $q->{'size'}) . ' '
                        . field('%7d', $q->{'maxsize'});
 
     my $min_age_last  = List::Util::min(grep { defined $_ } map { $_->{'age_last' } } @{$q->{'prioqueues'}});
     my $max_age_first = List::Util::max(grep { defined $_ } map { $_->{'age_first'} } @{$q->{'prioqueues'}});
-    $text .= ' '  . field('%13s', duration($min_age_last) . '-' . duration($max_age_first))  if (defined($min_age_last) || defined($max_age_first));
+    $text .= ' '  . field('%15s', duration($min_age_last) . '-' . duration($max_age_first))  if (defined($min_age_last) || defined($max_age_first));
    
     return "$text\n\n"; 
 }
@@ -195,7 +195,7 @@ sub format_buckets
     my $rm = shift;
     my $q  = shift;
 
-    my $text = " Buckets: (load=" . $rm->{'load'} . ")\n  " . UNDERLINE . "Name                 Priority  Rendering  MaxRend  Maxload Active Can Queued           Age\n" . RESET;
+    my $text = " Buckets: (load=" . $rm->{'load'} . ")\n  " . UNDERLINE . "Name                 Priority  Rendering  MaxRend  Maxload Active Can Queued             Age\n" . RESET;
 
     foreach my $b (@{$rm->{'buckets'}}) {
         $b->{'queued'} = 0;
@@ -216,7 +216,7 @@ sub format_buckets
                       . field('%3s', $b->{'active'} ? 'yes' : RED . ' no' . RESET) . ' '
                       . field('%3s', $b->{'can_render'} ? 'yes' : ' no') . ' '
                       . field('%6d', $b->{'queued'});
-        $text .= ' '  . field('%13s', duration($min_age_last) . '-' . duration($max_age_first))  if (defined($min_age_last) || defined($max_age_first));
+        $text .= ' '  . field('%15s', duration($min_age_last) . '-' . duration($max_age_first))  if (defined($min_age_last) || defined($max_age_first));
         $text .= "\n";
     }
 
@@ -227,7 +227,7 @@ sub format_rendering
 {
     my $rm = shift;
 
-    my $text = " Currently rendering: (num=" . $rm->{'num_rendering'} . ")\n  " . UNDERLINE . "Map                           X          Y   Z Prio  Age\n" . RESET;
+    my $text = " Currently rendering: (num=" . $rm->{'num_rendering'} . ")\n  " . UNDERLINE . "Map                           X          Y   Z Prio   Age\n" . RESET;
 
     foreach my $r (@{$rm->{'rendering'}}) {
         $text .= '  ' . field("%-20s", $r->{'map'}) . ' '
@@ -235,7 +235,7 @@ sub format_rendering
                         . field("%10d", $r->{'y'})    . '  '
                         . field("%2d", $r->{'z'})     . ' '
                         . field("%4d", $r->{'prio'})  . ' '
-                        . field("%4d", $r->{'age'})
+                        . field("%5d", $r->{'age'})
                         . "\n";
     }
 

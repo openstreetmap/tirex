@@ -114,14 +114,15 @@ syslog('info', 'Listening for commands on socket %s', $master_socket_name);
 # Set up the mod_tile socket. This is where mod_tile requests come in.
 # This is a stream socket.
 my $modtile_socket_name = Tirex::Config::get('modtile_socket_name', $Tirex::MODTILE_SOCK);
+my $modtile_listen_count = int(Tirex::Config::get('modtile_listen_count', 10));
+$modtile_listen_count = 10 if($modtile_listen_count < 1 || $modtile_listen_count > 128);
 unlink($modtile_socket_name); # ignore return code, opening the socket will fail if something was wrong here
 my $modtile_socket = IO::Socket::UNIX->new(
     Type     => SOCK_STREAM,
-    Listen   => 1,
+    Listen   => $modtile_listen_count,
     Local    => $modtile_socket_name,
-    Blocking => 0,
 ) or die("Cannot open modtile socket: $!\n");
-$modtile_socket->blocking(0); # seems necessary sometimes, is Blocking=>0 sometimes ignored?
+$modtile_socket->blocking(0);
 chmod($Tirex::MODTILE_PERM, $modtile_socket_name) or die("can't chmod socket '$modtile_socket_name': $!");
 $want_read->add([$modtile_socket, undef]);
 syslog('info', 'Listening for mod_tile connections on %s (UNIX)', $modtile_socket_name);
