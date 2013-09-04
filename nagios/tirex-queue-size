@@ -36,17 +36,19 @@ if (!defined($d->{'updated'}))
 
 my $size = $d->{'queue'}->{'size'};
 
+my $q = "| size=${size};$opt_w;$opt_c;0;";
+
 if ($size > $opt_c)
 {
-    printf "CRITICAL: Queue size = %d\n", $size;
+    printf "CRITICAL: Queue size = %d$q\n", $size;
     exit 2;
 }
 elsif ($size > $opt_w)
 {
-    printf "WARNING: Queue size = %d\n", $size;
+    printf "WARNING: Queue size = %d$q\n", $size;
     exit 1;
 }
 
-printf "OK: Queue size = %d\n", $size;
+printf "OK: Queue size = %d$q\n", $size;
 exit 0;
 

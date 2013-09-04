@@ -26,12 +26,14 @@ if (!defined($d->{'updated'}))
 
 my $age = time() - $d->{'updated'};
 
+my $q = "| age=${age}s;;30;0;";
+
 if ($age > 30)
 {
-    printf "CRITICAL: Latest status update is too old (%d seconds ago)\n", $age;
+    printf "CRITICAL: Latest status update is too old (%d seconds ago)$q\n", $age;
     exit 2;
 }
 
-printf "OK: Latest status update %d seconds ago\n", $age;
+printf "OK: Latest status update %d seconds ago$q\n", $age;
 exit 0;
 
