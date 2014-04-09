@@ -104,10 +104,28 @@ sub field
 
 sub duration
 {
-    my $seconds = shift;
+    my ($seconds, $milli) = @_;
 
-    my $minutes = int($seconds/60);
-    return sprintf("%d:%02d", $minutes, $seconds-$minutes*60);
+    my $m = "";
+    if($milli && $seconds)
+    {
+      $m = sprintf(".%03d", $seconds%1000);
+      $seconds = int($seconds/1000);
+    }
+
+    if($seconds >= 3600)
+    {
+      my $h = int($seconds/3600);
+      $seconds -= $h*3600;
+      my $minutes = int($seconds/60);
+      return sprintf("%d:%02d:%02d%s", $h, $minutes, $seconds-$minutes*60, $m);
+    }
+    elsif($seconds >= 60)
+    {
+      my $minutes = int($seconds/60);
+      return sprintf("%d:%02d%s", $minutes, $seconds-$minutes*60, $m);
+    }
+    return "$seconds$m";
 }
 
 sub format_status
@@ -151,7 +169,14 @@ sub format_stats
             foreach my $map (sort keys %$statvalue)
             {
                 $text .= "  $statkey" . "[$map]=";
-                $text .= join(', ', map { $_ || 0 } @{$statvalue->{$map}});
+                if($statkey =~ /_time$/)
+                {
+                  $text .= join(', ', map { duration($_ || 0, 1) } @{$statvalue->{$map}});
+                }
+                else
+                {
+                  $text .= join(', ', map { $_ || 0 } @{$statvalue->{$map}});
+                }
                 $text .= "\n";
             }
         }
