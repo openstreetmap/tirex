@@ -30,7 +30,7 @@
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
-MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, unsigned int mtrowcol)
+MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol)
 {
     mTileDir = tiledir;
     mTileWidth = tilesize;
@@ -38,6 +38,7 @@ MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& 
     mMetaTileRows = mtrowcol;
     mMetaTileColumns = mtrowcol;
     mScaleFactor = scalefactor;
+    mBufferSize = buffersize;
     load_map(mMap, stylefile);
 
     fourpow[0] = 1;
@@ -91,6 +92,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     rr.north = (twopow[z] - y) * MERCATOR_WIDTH / twopow[z] - MERCATOR_OFFSET;
     rr.south = (twopow[z] - y - mtr) * MERCATOR_WIDTH / twopow[z] - MERCATOR_OFFSET;
     rr.scale_factor = mScaleFactor;
+    rr.buffer_size = mBufferSize;
 
     // we specify the bbox in epsg:3857, and we also want our image returned
     // in this projection. 
@@ -266,8 +268,14 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
     mapnik::box2d<double> bbox(west, south, east, north);
     mMap.resize(rr->width, rr->height);
     mMap.zoom_to_box(bbox);
-    if(mMap.buffer_size() < 128)
+    if (rr->buffer_size > -1)
+    {
+        mMap.set_buffer_size(rr->buffer_size);
+    }
+    else if (mMap.buffer_size() < 128)
+    {
         mMap.set_buffer_size(128);
+    }
 
     debug("width: %d, height:%d", rr->width, rr->height);
     RenderResponse *resp = new RenderResponse();

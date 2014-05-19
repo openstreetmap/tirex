@@ -27,6 +27,7 @@ class RenderRequest
         double north;
         double south;
         double scale_factor;
+        int buffer_size;
         unsigned int srs;
         unsigned int bbox_srs;
 };
