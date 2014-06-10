@@ -65,13 +65,14 @@ if (scalar(@ARGV) == 0)
     $ARGV[0] = Tirex::Config::get('stats_dir', '/var/lib/tirex/stats') . '/tiles.stats';
 }
 my $json = join('', <>);
+$json =~ s/\n}\n\n{/,/g; # join individual files
 
 my $stats = JSON::from_json($json);
 
 print <<"EOF";
-                           ------------------Tiles-------------------  ----------Age----------  ----------Size---------  ---------Blocks--------  Block
-Map                  Zoom       Count        Max  Empty Exist% Empty%      Min     Avg     Max      Min     Avg     Max      Min     Avg     Max  Eff %
--------------------------------------------------------------------------------------------------------------------------------------------------------
+                            ------------------Tiles-------------------  ----------Age----------  ----------Size---------  ---------Blocks--------  Block
+Map                  Zoom       Count         Max  Empty Exist% Empty%      Min     Avg     Max      Min     Avg     Max      Min     Avg     Max  Eff %
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 EOF
 
 my $sum = { count => 0, countempty => 0, maxcount => 0, minage => 999_999_999, minsize => 999_999_999, minblocks => 999_999_999, maxage => 0, maxsize => 0, maxblocks => 0 };
@@ -91,12 +92,12 @@ foreach my $map (sort(keys %$stats))
         $s->{'avgsize'}   = int($s->{'sumsize'}   / $s->{'count'});
         $s->{'avgblocks'} = int($s->{'sumblocks'} / $s->{'count'});
 
-        printf "%-20s   %2d  %10d %10d %6d %6s %6s  %7s %7s %7s  %7d %7d %7d  %7d %7d %7d     %0.f\n", $map, $z,
+        printf "%-20s   %2d  %10d %11d %6d %6s %6s  %7s %7s %7s  %7d %7d %7d  %7d %7d %7d    %3d\n", $map, $z,
             $s->{'count'}, $maxcount, $s->{'countempty'}, $exist, $empty,
             format_time($s->{'minage'}), format_time($s->{'avgage'}), format_time($s->{'maxage'}),
             $s->{'minsize'},   $s->{'avgsize'}  , $s->{'maxsize'},
             $s->{'minblocks'}, $s->{'avgblocks'}, $s->{'maxblocks'},
-            $s->{'sumsize'} / ($BLOCKSIZE * $s->{'sumblocks'}) * 100;
+            int($s->{'sumsize'} / ($BLOCKSIZE * $s->{'sumblocks'}) * 100+0.5);
 
         $sum->{'count'}      += $s->{'count'};
         $sum->{'countempty'} += $s->{'countempty'};
@@ -114,7 +115,7 @@ foreach my $map (sort(keys %$stats))
 }
 
 print <<"EOF";
--------------------------------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 EOF
 
 my $s = $sum;
@@ -125,12 +126,12 @@ $s->{'avgage'}    = int($s->{'sumage'}    / $s->{'count'});
 $s->{'avgsize'}   = int($s->{'sumsize'}   / $s->{'count'});
 $s->{'avgblocks'} = int($s->{'sumblocks'} / $s->{'count'});
 
-printf "%-20s  ALL  %10d %10d %6d %6s %6s  %7s %7s %7s  %7d %7d %7d  %7d %7d %7d     %0.f\n", 'ALL',
+printf "%-20s  ALL  %10d %11d %6d %6s %6s  %7s %7s %7s  %7d %7d %7d  %7d %7d %7d    %3d\n", 'ALL',
     $s->{'count'}, $s->{'maxcount'}, $s->{'countempty'}, $exist, $empty,
     format_time($s->{'minage'}), format_time($s->{'avgage'}), format_time($s->{'maxage'}),
     $s->{'minsize'},   $s->{'avgsize'}  , $s->{'maxsize'},
     $s->{'minblocks'}, $s->{'avgblocks'}, $s->{'maxblocks'},
-    $s->{'sumsize'} / ($BLOCKSIZE * $s->{'sumblocks'}) * 100;
+    int($s->{'sumsize'} / ($BLOCKSIZE * $s->{'sumblocks'}) * 100+0.5);
 
 exit(0);
 
