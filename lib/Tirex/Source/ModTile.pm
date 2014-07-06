@@ -118,8 +118,8 @@ sub make_job
     my $job = eval {
         Tirex::Job->new(
             metatile => $metatile,
-            # enum protoCmd { cmdIgnore, cmdRender, cmdDirty, cmdDone, cmdNotDone, cmdRenderPrio, cmdRenderBulk };
-            'prio' => [99, 2, 10, 99, 99, 1, 20]->[$self->{'cmd'}] 
+            # enum protoCmd { cmdIgnore, cmdRender, cmdDirty, cmdDone, cmdNotDone, cmdRenderPrio, cmdRenderBulk, cmdRenderLow };
+            'prio' => [99, 2, 10, 99, 99, 1, 20, 25]->[$self->{'cmd'}] 
         );
     };
 
@@ -157,7 +157,7 @@ sub notify
     my $self = shift;
     my $job  = shift;
 
-    # enum protoCmd { cmdIgnore, cmdRender, cmdDirty, cmdDone, cmdNotDone, cmdRenderPrio, cmdRenderBulk };
+    # enum protoCmd { cmdIgnore, cmdRender, cmdDirty, cmdDone, cmdNotDone, cmdRenderPrio, cmdRenderBulk, cmdRenderLow };
     $self->{write_buffer} = pack("lllllZ*", 
         2, # protocol version
         $job->get_success() ? 3 : 4, # cmdDone or cmdNotDone
