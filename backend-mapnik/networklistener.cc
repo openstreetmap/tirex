@@ -130,10 +130,10 @@ void NetworkListener::run()
             continue;
         }
 
-        n = recvfrom(mSocket, buf, MAX_DGRAM, 0, (struct sockaddr *) &client, &fromlen);
+        n = recvfrom(mSocket, buf, MAX_DGRAM, MSG_DONTWAIT, (struct sockaddr *) &client, &fromlen);
         if (n < 0) 
         {
-            if (errno != EINTR)
+            if (errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR)
             {
                 error("error while reading data: %s", strerror(errno));
                 if (errcnt++ > 10)
