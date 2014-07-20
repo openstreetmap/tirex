@@ -55,6 +55,9 @@ fi
 
 #-----------------------------------------------------------------------------
 
+# be portable (see: https://www.gnu.org/software/coreutils/faq/coreutils-faq.html#Sort-does-not-sort-in-normal-order_0021)
+LC_ALL=C ; export LC_ALL
+
 # append output to logfile
 exec >>/var/log/tirex/tirex-create-stats-and-update-tiles.log 2>&1
 
