@@ -54,8 +54,8 @@ class MetatileHandler : public RequestHandler
 
     private:
 
-    long long fourpow[MAXZOOM];
-    long long twopow[MAXZOOM];
+    uint64_t fourpow[MAXZOOM];
+    uint64_t twopow[MAXZOOM];
     const RenderResponse *render(const RenderRequest *rr);
 
     unsigned int mTileWidth;
