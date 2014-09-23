@@ -62,7 +62,6 @@ class MetatileHandler : public RequestHandler
     unsigned int mTileHeight;
     unsigned int mMetaTileRows;
     unsigned int mMetaTileColumns;
-    unsigned int mTileSize;
     int mBufferSize;
     double mScaleFactor;
     std::string mTileDir;
