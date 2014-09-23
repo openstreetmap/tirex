@@ -27,7 +27,7 @@
 extern "C" 
 {
     static volatile sig_atomic_t gHangupOccurred;
-    static void hangup_signal_handler(int param) { param = param; gHangupOccurred = 1; }
+    static void hangup_signal_handler(int /*param*/) { gHangupOccurred = 1; }
     static void install_sighup_handler(bool with_restart) 
     {
         struct sigaction action;
