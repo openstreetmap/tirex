@@ -118,7 +118,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     {
         struct meta_layout m;
         struct entry offsets[mMetaTileRows * mMetaTileColumns];
-        std::string rawpng[mMetaTileRows * mMetaTileColumns];
+        std::vector<std::string> rawpng(mMetaTileRows * mMetaTileColumns);
         memset(&m, 0, sizeof(m));
         memset(&offsets, 0, sizeof(offsets));
 
