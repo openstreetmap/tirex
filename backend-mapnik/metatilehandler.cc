@@ -27,6 +27,11 @@
 #include <mapnik/load_map.hpp>
 #include <mapnik/box2d.hpp>
 
+#if MAPNIK_VERSION >= 300000
+# include <mapnik/datasource.hpp>
+# include <mapnik/projection.hpp>
+#endif
+
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
