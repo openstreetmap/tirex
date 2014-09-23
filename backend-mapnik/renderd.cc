@@ -154,13 +154,11 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     return rv;
 }
 
-RenderDaemon::RenderDaemon(int argc, char **argv)
+RenderDaemon::RenderDaemon(int argc, char **argv) :
+    mArgc(argc),
+    mArgv(argv),
+    mProgramName(argc ? argv[0] : "")
 {
-    // store for later use in setProgramName
-    mArgc = argc;
-    mArgv = argv;
-    if (argc) mProgramName.assign(argv[0]);
-
     setStatus("initializing");
 
     char *tmp = getenv("TIREX_BACKEND_DEBUG");

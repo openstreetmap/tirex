@@ -9,9 +9,9 @@
 
 #include "networkrequest.h"
 
-NetworkRequest::NetworkRequest()
+NetworkRequest::NetworkRequest() :
+    mDefaultType("metatile_render_request")
 {
-    mDefaultType.assign("metatile_render_request");
 }
 
 NetworkRequest::~NetworkRequest()

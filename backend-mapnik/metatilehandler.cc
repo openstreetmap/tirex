@@ -35,15 +35,15 @@
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
-MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol)
+MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol) :
+    mTileWidth(tilesize),
+    mTileHeight(tilesize),
+    mMetaTileRows(mtrowcol),
+    mMetaTileColumns(mtrowcol),
+    mBufferSize(buffersize),
+    mScaleFactor(scalefactor),
+    mTileDir(tiledir)
 {
-    mTileDir = tiledir;
-    mTileWidth = tilesize;
-    mTileHeight = tilesize;
-    mMetaTileRows = mtrowcol;
-    mMetaTileColumns = mtrowcol;
-    mScaleFactor = scalefactor;
-    mBufferSize = buffersize;
     load_map(mMap, stylefile);
 
     fourpow[0] = 1;

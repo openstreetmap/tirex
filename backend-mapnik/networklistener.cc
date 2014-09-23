@@ -46,10 +46,11 @@ extern "C"
     }
 }
 
-NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<std::string, RequestHandler *> *handlers)
+NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<std::string, RequestHandler *> *handlers) :
+    mpRequestHandlers(handlers),
+    mSocket(-1),
+    mParent(parentfd)
 {
-    mpRequestHandlers = handlers;
-
     socklen_t length;
     struct sockaddr_in server;
 
@@ -72,7 +73,6 @@ NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<st
         if (bind(mSocket,(struct sockaddr *) &server, length) < 0) die("cannot bind to port %d: %s", port, strerror(errno));
         debug("bound to port %d", port);
     }
-    mParent = parentfd;
 }
 
 NetworkListener::~NetworkListener()

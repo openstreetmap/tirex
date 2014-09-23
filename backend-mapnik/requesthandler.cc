@@ -12,9 +12,9 @@
 #include <vector>
 #include <stdarg.h>
 
-RequestHandler::RequestHandler()
+RequestHandler::RequestHandler() :
+    mpStatusReceiver(NULL)
 {
-    mpStatusReceiver = NULL;
 }
 
 void RequestHandler::updateStatus(const char *fmt, ...) const
