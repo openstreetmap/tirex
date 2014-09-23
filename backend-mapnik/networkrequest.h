@@ -11,7 +11,7 @@
  * NetworkRequest
  *
  * A request as read from the network interface.
- * 
+ *
  * @see NetworkMessage for details.
  */
 

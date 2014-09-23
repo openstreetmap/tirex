@@ -29,7 +29,7 @@ bool RenderDaemon::loadFonts(const boost::filesystem::path &dir, bool recurse)
         {
             if (!loadFonts(*itr, true)) return false;
         }
-        else 
+        else
         {
 #if (BOOST_FILESYSTEM_VERSION == 3)
             mapnik::freetype_engine::register_font(itr->path().string());
@@ -60,7 +60,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     unsigned int mtrowcol = 8;
     double scalefactor = 1.0;
     int buffersize = -1;
-    
+
     while (char *line = fgets(linebuf, sizeof(linebuf), f))
     {
         while (isspace(*line)) line++;
@@ -223,7 +223,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
 
 }
 
-RenderDaemon::~RenderDaemon() 
+RenderDaemon::~RenderDaemon()
 {
 }
 

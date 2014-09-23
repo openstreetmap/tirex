@@ -59,7 +59,7 @@ MetatileHandler::~MetatileHandler()
 {
 }
 
-const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *request) 
+const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *request)
 {
     debug(">> MetatileHandler::handleRequest");
     timeval start, end;
@@ -100,7 +100,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     rr.buffer_size = mBufferSize;
 
     // we specify the bbox in epsg:3857, and we also want our image returned
-    // in this projection. 
+    // in this projection.
     rr.bbox_srs = 3857;
     rr.srs = 3857;
 
@@ -157,7 +157,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             {
                 if ((col < mtc) && (row < mtr))
                 {
-                    mapnik::image_view<mapnik::image_data_32> view(col * mTileWidth, 
+                    mapnik::image_view<mapnik::image_data_32> view(col * mTileWidth,
                         row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
                     rawpng[index] = mapnik::save_to_string(view, "png256");
                     offsets[index].offset = offset;
@@ -236,7 +236,7 @@ bool MetatileHandler::mkdirp(const char *tile_dir, int x, int y, int z) const
     return true;
 }
 
-const RenderResponse *MetatileHandler::render(const RenderRequest *rr) 
+const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
 {
     debug(">> MetatileHandler::render");
     char init[255];

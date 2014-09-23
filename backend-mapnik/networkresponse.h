@@ -11,7 +11,7 @@
  * NetworkResponse
  *
  * A response as written to the network interface.
- * 
+ *
  * @see NetworkMessage for details.
  */
 

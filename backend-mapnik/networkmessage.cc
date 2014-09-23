@@ -32,7 +32,7 @@ int NetworkMessage::getParam(const std::string &key, int def) const
     return (i == mParams.end() ? def : atoi(i->second.c_str()));
 }
 
-void NetworkMessage::setParam(const std::string &key, const std::string &value) 
+void NetworkMessage::setParam(const std::string &key, const std::string &value)
 {
     mParams[key] = value;
 }
@@ -73,7 +73,7 @@ bool NetworkMessage::build(std::string &buffer) const
 {
     debug(">> NetworkMessage::build");
     buffer.clear();
-    for (std::map<std::string, std::string>::const_iterator i = 
+    for (std::map<std::string, std::string>::const_iterator i =
         mParams.begin(); i != mParams.end(); i++)
     {
         buffer.append(i->first);

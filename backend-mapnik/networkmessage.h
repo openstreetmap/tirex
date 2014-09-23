@@ -16,7 +16,7 @@
  * a plain-text value. Keys must not contain equal signs; lines without
  * equal signs are ignored; the order does not matter; and neither keys
  * nor values may contain CR or LF.
- * 
+ *
  * Example message:
  *
  * request=render

@@ -17,7 +17,7 @@
 #ifndef renderrequest_included
 #define renderrequest_included
 
-class RenderRequest 
+class RenderRequest
 {
     public:
         unsigned int width;

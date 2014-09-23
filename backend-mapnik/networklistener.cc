@@ -24,11 +24,11 @@
 #include "networkresponse.h"
 
 // stuff for handling the hangup signal properly
-extern "C" 
+extern "C"
 {
     static volatile sig_atomic_t gHangupOccurred;
     static void hangup_signal_handler(int /*param*/) { gHangupOccurred = 1; }
-    static void install_sighup_handler(bool with_restart) 
+    static void install_sighup_handler(bool with_restart)
     {
         struct sigaction action;
         sigemptyset(&action.sa_mask);
@@ -93,7 +93,7 @@ void NetworkListener::run()
     time_t last_alive_sent = 0;
     install_sighup_handler(false);
     ignore_sigpipe();
-    while (!gHangupOccurred) 
+    while (!gHangupOccurred)
     {
         timeval to = { 5, 0 };
         FD_SET(mSocket, &rfds);
@@ -102,21 +102,21 @@ void NetworkListener::run()
         int n = select(mSocket + 1, &rfds, NULL, NULL, &to);
 
         // send alive message to parent.
-        if (mParent > -1) 
+        if (mParent > -1)
         {
             time_t now = time(NULL);
             if (now >= last_alive_sent + 5)
             {
-                // we really are not interested in the write() result since 
+                // we really are not interested in the write() result since
                 // the parent is going to kill us anyway if it does not recieve
-                // an alive message. The following construction gets rid of 
+                // an alive message. The following construction gets rid of
                 // the compiler warning about not using the return value.
                 if (write(mParent, static_cast<const void *>("alive"), 5)) {};
                 last_alive_sent = now;
             }
         }
 
-        if (n <= 0) 
+        if (n <= 0)
         {
             if (n < 0 && errno != EINTR)
             {
@@ -131,7 +131,7 @@ void NetworkListener::run()
         }
 
         n = recvfrom(mSocket, buf, MAX_DGRAM, MSG_DONTWAIT, reinterpret_cast<sockaddr *>(&client), &fromlen);
-        if (n < 0) 
+        if (n < 0)
         {
             if (errno != EWOULDBLOCK && errno != EAGAIN && errno != EINTR)
             {
@@ -165,7 +165,7 @@ void NetworkListener::run()
                     if (!(resp = h->second->handleRequest(req)))
                     {
                         error("handler returned null");
-                        resp = NetworkResponse::makeErrorResponse(req, 
+                        resp = NetworkResponse::makeErrorResponse(req,
                             "Handler for map '%s' encountered an error", req->getParam("map", "").c_str());
                     }
                 }
