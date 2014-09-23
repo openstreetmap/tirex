@@ -28,8 +28,7 @@ class Mortal
 
     void die(const char *fmt, ...)
     {
-        char *cpy;
-        cpy = (char *) malloc(strlen(fmt) + 256);
+        char *cpy = static_cast<char *>(malloc(strlen(fmt) + 256));
         sprintf(cpy, "%s\n", fmt);
         va_list ap;
         va_start(ap, fmt);

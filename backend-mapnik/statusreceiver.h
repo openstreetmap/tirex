@@ -21,6 +21,8 @@ class StatusReceiver
 {
     public:
 
+    virtual ~StatusReceiver() {
+    }
     virtual void setStatus(const char *status) = 0;
 };
 

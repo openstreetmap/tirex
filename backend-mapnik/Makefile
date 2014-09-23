@@ -1,6 +1,7 @@
 INSTALLOPTS=-g root -o root
-CFLAGS +=   -Wall -Wextra -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+CFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
 CXXFLAGS = $(CFLAGS) `mapnik-config --cflags`
+CXXFLAGS += -Wall -Wextra -pedantic -Wredundant-decls -Wdisabled-optimization -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wold-style-cast
 LDFLAGS= `mapnik-config --libs --ldflags --dep-libs` 
 
 backend-mapnik: renderd.o metatilehandler.o networklistener.o networkmessage.o networkrequest.o networkresponse.o debuggable.o requesthandler.o

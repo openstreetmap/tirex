@@ -37,6 +37,9 @@ class RequestHandler : public Debuggable
     public:
 
     RequestHandler();
+    virtual ~RequestHandler() {
+    }
+
     void setStatusReceiver(StatusReceiver *sr) { mpStatusReceiver = sr; }
     virtual const std::string getRequestType() const = 0;
     virtual const NetworkResponse *handleRequest(const NetworkRequest *request) = 0;

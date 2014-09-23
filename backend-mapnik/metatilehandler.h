@@ -38,7 +38,7 @@ struct meta_layout {
     char magic[4];
     int count; // METATILE ^ 2
     int x, y, z; // lowest x,y of this metatile, plus z
-    struct entry index[]; // count entries
+    entry index[]; // count entries
 };
 
 class MetatileHandler : public RequestHandler

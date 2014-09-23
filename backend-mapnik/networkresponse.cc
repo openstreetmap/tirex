@@ -42,5 +42,5 @@ const NetworkResponse *NetworkResponse::makeErrorResponse(const NetworkRequest *
     rv->setParam("errmsg", buffer);
     rv->setParam("result", "error");
     return rv;
-};
+}
 

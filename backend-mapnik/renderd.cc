@@ -225,7 +225,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
 
 RenderDaemon::~RenderDaemon() 
 {
-};
+}
 
 void RenderDaemon::run()
 {

@@ -62,7 +62,7 @@ MetatileHandler::~MetatileHandler()
 const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *request) 
 {
     debug(">> MetatileHandler::handleRequest");
-    struct timeval start, end;
+    timeval start, end;
     gettimeofday(&start, NULL);
 
     int x = request->getParam("x", -1);
@@ -121,8 +121,8 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     }
     else
     {
-        struct meta_layout m;
-        struct entry offsets[mMetaTileRows * mMetaTileColumns];
+        meta_layout m;
+        entry offsets[mMetaTileRows * mMetaTileColumns];
         std::vector<std::string> rawpng(mMetaTileRows * mMetaTileColumns);
         memset(&m, 0, sizeof(m));
         memset(&offsets, 0, sizeof(offsets));
@@ -149,7 +149,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
         char tmpfilename[PATH_MAX];
         snprintf(tmpfilename, PATH_MAX, "%s.%d.tmp", metafilename, getpid());
         std::ofstream outfile(tmpfilename, std::ios::out | std::ios::binary | std::ios::trunc);
-        outfile.write((const char*) &m, sizeof(m));
+        outfile.write(reinterpret_cast<const char*>(&m), sizeof(m));
 
         for (unsigned int col = 0; col < mMetaTileColumns; col++)
         {
@@ -172,7 +172,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             }
         }
 
-        outfile.write((const char*) &offsets, sizeof(offsets));
+        outfile.write(reinterpret_cast<const char*>(&offsets), sizeof(offsets));
 
         for (int i=0; i < index; i++)
         {
