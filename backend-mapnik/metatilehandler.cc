@@ -290,7 +290,7 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
     {
         renderer.apply();
     }
-    catch (mapnik::datasource_exception dex)
+    catch (mapnik::datasource_exception const& dex)
     {
         delete resp;
         resp = NULL;
