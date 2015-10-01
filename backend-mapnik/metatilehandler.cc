@@ -122,10 +122,11 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     else
     {
         meta_layout m;
-        entry offsets[mMetaTileRows * mMetaTileColumns];
-        std::vector<std::string> rawpng(mMetaTileRows * mMetaTileColumns);
+        int numtiles = mMetaTileRows * mMetaTileColumns;
+        entry *offsets = static_cast<entry *>(malloc(sizeof(entry) * numtiles));
+        std::vector<std::string> rawpng(numtiles);
         memset(&m, 0, sizeof(m));
-        memset(&offsets, 0, sizeof(offsets));
+        memset(&offsets, 0, numtiles * sizeof(entry));
 
         // it seems that mod_tile expects us to always put the theoretical
         // number of tiles in this meta tile, not the real number (in standard
@@ -136,7 +137,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
         m.x = x;
         m.y = y;
         m.z = z;
-        size_t offset = sizeof(m) + sizeof(offsets);
+        size_t offset = sizeof(m) + numtiles * sizeof(entry);
         int index = 0;
 
         char metafilename[PATH_MAX];
@@ -172,7 +173,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             }
         }
 
-        outfile.write(reinterpret_cast<const char*>(&offsets), sizeof(offsets));
+        outfile.write(reinterpret_cast<const char*>(offsets), numtiles * sizeof(entry));
 
         for (int i=0; i < index; i++)
         {

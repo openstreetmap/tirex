@@ -38,7 +38,7 @@ struct meta_layout {
     char magic[4];
     int count; // METATILE ^ 2
     int x, y, z; // lowest x,y of this metatile, plus z
-    entry index[]; // count entries
+    // entry index[]; // count entries
 };
 
 class MetatileHandler : public RequestHandler
@@ -54,8 +54,8 @@ class MetatileHandler : public RequestHandler
 
     private:
 
-    uint64_t fourpow[MAXZOOM];
-    uint64_t twopow[MAXZOOM];
+    int64_t fourpow[MAXZOOM];
+    int64_t twopow[MAXZOOM];
     const RenderResponse *render(const RenderRequest *rr);
 
     unsigned int mTileWidth;
