@@ -35,14 +35,15 @@
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
-MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol) :
+MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string& imagetype) :
     mTileWidth(tilesize),
     mTileHeight(tilesize),
     mMetaTileRows(mtrowcol),
     mMetaTileColumns(mtrowcol),
+    mImageType(imagetype),
     mBufferSize(buffersize),
     mScaleFactor(scalefactor),
-    mTileDir(tiledir)
+    mTileDir(tiledir) 
 {
     load_map(mMap, stylefile);
 
@@ -160,7 +161,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
                 {
                     mapnik::image_view<mapnik::image_data_32> view(col * mTileWidth,
                         row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
-                    rawpng[index] = mapnik::save_to_string(view, "png256");
+                    rawpng[index] = mapnik::save_to_string(view, mImageType);
                     offsets[index].offset = offset;
                     offset += offsets[index].size = rawpng[index].length();
                 }
@@ -262,13 +263,13 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
         z = 0.0;
         pt.forward(east, north, z);
 
-        debug("rendering for %f,%f - %f,%f in SRS %d (projected from %f,%f - %f,%f in SRS %d) to %dx%dpx",
-            west, south, east, north, rr->srs, rr->west, rr->south, rr->east, rr->north, rr->bbox_srs, rr->width, rr->height);
+        debug("rendering format %s for %f,%f - %f,%f in SRS %d (projected from %f,%f - %f,%f in SRS %d) to %dx%dpx",
+            mImageType.c_str(), west, south, east, north, rr->srs, rr->west, rr->south, rr->east, rr->north, rr->bbox_srs, rr->width, rr->height);
     }
     else
     {
-        debug("rendering area %f,%f - %f,%f in SRS %d to %dx%d px",
-            west, south, east, north, rr->srs, rr->width, rr->height);
+        debug("rendering format %s for area %f,%f - %f,%f in SRS %d to %dx%d px",
+            mImageType.c_str(), west, south, east, north, rr->srs, rr->width, rr->height);
     }
 
     mapnik::box2d<double> bbox(west, south, east, north);

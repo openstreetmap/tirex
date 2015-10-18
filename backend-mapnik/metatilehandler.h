@@ -45,7 +45,7 @@ class MetatileHandler : public RequestHandler
 {
     public:
 
-    MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol);
+    MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string & imagetype);
     ~MetatileHandler();
     const NetworkResponse *handleRequest(const NetworkRequest *request);
     void xyz_to_meta(char *path, size_t len, const char *tile_dir, int x, int y, int z) const;
@@ -62,6 +62,7 @@ class MetatileHandler : public RequestHandler
     unsigned int mTileHeight;
     unsigned int mMetaTileRows;
     unsigned int mMetaTileColumns;
+    std::string mImageType;
     int mBufferSize;
     double mScaleFactor;
     std::string mTileDir;

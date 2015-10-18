@@ -60,11 +60,15 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     unsigned int mtrowcol = 8;
     double scalefactor = 1.0;
     int buffersize = -1;
+    std::string imagetype = "png256";
+    int lineno = 0;
 
     while (char *line = fgets(linebuf, sizeof(linebuf), f))
     {
+        lineno++;
         while (isspace(*line)) line++;
         if (*line == '#') continue;
+        if (!*line) continue;
         char *eq = strchr(line, '=');
         if (eq)
         {
@@ -105,6 +109,26 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
             {
                 stylename.assign(eq);
             }
+            else if (!strcmp(line, "imagetype"))
+            {
+                imagetype.assign(eq);
+            }
+            else if (!strcmp(line, "minz"))
+            {
+                // no error
+            }
+            else if (!strcmp(line, "maxz"))
+            {
+                // no error
+            }
+            else
+            {
+                warning("parse error on line %d of config file %s", lineno, configfile);
+            }
+        }
+        else
+        {
+            warning("parse error on line %d of config file %s", lineno, configfile);
         }
     }
     fclose(f);
@@ -141,7 +165,8 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
 
     try
     {
-        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile, tilesize, scalefactor, buffersize, mtrowcol);
+        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile, tilesize, 
+            scalefactor, buffersize, mtrowcol, imagetype);
         mHandlerMap[stylename]->setStatusReceiver(this);
         debug("added style '%s' from map %s", stylename.c_str(), configfile);
         rv = true;
