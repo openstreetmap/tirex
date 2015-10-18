@@ -126,7 +126,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
         entry *offsets = static_cast<entry *>(malloc(sizeof(entry) * numtiles));
         std::vector<std::string> rawpng(numtiles);
         memset(&m, 0, sizeof(m));
-        memset(&offsets, 0, numtiles * sizeof(entry));
+        memset(offsets, 0, numtiles * sizeof(entry));
 
         // it seems that mod_tile expects us to always put the theoretical
         // number of tiles in this meta tile, not the real number (in standard
