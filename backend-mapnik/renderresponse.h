@@ -17,7 +17,14 @@
 #define renderresponse_included
 
 #include <mapnik/version.hpp>
+#if MAPNIK_VERSION >= 300000
+#define image_data_32 image_rgba8
+#define image_32 image_rgba8
+#include <mapnik/image.hpp>
+#include <mapnik/image_view_any.hpp>
+#else
 #include <mapnik/graphics.hpp>
+#endif
 
 class RenderResponse
 {

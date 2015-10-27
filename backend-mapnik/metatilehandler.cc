@@ -159,8 +159,14 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             {
                 if ((col < mtc) && (row < mtr))
                 {
+#if MAPNIK_VERSION >= 300000
+                    mapnik::image_view<mapnik::image<mapnik::rgba8_t>> vw1(col * mTileWidth,
+                        row * mTileHeight, mTileWidth, mTileHeight, *(rrs->image));
+                    struct mapnik::image_view_any view(vw1);
+#else
                     mapnik::image_view<mapnik::image_data_32> view(col * mTileWidth,
                         row * mTileHeight, mTileWidth, mTileHeight, rrs->image->data());
+#endif
                     rawpng[index] = mapnik::save_to_string(view, mImageType);
                     offsets[index].offset = offset;
                     offset += offsets[index].size = rawpng[index].length();
