@@ -105,6 +105,10 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
             {
                 mtrowcol = atoi(eq);
             }
+            else if (!strcmp(line, "maxrequests"))
+            {
+                mMaxRequests  = atoi(eq);
+            }
             else if (!strcmp(line, "name"))
             {
                 stylename.assign(eq);
@@ -186,6 +190,8 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
 {
     setStatus("initializing");
 
+    mMaxRequests = -1;
+
     char *tmp = getenv("TIREX_BACKEND_DEBUG");
     Debuggable::msDebugLogging = tmp ? true : false;
 
@@ -254,7 +260,7 @@ RenderDaemon::~RenderDaemon()
 
 void RenderDaemon::run()
 {
-    NetworkListener listener(mPort, mSocketFd, mParentFd, &mHandlerMap);
+    NetworkListener listener(mPort, mSocketFd, mParentFd, &mHandlerMap, mMaxRequests);
     setStatus("idle");
     listener.run();
 }

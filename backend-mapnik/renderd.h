@@ -30,6 +30,7 @@ class RenderDaemon : public Mortal, public Debuggable, public StatusReceiver
     int mParentFd;
     std::map<std::string, RequestHandler *> mHandlerMap;
     int mArgc;
+    int mMaxRequests;
     char **mArgv;
     std::string mProgramName;
 

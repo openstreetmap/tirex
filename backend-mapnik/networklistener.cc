@@ -46,11 +46,13 @@ extern "C"
     }
 }
 
-NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<std::string, RequestHandler *> *handlers) :
+NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<std::string, RequestHandler *> *handlers, int maxreq) :
     mpRequestHandlers(handlers),
     mSocket(-1),
-    mParent(parentfd)
+    mParent(parentfd),
+    mMaxRequests(maxreq)
 {
+    mRequestCount = 0;
     socklen_t length;
     sockaddr_in server;
 
@@ -188,6 +190,11 @@ void NetworkListener::run()
             }
             delete resp;
             delete req;
+            if (mMaxRequests > -1 && ++mRequestCount > mMaxRequests) 
+            {
+                error("maxrequests reached, terminating");
+		exit(1);
+            }
         }
     }
 }

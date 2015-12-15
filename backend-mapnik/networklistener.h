@@ -32,7 +32,7 @@ class NetworkListener : public Mortal, public Debuggable
 
     public:
 
-    NetworkListener(int port, int sockfd, int parentfd, std::map<std::string, RequestHandler *> *handlers);
+    NetworkListener(int port, int sockfd, int parentfd, std::map<std::string, RequestHandler *> *handlers, int maxreq);
     ~NetworkListener();
 
     void run();
@@ -42,6 +42,8 @@ class NetworkListener : public Mortal, public Debuggable
     std::map<std::string, RequestHandler *> *mpRequestHandlers;
     int mSocket;
     int mParent;
+    int mMaxRequests;
+    int mRequestCount;
 
 };
 #endif
