@@ -203,6 +203,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
         char buffer[20];
         snprintf(buffer, 20, "%ld", (end.tv_sec-start.tv_sec) * 1000 + (end.tv_usec - start.tv_usec) / 1000);
         resp->setParam("render_time", buffer);
+        free(offsets);
     }
     debug("<< MetatileHandler::handleRequest");
     return resp;
