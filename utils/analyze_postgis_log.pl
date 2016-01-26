@@ -110,9 +110,9 @@ sub process_statement
 {
     my ($stmt, $dur) = @_;
     $stmt =~ s/\s+/ /g;
-    if ($stmt =~ /SELECT.*from (\(.*\) as \S+) WHERE \S+ && SetSRID\('BOX3D\((\S+) (\S+),(\S+) (\S+)\)'::box3d,\s*(4326|900913)\)/)
+    if ($stmt =~ /SELECT.*from (\(.*\) as \S+) WHERE \S+ && (ST_)?SetSRID\('BOX3D\((\S+) (\S+),(\S+) (\S+)\)'::box3d,\s*(4326|900913)\)/i)
     {
-        my ($datasource, $left, $bottom, $right, $top, $proj) = ($1, $2, $3, $4, $5, $6);
+        my ($datasource, $left, $bottom, $right, $top, $proj) = ($1, $3, $4, $5, $6, $7);
         my $zoom = guessZoomLevel($left, $bottom, $right, $top, $proj);
         $timings->{$datasource}->{$zoom}->{count} ++;
         $timings->{$datasource}->{$zoom}->{sum} += $dur;
