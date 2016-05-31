@@ -35,6 +35,7 @@ use File::stat;
 use Getopt::Long qw( :config gnu_getopt );
 use IO::File;
 use IO::Handle;
+use IO::Seekable;
 use JSON;
 use List::Util qw();
 use Pod::Usage qw();
@@ -81,7 +82,7 @@ if ($opts{'stats'} eq '-')
 }
 elsif ($opts{'stats'})
 {
-    $fh_stats = IO::File->new($opts{'stats'}, 'w') or die("Can't open stats file '$opts{'stats'}': $!\n");
+    $fh_stats = IO::File->new($opts{'stats'}, 'a') or die("Can't open stats file '$opts{'stats'}': $!\n");
 }
 
 die("missing map parameter\n") unless (defined $ARGV[0]);
@@ -129,6 +130,11 @@ foreach my $dir (@directories)
 if ($fh_stats)
 {
     my $json = JSON::to_json(\%stats, { pretty => 1 });
+    unless ($opts{'stats'} eq '-')
+    {
+        $fh_stats->truncate(0);
+        $fh_stats->seek(0, SEEK_SET);
+    }
     $fh_stats->print("$json\n");
 }
 
