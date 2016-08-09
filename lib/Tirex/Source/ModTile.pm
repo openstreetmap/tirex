@@ -111,7 +111,7 @@ sub make_job
 
     # return error if we cannot create the metatile
     if ($@) {
-        ::syslog('warning', $@) if ($Tirex::DEBUG);
+        ::syslog('warning', $@);
         return;
     }
 
@@ -124,7 +124,10 @@ sub make_job
     };
 
     # return error if we can't create the job
-    return if ($@);
+    if ($@) {
+        ::syslog('warning', $@);
+        return;
+    }
 
     $job->add_notify($self);
 
