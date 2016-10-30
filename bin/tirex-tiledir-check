@@ -49,7 +49,7 @@ use Tirex::Map;
 my $EMPTY_TILE_SIZE = 7124;
 
 my %opts = ( list => '', stats => '' );
-GetOptions( \%opts, 'help|h', 'config|c=s', 'list|l=s', 'stats|s=s' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'config|c=s', 'list|l=s', 'stats|s=s', 'minz|z=i', 'maxz|Z=i' ) or exit(2);
 
 if ($opts{'help'})
 {
@@ -112,14 +112,15 @@ my %stats;
 my $exitcode = 0;
 my $list = '';
 
-my @directories = (
-    glob("$mtdir/[0-9]"), 
-    glob("$mtdir/[1-9][0-9]"), 
-);
+my $minz = $opts{'minz'};
+$minz = 0 unless defined($minz);
+my $maxz = $opts{'maxz'};
+$minz = 19 unless defined($maxz);
 
-foreach my $dir (@directories)
+for (my $i=$minz; $i<=$maxz; $i++)
 {
-    find({ wanted => \&process, follow_fast => 1, no_chdir => 1 }, $dir);
+    next unless (-d "$mtdir/$i");
+    find({ wanted => \&process, follow_fast => 1, no_chdir => 1 }, "$mtdir/$i");
     if ($fh_list)
     {
         $fh_list->print($list);
