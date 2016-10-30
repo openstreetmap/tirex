@@ -1,4 +1,4 @@
-#!/usr/bib/perl
+#!/usr/bin/perl
 
 # script to reset the time of all expired meta tiles to 1970-01-01,
 # reads an expiry output file from osm2pgsql. 
