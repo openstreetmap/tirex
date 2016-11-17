@@ -14,10 +14,14 @@ use File::Touch;
 use Getopt::Long;
 
 my $minz = 12;
+# time offset in days to go back from current date
+# when touching files 8000 ~= 22 years 
+my $timeoffset = 8000;
 my $map = undef;
 my $configdir = "/etc/tirex";
+my $dryrun = 0;
 
-GetOptions("map=s" => \$map, "minzoom=i" => \$minz, "config=s" => \$configdir);
+GetOptions("map=s" => \$map, "minzoom=i" => \$minz, "config=s" => \$configdir, "dryrun" => \$dryrun);
 
 Tirex::Config::init("$configdir/tirex.conf");
 Tirex::Renderer->read_config_dir($configdir);
@@ -29,14 +33,13 @@ if (!defined($map))
 }
 
 my $limit = [];
-my $processed = {};
 my $touched = 0;
 my $nonex = 0;
 my $recursed = 0;
-my $already = 0;
 my $reported = 0;
 for (my $i=0; $i<21; $i++) { $limit->[$i] = 2**$i-1 };
-my $touch = File::Touch->new(time => 0, no_create => 1);
+my $time = time() - $timeoffset * 86400;
+my $touch = File::Touch->new(mtime_only => 1, time => $time, no_create => 1);
 my $tiledir = Tirex::Map->get($map)->get_tiledir();
 
 while(<STDIN>)
@@ -50,8 +53,9 @@ while(<STDIN>)
     touch_with_recurse($x<<3, $y<<3, $z+3, 0);
 }
 
-printf("%d meta tiles reported, %d added through recursion (%d duplicate), %d did not exist, %d touched\n",
-   $reported, $recursed, $already, $nonex, $touched);
+printf("%d meta tiles reported, %d added through recursion, %d did not exist, %d %s\n",
+   $reported, $recursed, $nonex, $touched,
+   $dryrun ? "would have been touched if this hadn't been a dry run" : "touched");
 
 sub touch_with_recurse {
     my ($x, $y, $z, $rec) = @_;
@@ -59,12 +63,10 @@ sub touch_with_recurse {
     my $mt = Tirex::Metatile->new(map => $map, x=>$x, y=>$y, z=>$z);
     my $fn = $mt->get_filename();
     $recursed++ if ($rec);
-    if (defined($processed->{$fn})) { $already++; return; }
     my $fullname = $tiledir . '/' . $fn;
     if (-e $fullname) {
-       $touch->touch($fullname);
+       $touch->touch($fullname) unless ($dryrun);
        $touched++;
-       $processed->{$fn}=1;
     }
     else
     {
