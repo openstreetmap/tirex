@@ -14,6 +14,9 @@ use File::Touch;
 use Getopt::Long;
 
 my $minz = 12;
+# time offset in days to go back from current date
+# when touching files 8000 ~= 22 years 
+my $timeoffset = 8000;
 my $map = undef;
 my $configdir = "/etc/tirex";
 my $dryrun = 0;
@@ -35,7 +38,8 @@ my $nonex = 0;
 my $recursed = 0;
 my $reported = 0;
 for (my $i=0; $i<21; $i++) { $limit->[$i] = 2**$i-1 };
-my $touch = File::Touch->new(time => 0, no_create => 1);
+my $time = time() - $timeoffset * 86400;
+my $touch = File::Touch->new(mtime_only => 1, time => $time, no_create => 1);
 my $tiledir = Tirex::Map->get($map)->get_tiledir();
 
 while(<STDIN>)
