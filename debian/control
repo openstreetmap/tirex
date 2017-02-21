@@ -2,7 +2,7 @@ Source: tirex
 Section: web
 Priority: extra
 Maintainer: Frederik Ramm <frederik.ramm@geofabrik.de>
-Build-Depends: debhelper (>= 7), libboost-program-options-dev
+Build-Depends: debhelper (>= 7), libboost-program-options-dev, libmapnik-dev
 Homepage: http://wiki.openstreetmap.org/wiki/Tirex
 Standards-Version: 3.8.0
 
