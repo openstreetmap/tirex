@@ -55,7 +55,7 @@ die("refusing to run as root\n") if ($< == 0);
 my @argv = @ARGV;
 
 my %opts = ();
-GetOptions( \%opts, 'help|h', 'debug|d', 'config|c=s' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'debug|d', 'foreground|f', 'config|c=s' ) or exit(2);
 
 if ($opts{'help'})
 {
@@ -67,6 +67,9 @@ if ($opts{'help'})
 }
 
 $Tirex::DEBUG = 1 if ($opts{'debug'});
+$Tirex::FOREGROUND = 1 if ($opts{'foreground'});
+# debug implies foreground
+$Tirex::FOREGROUND =1 if ($opts{'debug'});
 
 my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
 my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
@@ -84,10 +87,10 @@ syslog('info', 'tirex-backend-manager started with cmd line options: %s', join('
 Tirex::Config::dump_to_syslog();
 
 #-----------------------------------------------------------------------------
-# Daemonize unless in debug mode
+# Daemonize unless in debug mode or foreground
 #-----------------------------------------------------------------------------
 
-if (! $Tirex::DEBUG)
+if (!$Tirex::FOREGROUND)
 {
     chdir('/')                     or die("Cannot chdir to /: $!");
     open(STDIN,  '<', '/dev/null') or die("Cannot read from /dev/null: $!");
@@ -486,6 +489,10 @@ Display help message.
 =item B<-d>, B<--debug>
 
 Run in debug mode, and pass on the debug flag to workers
+
+=item B<-f>, B<--foreground>
+
+Run in foreground. E.g. when started from systemd service
 
 =item B<--config=DIR>
 
