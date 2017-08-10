@@ -115,7 +115,7 @@ my $list = '';
 my $minz = $opts{'minz'};
 $minz = 0 unless defined($minz);
 my $maxz = $opts{'maxz'};
-$minz = 19 unless defined($maxz);
+$maxz = 19 unless defined($maxz);
 
 for (my $i=$minz; $i<=$maxz; $i++)
 {
