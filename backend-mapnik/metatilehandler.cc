@@ -145,6 +145,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
         xyz_to_meta(metafilename, PATH_MAX, mTileDir.c_str(), x, y, z);
         if (!mkdirp(mTileDir.c_str(), x, y, z))
         {
+            free(offsets);
             return NetworkResponse::makeErrorResponse(request, "renderer internal error");
         }
 
