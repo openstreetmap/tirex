@@ -44,7 +44,7 @@ use Tirex::Status;
 #-----------------------------------------------------------------------------
 
 my %opts = ( raw => 0, once => 0 );
-GetOptions( \%opts, 'help|h', 'once|o', 'raw|r', 'extended|e' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'once|o', 'raw|r', 'extended|e', 'times|t' ) or exit(2);
 
 if ($opts{'help'})
 {
@@ -56,6 +56,7 @@ if ($opts{'help'})
 }
 
 $opts{'once'} = 1 if ($opts{'raw'});
+$opts{'once'} = 1 if ($opts{'times'});
 
 #-----------------------------------------------------------------------------
 
@@ -71,7 +72,7 @@ while (1)
     my $s = $status->read();
     if (defined $s)
     {
-        $s = format_status(JSON::from_json($s)) unless ($opts{'raw'});
+        $s = format_status(JSON::from_json($s), $opts{'times'}) unless ($opts{'raw'});
         print $clear, $s;
     }
     else
@@ -128,9 +129,52 @@ sub duration
     return "$seconds$m";
 }
 
+sub max
+{
+    my ($a, $b) = @_;
+    return ($a > $b) ? $a : $b;
+}
+
 sub format_status
 {
     my $d = shift;
+    my $times = shift;
+    my $r = "";
+
+    if (defined($times))
+    {
+        my @styles = keys %{$d->{'rm'}->{'stats'}->{'sum_render_time'}};
+        my $maxzoom = 0;
+        map { $maxzoom = max($maxzoom, scalar(@{$d->{'rm'}->{'stats'}->{'sum_render_time'}->{$_}})); } @styles;
+        $r = "style     zoom |";
+        for (my $i = 0; $i < $maxzoom; $i++)
+        {
+            $r .= sprintf("%7d ", $i);
+        }
+        $r .= "\n";
+        $r .= "---------------+";
+        $r .= "----------" x $maxzoom;
+        $r .= "\n";
+        foreach (@styles)
+        {
+            $r .= sprintf("%-15s|", $_);
+            for (my $i = 0; $i < $maxzoom; $i++)
+            {
+                my $time = $d->{'rm'}->{'stats'}->{'sum_render_time'}->{$_}->[$i];
+                my $count = $d->{'rm'}->{'stats'}->{'count_rendered'}->{$_}->[$i];
+                if (defined($time) && defined($count))
+                {
+                    $r .= sprintf "%7.1fs", $time / $count / 1000 + 0.5;
+                }
+                else
+                {
+                    $r .= " " x 8;
+                }
+            }
+            $r .= "\n";
+        }
+        return $r;
+    }
 
     return "\n " . BOLD . UNDERLINE . "Tirex Master Status" . RESET . ' (updated='
                  . ($d->{'updated'} < time()-2 ? RED : '') . BOLD . prettydate($d->{'updated'}) . RESET . ")\n\n"
@@ -324,6 +368,10 @@ Display help message.
 =item B<-o>, B<--once>
 
 Show status only once, default is to show it once per second.
+
+=item B<-t>, B<--times>
+
+Show a table of rendering times by style and zoom level. Implies --once.
 
 =item B<-r>, B<--raw>
 
