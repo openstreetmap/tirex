@@ -62,13 +62,19 @@ my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
 Tirex::Config::init($config_file);
 Tirex::Renderer->read_config_dir($config_dir);
 
-my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', LocalPort => $Tirex::SYNCD_UDP_PORT, Proto => 'udp', ReuseAddr => 1 ) or die("Can't open UDP socket: :$!\n");
+my $syncd_udp_port = Tirex::Config::get('syncd_udp_port', $Tirex::SYNCD_UDP_PORT, qr{^[1-9][0-9]{1,4}$});
+my $delay = Tirex::Config::get('syncd_aggregate_delay', $Tirex::SYNCD_AGGREGATE_DELAY, qr{^\d+$});
+my $syncd_command = Tirex::Config::get('syncd_command', $Tirex::SYNCD_COMMAND);
+
+my $socket = IO::Socket::INET->new( LocalAddr => 'localhost', LocalPort => $syncd_udp_port, Proto => 'udp', ReuseAddr => 1, Blocking => 0 ) or die("Can't open UDP socket: :$!\n");
 
 my $host = Tirex::Config::get('sync_to_host');
 
 if (! defined($host) || $host eq '') {
     die("Please set 'sync_to_host' config option in $config_file\n");
 }
+
+my @hosts = split(/[ ,]/, $host);
 
 #-----------------------------------------------------------------------------
 # daemonize and create pidfile
@@ -91,27 +97,42 @@ close($pidfh);
 
 while (1)
 {
-    my $msg = eval {
-        Tirex::Message->new_from_socket($socket);
-    };
-    die("error reading from socket: $!\n") if ($@);
-    next unless ($msg);
+    my $tiles = [];
+    while (1)
+    {
+        my $msg = eval {
+            Tirex::Message->new_from_socket($socket);
+        };
+        last unless $msg;
+        syslog('debug', 'got request: %s', $msg->to_s()) if ($Tirex::DEBUG);
+        my $metatile = $msg->to_metatile();
+        my $filename = Tirex::Map->get_map_for_metatile($metatile)->get_tiledir() . '/' . $metatile->get_filename();
+        $filename = $1 if ($filename =~ m!^/(.*)!);
+        push(@$tiles, $filename);
+    }
 
-    syslog('debug', 'got request: %s', $msg->to_s()) if ($Tirex::DEBUG);
+    if (!scalar(@$tiles))
+    {
+        syslog('debug', 'sleeping') if ($Tirex::DEBUG);
+        sleep $delay;
+        syslog('debug', 'waking up') if ($Tirex::DEBUG);
+        next;
+    }
+    syslog('debug', 'acting on %d tiles', scalar(@$tiles)) if ($Tirex::DEBUG);
 
-    my $metatile = $msg->to_metatile();
-    my $filename = Tirex::Map->get_map_for_metatile($metatile)->get_tiledir() . '/' . $metatile->get_filename();
-    $filename = $1 if ($filename =~ m!^/(.*)!);
-
-    # fixme make this configurable
-    my $command = 'tar -C/ -cf - %f | ssh %h -Tq "tar -C/ -xf -"';
-    $command =~ s/%h/$host/g;
-    $command =~ s/%f/$filename/g;
-
-    syslog('debug', "executing $command") if ($Tirex::DEBUG);
-    system "$command" unless($dryrun);
+    my $names = join(" ", @$tiles);
+    # fixme these could be run in parallel
+    foreach my $host(@hosts)
+    {
+        my $command = $syncd_command;
+        $command =~ s/%HOST%/$host/g;
+        $command =~ s/%FILES%/$names/g;
+        syslog('debug', "executing $command") if ($Tirex::DEBUG);
+        system "$command" unless($dryrun);
+	sleep 2;
+        syslog('debug', "command done") if ($Tirex::DEBUG);
+    }
 }
-
 
 __END__
 

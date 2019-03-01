@@ -73,6 +73,8 @@ our $BACKEND_MANAGER_ALIVE_TIMEOUT   = 8; # minutes - make this a tad smaller th
 
 our $SYNCD_PIDFILE                   = '/var/run/tirex/tirex-syncd.pid';
 our $SYNCD_UDP_PORT                  = 9323;
+our $SYNCD_AGGREGATE_DELAY           = 5;
+our $SYNCD_COMMAND                   = qq(tar -C/ -cf - %FILES% | ssh %HOST% -oControlMaster=auto -oControlPersist=1h -oControlPath=$SOCKET_DIR/ssh-control-%h-%r-%p -Tq "tar -C/ -xf -");
 
 our $MODTILE_SOCK                    = "/var/lib/tirex/modtile.sock";
 our $MODTILE_PERM                    = 0666;

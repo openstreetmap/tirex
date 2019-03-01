@@ -67,10 +67,21 @@ bucket name=background minprio=20 maxproc=2 maxload=4
 #syncd_pidfile=/var/run/tirex/tirex-syncd.pid
 
 #  If this is defined, the syncd will copy rendered tiles to this server.
-#sync_to_host=some.other.host
+#  A comma-separated list is allowed.
+#sync_to_host=some.other.host,yet.another.host
 
 #  UDP port where the syncd listens for messages from master.
 #syncd_udp_port=9323
 
+#  Number of seconds syncd will sleep after doing something, to allow
+#  some tiles to collect in the replication queue. This queue is simply
+#  the UDP packet buffer of the local OS. If this number is larger than 
+#  10 or 20 seconds then there's a danger of replications being dropped
+#syncd_aggregate_delay=5
+
+#  command to execute for replicating the space-separated list of files
+#  %FILES% to host %HOST%. By default uses a ssh connection with a 
+#  persistent control connection that will be re-created on demand.
+#syncd_command=tar -C/ -cf - %FILES% | ssh %HOST% -oControlMaster=auto -oControlPersist=1h -oControlPath=/var/run/tirex/ssh-control-%h-%r-%p -Tq "tar -C/ -xf -"
 
 #-- THE END ------------------------------------------------------------------
