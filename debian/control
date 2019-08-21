@@ -52,6 +52,13 @@ Description: Mapnik backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the Mapnik backend for creating maps with the Mapnik renderer.
 
+Package: tirex-backend-openseamap
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, default-jre-headless | java8-runtime-headless
+Description: OpenSeaMap backend for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the OpenSeaMap backend for creating maps with the OpenSeaMap renderer.
+
 Package: tirex-syncd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core

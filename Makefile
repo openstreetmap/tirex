@@ -37,6 +37,7 @@ install: build
 	install -m 755 ${INSTALLOPTS} backends/test                            $(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 ${INSTALLOPTS} backends/wms                             $(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 ${INSTALLOPTS} backends/mapserver                       $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 ${INSTALLOPTS} backends/openseamap                      $(DESTDIR)/usr/lib/tirex/backends
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex
 	install -m 644 ${INSTALLOPTS} etc/tirex.conf.dist                      $(DESTDIR)/etc/tirex/tirex.conf
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer
@@ -44,10 +45,13 @@ install: build
 	install -m 644 ${INSTALLOPTS} etc/renderer/test.conf.dist              $(DESTDIR)/etc/tirex/renderer/test.conf
 	install -m 644 ${INSTALLOPTS} etc/renderer/test/checkerboard.conf.dist $(DESTDIR)/etc/tirex/renderer/test/checkerboard.conf
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/wms
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/openseamap
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/mapserver
 	install -m 644 ${INSTALLOPTS} etc/renderer/wms.conf.dist               $(DESTDIR)/etc/tirex/renderer/wms.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/openseamap.conf.dist        $(DESTDIR)/etc/tirex/renderer/openseamap.conf
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver.conf.dist         $(DESTDIR)/etc/tirex/renderer/mapserver.conf
 	install -m 644 ${INSTALLOPTS} etc/renderer/wms/demowms.conf.dist       $(DESTDIR)/etc/tirex/renderer/wms/demowms.conf
+	install -m 644 ${INSTALLOPTS} etc/renderer/openseamap/openseamap.conf.dist $(DESTDIR)/etc/tirex/renderer/openseamap/openseamap.conf
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/msdemo.conf.dist  $(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.conf
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/msdemo.map        $(DESTDIR)/etc/tirex/renderer/mapserver/msdemo.map
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/fonts.lst         $(DESTDIR)/etc/tirex/renderer/mapserver/fonts.lst
