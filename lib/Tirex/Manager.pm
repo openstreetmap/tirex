@@ -257,7 +257,14 @@ sub send
 
     my $map  = Tirex::Map->get($job->get_map());
     my $port = $map->get_renderer()->get_port();
-    my $sock = Socket::pack_sockaddr_in($port, Socket::inet_aton('localhost'));
+    my $sock;
+
+    eval { $sock = Socket::pack_sockaddr_in($port, Socket::INADDR_LOOPBACK) };
+    if (!defined($sock))
+    {
+        ::syslog('warning', 'cannot send request %s, renderer port is undef', $job->get_id());
+        return;
+    };
 
     ::syslog('debug', 'sending request to port %d id=%s prio=%s map=%s x=%d y=%d z=%d', $port, $job->get_id(), $job->get_prio(), $job->get_map(), $job->get_x(), $job->get_y(), $job->get_z()) if ($Tirex::DEBUG);
 
