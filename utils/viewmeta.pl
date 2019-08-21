@@ -95,6 +95,9 @@ my $scaled_tileheight = $tileheight / $scale;
 my $meta = new GD::Image($cols*$scaled_tilewidth  + $cols - 1,
                          $rows*$scaled_tileheight + $rows - 1, 1);
 
+$meta->saveAlpha(1);
+$meta->alphaBlending(0);
+
 my $black = $meta->colorAllocate(0, 0, 0);
 
 for (my $i=0; $i<$count; $i++)

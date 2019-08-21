@@ -270,6 +270,8 @@ sub write_metatile
             if ($image->isTrueColor())
             {
                 $tile = GD::Image->newTrueColor($Tirex::PIXEL_PER_TILE, $Tirex::PIXEL_PER_TILE);
+		$tile->alphaBlending(0);
+    		$tile->saveAlpha(1);
             }
             else
             {
