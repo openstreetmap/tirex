@@ -1,28 +1,34 @@
+tirex (0.6.0) UNRELEASED; urgency=medium
+
+  * tirex-syncd to use ssh master, also allow multiple destinations
+
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Sat, 02 Mar 2019 14:23:23 +0000
+
 tirex (0.5.2) UNRELEASED; urgency=medium
 
   * die after serving X requests
 
- -- root <root@craig.geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
 
 tirex (0.5.1) UNRELEASED; urgency=medium
 
   * jpeg tiles
   * mapnik 3
 
- -- root <root@craig.geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
 
 tirex (0.4.1precise1) precise; urgency=low
 
   * support (alomst) arbitrary sized meta tiles
   * support for Mapnik2 
 
- -- root <root@craig.geofabrik.de>  Tue, 26 Jun 2012 21:45:22 +0000
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Tue, 26 Jun 2012 21:45:22 +0000
 
 tirex (0.3.1debian1) precise; urgency=low
 
   * fix epsg3857 bug
 
- -- root <root@craig.geofabrik.de>  Tue, 08 May 2012 20:27:04 +0000
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Tue, 08 May 2012 20:27:04 +0000
 
 tirex (0.3.0) jaunty; urgency=low
 
