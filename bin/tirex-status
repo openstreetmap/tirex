@@ -164,7 +164,7 @@ sub format_status
                 my $count = $d->{'rm'}->{'stats'}->{'count_rendered'}->{$_}->[$i];
                 if (defined($time) && defined($count))
                 {
-                    $r .= sprintf "%7.1fs", $time / $count / 1000 + 0.5;
+                    $r .= sprintf "%7.1fs", $time / $count / 1000 + 0.05;
                 }
                 else
                 {
