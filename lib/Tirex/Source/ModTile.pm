@@ -150,7 +150,7 @@ sub set_request_write_callback
 
 =head2 $source->notify($job)
 
-Prepares a notification message about succesful tile rendering
+Prepares a notification message about successful tile rendering
 and informs the main select loop to give us a chance to write.
 
 =cut

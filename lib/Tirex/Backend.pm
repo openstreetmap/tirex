@@ -93,7 +93,7 @@ sub set_status
 
 Core backend method. Call this directly after creating a subclass with new().
 It will parse the config file(s), set everything up and then wait for rendering
-requests and fullfill them by calling create_metatile().
+requests and fulfill them by calling create_metatile().
 
 =cut
 
