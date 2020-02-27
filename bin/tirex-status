@@ -114,7 +114,16 @@ sub duration
       $seconds = int($seconds/1000);
     }
 
-    if($seconds >= 3600)
+    if($seconds >= 86400)
+    {
+      my $d = int($seconds/86400);
+      $seconds -= $d*86400;
+      my $h = int($seconds/3600);
+      $seconds -= $h*3600;
+      my $minutes = int($seconds/60);
+      return sprintf("%dd+%d:%02d:%02d%s", $d, $h, $minutes, $seconds-$minutes*60, $m);
+    }
+    elsif($seconds >= 3600)
     {
       my $h = int($seconds/3600);
       $seconds -= $h*3600;
