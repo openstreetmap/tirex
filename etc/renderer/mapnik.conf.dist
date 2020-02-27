@@ -33,8 +33,9 @@ procs=3
 #  Backend specific configuration
 #-----------------------------------------------------------------------------
 
-#  Directory with input plugins for mapnik.
-plugindir=/usr/lib/mapnik/input
+#  Directory with input plugins for mapnik. The directory of your mapnik
+#  installation can be retrieved by this command: mapnik-config --input-plugins
+plugindir=/usr/lib/mapnik/3.0/input
 
 #  The directory where the Mapnik rendering engine loads its TrueType fonts from.
 #  If the style sheet references fonts that are not present here, the renderer will 
