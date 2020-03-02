@@ -58,7 +58,7 @@ sub new
         'count_error'      => 0,
         'count_rendered'   => {},
         'sum_render_time'  => {},
-        'mean_render_time' => {},
+        'max_render_time'  => {},
     };
 
     $self->{'rendering_timeout'} = Tirex::Config::get('master_rendering_timeout', $Tirex::MASTER_RENDERING_TIMEOUT) * 60; # config is in minutes, but we need in seconds
@@ -301,9 +301,9 @@ sub done
             $self->{'stats'}->{'count_rendered' }->{$job->get_map()}->[$job->get_z()]++;
             $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] ||= 0;
             $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] += $msg->{'render_time'};
-            $self->{'stats'}->{'mean_render_time'}->{$job->get_map()}->[$job->get_z()] =
-                $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] /
-                $self->{'stats'}->{'count_rendered'}->{$job->get_map()}->[$job->get_z()];
+            my $max = $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()] || 0;
+            $max = $msg->{'render_time'} if $msg->{'render_time'} > $max;
+            $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()] = $max;
 
             $job->{'render_time'} = $msg->{'render_time'};
         }

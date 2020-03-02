@@ -110,7 +110,7 @@ sub duration
     my $m = "";
     if($milli && $seconds)
     {
-      $m = sprintf(".%03d", $seconds%1000);
+      $m = sprintf(".%03d", $seconds%1000) if $seconds < 60000;
       $seconds = int($seconds/1000);
     }
 
@@ -210,10 +210,20 @@ sub format_stats
     my $stats = shift;
 
     my $text = " Statistics:\n";
-    foreach my $statkey (sort keys %$stats)
+    foreach my $statkey (sort keys %$stats, "mean_render_time")
     {
         my $statvalue = $stats->{$statkey};
-        if (ref($statvalue) eq '')
+        if ($statkey eq "mean_render_time")
+        {
+            foreach my $map (sort keys %{$stats->{"count_rendered"}})
+            {
+                $text .= "  $statkey" . "[$map]=";
+                my $n = scalar(@{$stats->{"count_rendered"}{$map}}) - 1;
+                $text .= join(', ', map { my $c=$stats->{"count_rendered"}{$map}[$_]; duration($c ? ($stats->{"sum_render_time"}{$map}[$_] / $c) : 0, 1)} (0 .. $n));
+                $text .= "\n";
+            }
+        }
+        elsif (ref($statvalue) eq '')
         {
             $text .= "  $statkey=$statvalue\n";
         }
