@@ -65,7 +65,7 @@ if (scalar(@ARGV) == 0)
     $ARGV[0] = Tirex::Config::get('stats_dir', '/var/lib/tirex/stats') . '/tiles.stats';
 }
 my $json = join('', <>);
-$json =~ s/\n}\n\n{/,/g; # join individual files
+$json =~ s/\n\}\n\n\{/,/g; # join individual files
 
 my $stats = JSON::from_json($json);
 
