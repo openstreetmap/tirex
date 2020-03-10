@@ -2,7 +2,7 @@ tirex (0.6.1) UNRELEASED; urgency=medium
   
   * add openseamap backend
 
- -- Frederik Ramm E <fred@lambert.geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
 
 tirex (0.6.0) UNRELEASED; urgency=medium
 
