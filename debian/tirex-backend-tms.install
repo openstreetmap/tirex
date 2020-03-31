@@ -1,0 +1,5 @@
+usr/lib/tirex/backends/tms
+usr/share/perl5/Tirex/Backend/TMS.pm
+usr/share/man/man3/Tirex::Backend::TMS.3pm
+etc/tirex/renderer/tms.conf
+etc/tirex/renderer/tms/demotms.conf

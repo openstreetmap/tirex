@@ -1,22 +1,28 @@
-tirex (0.6.1) UNRELEASED; urgency=medium
+tirex (0.6.2) bionic; urgency=medium
+  
+  * add TMS backend
+
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
+
+tirex (0.6.1) bionic; urgency=medium
   
   * add openseamap backend
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
 
-tirex (0.6.0) UNRELEASED; urgency=medium
+tirex (0.6.0) bionic; urgency=medium
 
   * tirex-syncd to use ssh master, also allow multiple destinations
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Sat, 02 Mar 2019 14:23:23 +0000
 
-tirex (0.5.2) UNRELEASED; urgency=medium
+tirex (0.5.2) bionic; urgency=medium
 
   * die after serving X requests
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
 
-tirex (0.5.1) UNRELEASED; urgency=medium
+tirex (0.5.1) bionic; urgency=medium
 
   * jpeg tiles
   * mapnik 3
