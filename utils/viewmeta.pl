@@ -73,18 +73,21 @@ my $tileheight;
 foreach my $i (0 .. $count-1)
 {
     die("problem with file offsets") unless (sysseek(META, 0, SEEK_CUR) == $offset[$i*2]);
-    my $png;
-    sysread(META, $png, $offset[$i*2+1]);
-    $img[$i] = GD::Image->newFromPngData($png);
-    if (defined $tileheight)
+    if ($offset[$i*2+1])
     {
-        die("tile $i has non-matching size") 
-            unless ($img[$i]->width == $tilewidth && $img[$i]->height == $tileheight);
-    }
-    else
-    {
-        $tileheight = $img[$i]->height;
-        $tilewidth  = $img[$i]->width;
+        my $png;
+        sysread(META, $png, $offset[$i*2+1]);
+        $img[$i] = GD::Image->newFromPngData($png);
+        if (defined $tileheight)
+        {
+            die("tile $i has non-matching size") 
+                unless ($img[$i]->width == $tilewidth && $img[$i]->height == $tileheight);
+        }
+        else
+        {
+            $tileheight = $img[$i]->height;
+            $tilewidth  = $img[$i]->width;
+        }
     }
 }
 close(META);
@@ -102,10 +105,13 @@ my $black = $meta->colorAllocate(0, 0, 0);
 
 for (my $i=0; $i<$count; $i++)
 {
-    my $x = int($i/$rows) * ($scaled_tilewidth  + 1);
-    my $y =    ($i%$rows) * ($scaled_tileheight + 1);
-    $meta->copyResampled($img[$i], $x, $y, 0, 0,
-        $scaled_tilewidth, $scaled_tileheight, $tilewidth, $tileheight);
+    if (defined($img[$i]))
+    {
+        my $x = int($i/$rows) * ($scaled_tilewidth  + 1);
+        my $y =    ($i%$rows) * ($scaled_tileheight + 1);
+        $meta->copyResampled($img[$i], $x, $y, 0, 0,
+            $scaled_tilewidth, $scaled_tileheight, $tilewidth, $tileheight);
+    }
 }
 
 for (my $i=0; $i<$rows; $i++)
