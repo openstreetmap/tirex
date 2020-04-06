@@ -51,7 +51,7 @@ var stats = {
 
 var config = {
     configdir: '/etc/tirex',
-    master_udp_port: 9322,
+    master_udp_port: 9331,
     tileserver_http_port: 9320
 };
 
