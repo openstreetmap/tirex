@@ -70,7 +70,9 @@ function send_image(x, y, z, fd, response) {
         if (err || bytesRead !== metatile_header_size) {
             response.writeHead(500, { 'Content-Type': 'text/plain' });
             response.end('Metatile error\n');
-            fs.close(fd);
+            fs.close(fd, function(err) { 
+                          if (err) { console.log("fs.close-Header-ERROR:" + err); }
+                         });
             return;
         }
 
@@ -84,7 +86,9 @@ function send_image(x, y, z, fd, response) {
             if (err || bytesRead !== size) {
                 response.writeHead(500, { 'Content-Type': 'text/plain' });
                 response.end('Metatile error\n');
-                fs.close(fd);
+                fs.close(fd, function(err) { 
+                          if (err) { console.log("fs.close-Content-ERROR:" + err); }
+                         });
                 return;
             }
             response.writeHead(200, {
@@ -92,7 +96,9 @@ function send_image(x, y, z, fd, response) {
                 'Content-Length': size
             });
             response.end(png);
-            fs.close(fd);
+            fs.close(fd, function(err) { 
+                          if (err) { console.log("fs.close-png-WARNING:" + err); }
+                         });
         });
     });
 }
