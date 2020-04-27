@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------
 #
-#  Konfiguration for wms map
+#  Konfiguration for tms map
 #
-#  /etc/tirex/renderer/wms/demowms.conf
+#  /etc/tirex/renderer/tms/demotms.conf
 #
 #-----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
 name=demotms
 
 #  tile directory
-tiledir=/var/lib/tirex/tiles/demowms
+tiledir=/var/lib/tirex/tiles/demotms
 
 #  minimum zoom level allowed (default 0)
 #minz=0
@@ -26,7 +26,9 @@ maxz=10
 #  Backend specific configuration
 #-----------------------------------------------------------------------------
 
-#  the URL prefix for the WMS server, should probably end with a '?' or '&'
+#  the URL prefix for the TMS server, should probably end with a '?' or '&'
+#  DO NOT USE tile.openstreetmap.de in a production environment, this is
+#  for testing only!
 url=https://a.tile.openstreetmap.de/
 
 #  "slots" is the maximum number of parallel requests that one backend process
