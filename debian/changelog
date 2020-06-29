@@ -1,3 +1,7 @@
+tirex (0.6.3) bionic; urgency=medium
+  
+  * modify TMS backend to take template URL parameter
+
 tirex (0.6.2) bionic; urgency=medium
   
   * add TMS backend

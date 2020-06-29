@@ -33,7 +33,8 @@ Config parameters for the map file:
 
 =over 8
 
-=item url url prefix (to be followed by z/x/y.png)
+=item url url template (should contain {x}, {y}, {z} which are replaced)
+=item slots maximum number of parallel connections per backend process
 
 =back
 
@@ -71,17 +72,24 @@ sub create_metatile
 
     my $limit = 2 ** $metatile->get_z();
     
+    my $url = $map->{'url'};
+    my $z = $metatile->get_z();
+    $url =~ s/{z}/$z/g;
+
     for (my $x = 0; $x < $Tirex::METATILE_COLUMNS; $x++)
     {
         my $xx = $metatile->get_x() + $x;
-	next if ($xx >= $limit);
+        next if ($xx >= $limit);
+        my $url1 = $url;
+        $url1 =~ s/{x}/$xx/g;
         for (my $y = 0; $y < $Tirex::METATILE_ROWS; $y++)
         {
             my $yy = $metatile->get_y() + $y;
-	    next if ($yy >= $limit);
-            my $url = sprintf("%s/%d/%d/%d.png", $map->{'url'}, $metatile->get_z(), $xx, $yy);
-            ::syslog('debug', 'TMS request: %s', $url) if ($Tirex::DEBUG);
-            my $request = HTTP::Request->new('GET', $url, [ 'User-Agent' => 'tirex-backend-tms/' . $Tirex::VERSION ]);
+            next if ($yy >= $limit);
+            my $url2 = $url1;
+            $url2 =~ s/{y}/$yy/g;
+            ::syslog('debug', 'TMS request: %s', $url2) if ($Tirex::DEBUG);
+            my $request = HTTP::Request->new('GET', $url2, [ 'User-Agent' => 'tirex-backend-tms/' . $Tirex::VERSION ]);
             my $async_id = $async->add($request);
             $async_index->{$async_id} = $x*$Tirex::METATILE_ROWS+$y;
         }
