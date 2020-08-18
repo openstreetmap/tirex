@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  munin/tirex-tiledir-tilecount-relative
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex::Munin::Tiledir::Tilecount;
+
+#-----------------------------------------------------------------------------
+
+my $config_file = exists($ENV{'TIREX_CONFIGFILE'}) ? $ENV{'TIREX_CONFIGFILE'} : $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+(my $execname = $0) =~ s{^.*/}{};
+
+my $map = 'default';
+if ($execname =~ /^tirex-tiledir-tilecount-relative-(.*)$/)
+{
+    $map = $1;
+}
+
+my @z   = ('0-9', 10 .. 17);
+
+my $statsfile = Tirex::Config::get('stats_dir', $Tirex::STATS_DIR) . "/tiles-$map.stats";
+
+Tirex::Munin::Tiledir::Tilecount->new( map => $map, z => \@z, relative => 1 )->do( statsfile => $statsfile );
+
+
+#-- THE END ------------------------------------------------------------------

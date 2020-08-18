@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  munin/tirex-status-render-time
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex::Munin::Status::RenderTime;
+
+#-----------------------------------------------------------------------------
+
+my $config_file = exists($ENV{'TIREX_CONFIGFILE'}) ? $ENV{'TIREX_CONFIGFILE'} : $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+(my $execname = $0) =~ s{^.*/}{};
+
+my $map = '*';
+if ($execname =~ /^tirex-status-render-time-(.*)$/)
+{
+    $map = $1;
+}
+
+my @z   = ('0-9', '10-12', '13-15', '16-17');
+
+Tirex::Munin::Status::RenderTime->new( map => $map, z => \@z )->do();
+
+
+#-- THE END ------------------------------------------------------------------

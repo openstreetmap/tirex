@@ -1,0 +1,650 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  tirex-master
+#
+#-----------------------------------------------------------------------------
+#  See end of this file for documentation.
+#-----------------------------------------------------------------------------
+#
+#  Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
+#                      Jochen Topf <jochen.topf@geofabrik.de>
+#  
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
+#  
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#  
+#  You should have received a copy of the GNU General Public License
+#  along with this program; If not, see <http://www.gnu.org/licenses/>.
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Fcntl;
+use Getopt::Long qw( :config gnu_getopt );
+use IO::Select;
+use IO::Socket;
+use POSIX 'setsid';
+use Pod::Usage qw();
+use Socket;
+use Sys::Syslog;
+
+use Data::Dumper;
+
+use Tirex;
+use Tirex::Queue;
+use Tirex::Manager;
+use Tirex::Source;
+use Tirex::Status;
+use Tirex::Renderer;
+use Tirex::Map;
+
+#-----------------------------------------------------------------------------
+
+die("refusing to run as root\n") if ($< == 0);
+
+#-----------------------------------------------------------------------------
+# Reading command line and config
+#-----------------------------------------------------------------------------
+
+my @argv = @ARGV;
+
+my %opts = ();
+GetOptions( \%opts, 'help|h', 'debug|d', 'foreground|f', 'config|c=s' ) or exit(2);
+
+if ($opts{'help'})
+{
+    Pod::Usage::pod2usage(
+        -verbose => 1,
+        -msg     => "tirex-master - tirex master daemon\n",
+        -exitval => 0
+    );
+}
+
+$Tirex::DEBUG = 1 if ($opts{'debug'});
+$Tirex::FOREGROUND = 1 if ($opts{'foreground'});
+# debug implies foreground
+$Tirex::FOREGROUND =1 if ($opts{'debug'});
+
+my $config_dir = $opts{'config'} || $Tirex::TIREX_CONFIGDIR;
+my $config_file = $config_dir . '/' . $Tirex::TIREX_CONFIGFILENAME;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+# Initialize logging
+#-----------------------------------------------------------------------------
+
+openlog('tirex-master', $Tirex::DEBUG ? 'pid|perror' : 'pid', 
+    Tirex::Config::get('master_syslog_facility', $Tirex::MASTER_SYSLOG_FACILITY, qr{^(daemon|syslog|user|local[0-7])$}));
+
+syslog('info', 'tirex-master started with cmd line options: %s', join(' ', @argv));
+
+Tirex::Config::dump_to_syslog();
+
+read_renderer_and_map_config();
+
+#-----------------------------------------------------------------------------
+# Prepare sockets
+#-----------------------------------------------------------------------------
+
+my $want_read  = IO::Select->new();
+my $want_write = IO::Select->new();
+
+# Set up the master socket. This is where we receive render requests using
+# the Tirex protocol.
+# This is a UNIX domain datagram socket.
+my $master_socket_name = Tirex::Config::get('socket_dir', $Tirex::SOCKET_DIR) . '/master.sock';
+unlink($master_socket_name); # remove if left over from last run
+my $master_socket = IO::Socket::UNIX->new(
+    Type  => SOCK_DGRAM,
+    Local => $master_socket_name,
+) or die("Cannot open master UNIX domain socket: $!\n");
+chmod(0777, $master_socket_name); # make sure everybody can write to socket
+
+$want_read->add([$master_socket, undef]);
+syslog('info', 'Listening for commands on socket %s', $master_socket_name);
+
+# Set up the mod_tile socket. This is where mod_tile requests come in.
+# This is a stream socket.
+my $modtile_socket_name = Tirex::Config::get('modtile_socket_name', $Tirex::MODTILE_SOCK);
+my $modtile_listen_count = int(Tirex::Config::get('modtile_listen_count', 10));
+$modtile_listen_count = 10 if($modtile_listen_count < 1 || $modtile_listen_count > 128);
+unlink($modtile_socket_name); # ignore return code, opening the socket will fail if something was wrong here
+my $modtile_socket = IO::Socket::UNIX->new(
+    Type     => SOCK_STREAM,
+    Listen   => $modtile_listen_count,
+    Local    => $modtile_socket_name,
+) or die("Cannot open modtile socket: $!\n");
+$modtile_socket->blocking(0);
+chmod($Tirex::MODTILE_PERM, $modtile_socket_name) or die("can't chmod socket '$modtile_socket_name': $!");
+$want_read->add([$modtile_socket, undef]);
+syslog('info', 'Listening for mod_tile connections on %s (UNIX)', $modtile_socket_name);
+
+my $to_syncd;
+if (Tirex::Config::get('sync_to_host')) {
+    my $syncd_udp_port = Tirex::Config::get('syncd_udp_port', $Tirex::SYNCD_UDP_PORT, qr{^[1-9][0-9]{1,4}$});
+    $to_syncd = Socket::pack_sockaddr_in( $syncd_udp_port, Socket::inet_aton('localhost') );
+}
+
+#-----------------------------------------------------------------------------
+# Daemonize unless in debug mode or foreground
+#-----------------------------------------------------------------------------
+if (!$Tirex::FOREGROUND)
+{
+    chdir('/')                     or die("Cannot chdir to /: $!");
+    open(STDIN,  '<', '/dev/null') or die("Cannot read from /dev/null: $!");
+    open(STDOUT, '>', '/dev/null') or die("Cannot write to /dev/null: $!");
+    defined(my $pid = fork)        or die("Cannot fork: $!");
+    exit(0) if ($pid);
+    setsid()                       or die("Cannot start a new session: $!");
+    open(STDERR, '>&STDOUT')       or die("Cannot dup stdout: $!");
+}
+
+#-----------------------------------------------------------------------------
+# Write pid to pidfile
+#-----------------------------------------------------------------------------
+my $pidfile = Tirex::Config::get('master_pidfile', $Tirex::MASTER_PIDFILE);
+
+if (open(my $pidfh, '>', $pidfile)) 
+{
+    print $pidfh "$$\n";
+    close($pidfh);
+}
+else
+{
+    syslog('err', "Can't open pidfile '$pidfile' for writing: $!\n");
+    # keep going, we'd rather go on without a pidfile than stopping the show
+}
+
+#-----------------------------------------------------------------------------
+# Initialize status, queue, and rendering manager
+#-----------------------------------------------------------------------------
+my $status = Tirex::Status->new(master => 1);
+
+my $queue = Tirex::Queue->new();
+my $rendering_manager = Tirex::Manager->new( queue => $queue );
+foreach my $bucket_config (@{Tirex::Config::get('bucket')})
+{
+    $rendering_manager->add_bucket(%$bucket_config);
+}
+
+# Set up the backend return socket. This is where the rendering backend notifies
+# us when a request was completed.
+# This is a datagram socket.
+my $backend_return_socket = $rendering_manager->get_socket();
+$want_read->add([$backend_return_socket, undef]);
+syslog('info', 'Listening for backend responses');
+
+#-----------------------------------------------------------------------------
+# Set signal handler
+#-----------------------------------------------------------------------------
+
+$SIG{'TERM'} = \&sigterm_handler;  
+$SIG{'INT'}  = \&sigint_handler;  
+$SIG{'HUP'}  = \&sighup_handler;  
+
+# run main loop in eval() since Perl socket operations are notorious for
+# calling croak() when unhappy; if they do, we want to know what happened.
+
+my $started = time();
+
+eval { main_loop() };
+my $err = $@;
+if ($err)
+{
+    syslog('crit', $err);
+    die($err);
+}
+
+#-----------------------------------------------------------------------------
+# The big loop
+#-----------------------------------------------------------------------------
+
+sub main_loop
+{
+    my $select_timeout = 1;
+
+    my $accept_timeout = 10;
+    my $read_timeout   = 10;
+    my $write_timeout  = 10;
+
+    my $last_status_update = 0;
+
+
+    while (1) 
+    {
+        my $now = time();
+
+        # keep status in shared memory updated once per second
+        if ($last_status_update < $now)
+        {
+            $status->update(started => $started, queue => $queue->status(), rm => $rendering_manager->status(), renderers => Tirex::Renderer->status(), maps => Tirex::Map->status());
+            $last_status_update = $now;
+        }
+
+        # clean out closed handles
+        foreach my $handle ($want_read->handles()) {
+            my ($socket, $source) = @$handle;
+            my $fcn = $socket->fcntl(F_GETFD, 0);
+            if (!defined($fcn))
+            {
+                syslog('warning', "dropping closed fh %d from want_read (internal state: %s)",
+                   $socket->fileno(), $socket->opened() ? "opened" : "closed");
+                $want_read->remove($handle);
+            }
+        }
+        foreach my $handle ($want_write->handles()) {
+            my ($socket, $source) = @$handle;
+            my $fcn = $socket->fcntl(F_GETFD, 0);
+            if (!defined($fcn))
+            {
+                syslog('warning', "dropping closed fh %d from want_write (internal state: %s)",
+                   $socket->fileno(), $socket->opened() ? "opened" : "closed");
+                $want_write->remove($handle);
+            }
+        }
+
+        my ($readable, $writable, $dummy) = IO::Select::select($want_read, $want_write, undef, $select_timeout);
+
+        # first process all readable handles.
+        # each handle is an array reference, the first element of which is
+        # the socket, and we use the second element to point to a Source object
+        # where appropriate.
+        foreach my $handle (@$readable) 
+        {
+            my ($sock, $source) = @$handle;
+
+            if ($sock == $master_socket)
+            {
+                my $source = Tirex::Source::Command->new( socket => $master_socket );
+                $source->readable($sock);
+                syslog('debug', "got msg: ". join(' ', map { "$_=$source->{$_}" } sort(keys %$source))) if ($Tirex::DEBUG);
+                my $msg_type = $source->get_msg_type();
+                if ($msg_type eq 'metatile_enqueue_request') {
+                    my $job = $source->make_job();
+                    if ($job)
+                    {
+                        if (my $already_rendering_job = $rendering_manager->requests_by_metatile($job))
+                        {
+                            $already_rendering_job->add_notify($source) if (defined $source->{id}); 
+                        }
+                        else
+                        {
+                            $queue->add($job);
+                        }
+                    }
+                } elsif ($msg_type eq 'metatile_remove_request') {
+                    my $job = $source->make_job();
+                    $queue->remove($job);
+                } elsif ($msg_type eq 'ping') {
+                    syslog('info', 'got ping request');
+                    $source->reply({ type => $msg_type, result => 'ok' });
+                } elsif ($msg_type eq 'reset_max_queue_size') {
+                    syslog('info', 'got reset_max_queue_size message');
+                    $queue->reset_maxsize();
+                    $source->reply({ type => $msg_type, result => 'ok' });
+                } elsif ($msg_type eq 'quit') {
+                    syslog('info', 'got quit message, shutting down now');
+                    $source->reply({ type => 'quit', result => 'ok' });
+                    cleanup();
+                    exit(0);
+                } elsif ($msg_type eq 'debug') {
+                    syslog('info', 'got debug message, activating debug mode');
+                    $source->reply({ type => 'debug', result => 'ok' });
+                    $Tirex::DEBUG=1;
+                } elsif ($msg_type eq 'nodebug') {
+                    syslog('info', 'got nodebug message, deactivating debug mode');
+                    $source->reply({ type => 'nodebug', result => 'ok' });
+                    $Tirex::DEBUG=0;
+                } elsif ($msg_type eq 'stop_rendering_bucket') {
+                    syslog('info', 'got stop_rendering_bucket message (bucket=%s)', $source->{'bucket'} || '');
+                    my $res = defined($source->{'bucket'}) ? $rendering_manager->set_active_flag_on_bucket(0, $source->{'bucket'}) : undef;
+                    $source->reply({ type => $msg_type, result => $res ? 'ok' : 'error_bucket_not_found' });
+                } elsif ($msg_type eq 'continue_rendering_bucket') {
+                    syslog('info', 'got continue_rendering_bucket message (bucket=%s)', $source->{'bucket'} || '');
+                    my $res = defined($source->{'bucket'}) ? $rendering_manager->set_active_flag_on_bucket(1, $source->{'bucket'}) : undef;
+                    $source->reply({ type => $msg_type, result => $res ? 'ok' : 'error_bucket_not_found' });
+                } elsif ($msg_type eq 'reload_config') {
+                    syslog('info', 'got reload_config message');
+                    read_renderer_and_map_config();
+                    $queue->remove_jobs_for_unknown_maps();
+                    $source->reply({ type => 'reload_config', result => 'ok' });
+                } elsif ($msg_type eq 'shutdown') {
+                    syslog('info', 'got shutdown message, shutting down cleanly');
+                    $source->reply({ type => 'shutdown', result => 'error_not_implemented' });
+#XXX
+                } else {
+                    syslog('warning', "ignoring unknown message type '$msg_type' from command socket" );
+                    $source->reply({ type => $msg_type, result => 'error_unknown_message_type' });
+                }
+            }
+            elsif ($sock == $backend_return_socket)
+            {
+                my $buf;
+                my $peer = $sock->recv($buf, $Tirex::MAX_PACKET_SIZE);
+                my $msg = Tirex::parse_msg($buf);
+                my $job = $rendering_manager->done($msg);
+                if ($job)
+                {
+                    log_job($job);
+                    $job->notify();
+                    $sock->send($buf, undef, $to_syncd) if ($to_syncd);
+                }
+            }
+            elsif ($sock == $modtile_socket)
+            {
+                my $count = 0;
+                # readability on a stream socket means we can accept, but not
+                # necessarily read.
+                while(my $newsock = $sock->accept())
+                {
+                    syslog('debug', 'connection from mod_tile accepted') if ($Tirex::DEBUG);
+                    $newsock->blocking(0);
+                    my $source = Tirex::Source::ModTile->new($newsock);
+                    $want_read->add([$newsock, $source]);
+                    $source->set_timeout($now + $accept_timeout);
+                    ++$count;
+                }
+                if (!$count)
+                {
+                    syslog('err', "could not accept() from mod_tile: $!");
+                }
+            }
+            else 
+            {
+                # must be one of the mod_tile sockets that we accepted then;
+                # notify the source that it may read something.
+                my $status = $source->readable($sock);
+                $source->set_timeout($now + $read_timeout);
+                if ($status == Tirex::Source::STATUS_MESSAGE_COMPLETE)
+                {
+                    # source returns true, this indicates it doesn't want to
+                    # read more and can prepare a job
+                    # $want_read->remove([$sock]); -- leave in select so we get notified when other side closes
+                    $source->set_timeout($now + 86400);
+                    my $job = $source->make_job($sock);
+                    if (!defined($job))
+                    {
+                        $want_read->remove([$sock]);
+                        $sock->close();
+                        next;
+                    }
+                    my $already_rendering_job = $rendering_manager->requests_by_metatile($job);
+                    if ($job->has_notify())
+                    {           
+                        # give source a chance to re-insert itself into our write
+                        # queue later. slightly inelegant, should rather hand over
+                        # reference to self but we're not an object
+                        $source->set_request_write_callback( sub {
+                            if ($sock->opened)
+                            {
+                                $want_read->remove([$sock, $source]);
+                                $want_write->add([$sock, $source]);
+                                $source->set_timeout(time() + $write_timeout);
+                            }
+                        });
+                        # the following serves the sole purpose of keeping Perl from
+                        # garbage-collecting our socket...
+                        # fixme: respect timeout if specified in request 
+                        $already_rendering_job->add_notify($source) if defined($already_rendering_job);
+                    }
+                    else
+                    {
+                        # drop the connection if notification has not been requested 
+                        $want_read->remove([$sock]);
+                        $sock->close();
+                    }
+
+                    unless (defined($already_rendering_job))
+                    {
+                        $queue->add($job);
+                    }
+                }
+                elsif ($status == Tirex::Source::STATUS_SOCKET_CLOSED)
+                {
+                    syslog('debug', 'other side closed mod_tile socket %d',
+                        $sock->fileno) if ($Tirex::DEBUG);
+                    $want_read->remove([$sock]);
+                    $sock->close();
+                }
+            }
+        }
+
+        # now handle writes. currently the UDP based writing is done elsewhere, but
+        # the Unix domain socket writing needs to be part of the select loop.
+        foreach my $handle (@$writable) 
+        {
+            my ($sock, $source) = @$handle;
+            my $status= $source->writable($sock);
+            if ($status == Tirex::Source::STATUS_MESSAGE_COMPLETE)
+            {
+                # source is done writing, and the socket goes back to want-read
+                # mode
+                syslog('debug', 'sent answer on mod_tile socket %d',
+                    $sock->fileno) if ($Tirex::DEBUG);
+                $want_write->remove([$sock]);
+                $want_read->add([$sock, $source]);
+                $source->set_timeout($now + $read_timeout);
+            }
+            elsif ($status == Tirex::Source::STATUS_SOCKET_CLOSED)
+            {
+                $want_write->remove([$sock]);
+                $sock->close();
+            }
+            else
+            {
+                # keep on writing
+                $source->set_timeout($now + $write_timeout);
+            }
+        }
+
+        foreach my $handle ($want_write->handles)
+        {
+            my ($socket, $source) = @$handle;
+            next unless defined($source); # udp sockets don't have source
+            if ($source->get_timeout() < $now && $source->get_timeout() > 0)
+            {
+                # timeout on writing the result. close.
+                syslog('warning', 'timeout writing to socket %d; discarding response', $socket->fileno);
+                $want_write->remove([$socket]);
+                $want_read->remove([$socket]);
+                $socket->close();
+                $source->set_timeout(0); # avoid tight loop in case of problems
+            }
+        }
+
+        foreach my $handle ($want_read->handles)
+        {
+            my ($socket, $source) = @$handle;
+            next unless defined($source); # udp sockets don't have source
+            if ($source->get_timeout() < $now && $source->get_timeout() > 0)
+            {
+                # timeout on reading a request. close.
+                syslog('warning', 'timeout reading from socket %d; closing connection', $socket->fileno);
+                $want_read->remove([$socket]);
+                $socket->close();
+                $source->set_timeout(0); # avoid tight loop in case of problems
+            }
+        }
+
+        $rendering_manager->schedule(); # processes anything added
+    }
+}
+
+#-----------------------------------------------------------------------------
+
+sub log_job
+{
+    my $job = shift;
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime(time);
+
+    my $logfile = Tirex::Config::get('master_logfile', $Tirex::MASTER_LOGFILE);
+    if (open(my $logfh, '>>', $logfile))
+    {
+        printf $logfh "%04d-%02d-%02dT%02d:%02d:%02d id=%s map=%s x=%d y=%d z=%d prio=%d request_time=%s expire=%s sources=%s render_time=%d success=%s\n",
+            1900+$year, 1+$mon, $mday, $hour, $min, $sec,
+            $job->get_id(),
+            $job->get_map(),
+            $job->get_x(),
+            $job->get_y(),
+            $job->get_z(),
+            $job->get_prio(),
+            $job->{'request_time'},
+            defined $job->{'expire'} ? $job->{'expire'} : '',
+            $job->sources_as_string(),
+            $job->{'render_time'},
+            $job->get_success();
+        close($logfh);
+    }
+    else
+    {
+        syslog('err', "Can't write to logfile '$logfile': $!");
+    }
+}
+
+
+#-----------------------------------------------------------------------------
+# Read renderer and map config
+#-----------------------------------------------------------------------------
+sub read_renderer_and_map_config
+{
+    Tirex::Map->clear();
+    Tirex::Renderer->clear();
+
+    Tirex::Renderer->read_config_dir($config_dir);
+
+    foreach my $renderer (Tirex::Renderer->all())
+    {
+        syslog('info', $renderer->to_s());
+        foreach my $map ($renderer->get_maps())
+        {
+            syslog('info', '  %s', $map->to_s());
+        }
+    }
+}
+
+#-----------------------------------------------------------------------------
+
+# clean up sockets, files, shm
+sub cleanup
+{
+    defined($rendering_manager) && $rendering_manager->log_stats();
+    unlink($modtile_socket_name);
+    unlink($master_socket_name);
+    unlink($pidfile);
+    $status->destroy();
+    syslog('info', 'tirex-master shutting down');
+}
+
+sub sigint_handler
+{
+    syslog('info', 'SIGINT (CTRL-C) received');
+    cleanup();
+    exit(0);
+}
+
+sub sigterm_handler 
+{
+    syslog('info', 'SIGTERM received');
+    cleanup();
+    exit(0);
+}
+
+sub sighup_handler
+{
+    syslog('info', 'SIGHUP received');
+# XXX ignore for the time being
+    $SIG{HUP} = \&sighup_handler;
+}
+
+__END__
+
+=head1 NAME
+
+tirex-master - tirex master daemon
+
+=head1 SYNOPSIS
+
+tirex-master [OPTIONS]
+
+=head1 OPTIONS
+
+=over 8
+
+=item B<-h>, B<--help>
+
+Display help message.
+
+=item B<-d>, B<--debug>
+
+Run in debug mode. You'll see the actual messages sent and received and other
+debug messages.
+
+=item B<-f>, B<--foreground>
+
+Run in foreground. E.g. when started from systemd service
+
+=item B<-c>, B<--config=DIR>
+
+Use the config directory DIR instead of /etc/tirex.
+
+=back
+
+=head1 DESCRIPTION
+
+The tirex master process gets requests for metatiles from mod_tile and other
+sources, queues them and sends them on to the rendering backends. It has a
+sophisticated queueing and rendering manager that decides what is to be
+rendered when.
+
+Unless the --debug option is given, tirex-master will detach from the
+terminal.
+
+=head1 FILES
+
+=over 8
+
+=item F</etc/tirex/tirex.conf>
+
+The configuration file.
+
+=item F</etc/tirex/renderer/*.conf>
+
+The renderer configuration files.
+
+=item F</etc/tirex/renderer/*/*.conf>
+
+The map configuration files.
+
+=item F</var/log/tirex/jobs.log>
+
+Default location for jobs logfile. It contains one line for each
+metatile rendered.
+
+=back
+
+=head1 SEE ALSO
+
+See the tirex-send manpage for the list of commands you can send to a running tirex-master.
+
+L<http://wiki.openstreetmap.org/wiki/Tirex>
+
+=head1 AUTHORS
+
+Frederik Ramm <frederik.ramm@geofabrik.de>, Jochen Topf
+<jochen.topf@geofabrik.de> and possibly others.
+
+=cut
+
+
+#-- THE END ------------------------------------------------------------------

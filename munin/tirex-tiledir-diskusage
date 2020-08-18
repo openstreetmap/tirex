@@ -1,0 +1,37 @@
+#!/usr/bin/perl
+#-----------------------------------------------------------------------------
+#
+#  Tirex Tile Rendering System
+#
+#  munin/tirex-tiledir-diskusage
+#
+#-----------------------------------------------------------------------------
+
+use strict;
+use warnings;
+
+use Tirex::Munin::Tiledir::Diskusage;
+
+#-----------------------------------------------------------------------------
+
+my $config_file = exists($ENV{'TIREX_CONFIGFILE'}) ? $ENV{'TIREX_CONFIGFILE'} : $Tirex::TIREX_CONFIGFILE;
+Tirex::Config::init($config_file);
+
+#-----------------------------------------------------------------------------
+
+(my $execname = $0) =~ s{^.*/}{};
+
+my $map = 'default';
+if ($execname =~ /^tirex-tiledir-diskusage-(.*)$/)
+{
+    $map = $1;
+}
+
+my @z   = ('0-9', 10 .. 17);
+
+my $statsfile = Tirex::Config::get('stats_dir', $Tirex::STATS_DIR) . "/tiles-$map.stats";
+
+Tirex::Munin::Tiledir::Diskusage->new( map => $map, z => \@z )->do( statsfile => $statsfile );
+
+
+#-- THE END ------------------------------------------------------------------

@@ -1,0 +1,11 @@
+
+Tirex Bugs
+==========
+
+* There are config options metatile_rows and metatile_columns and defaults for
+  those settings in the Perl code as $Tirex::METATILE_ROWS and
+  $Tirex::METATILE_COLUMNS. Some Tirex code looks into the config, some uses the
+  variables above and some has hardcoded dependencies on metatile size.  Nobody
+  has ever tested Tirex with sizes other than 8x8. Especially non-quadratic
+  metatiles will probably not work at all.
+

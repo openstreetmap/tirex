@@ -1,0 +1,245 @@
+# Minimal mapfile for Mapserver backend demo
+#
+# The backend works fine with this mapfile if blue text and green background is shown
+MAP
+
+OUTPUTFORMAT
+    NAME agg
+    DRIVER AGG/PNG8
+    FORMATOPTION "INTERLACE=OFF"
+    MIMETYPE "image/png"
+END
+
+FONTSET "/etc/tirex/renderer/mapserver/fonts.lst"
+MAXSIZE 10000
+SIZE 800 800
+EXTENT         -180 -85 180 85
+IMAGECOLOR     "#6bd06b"
+SHAPEPATH      "/tmp"
+
+WEB
+    METADATA
+      "ows_enable_request" "*"
+       wms_srs "EPSG:900913 EPSG:4326 EPSG:3857"
+       wms_title "demo"
+    END
+   IMAGEPATH "/tmp/"
+   IMAGEURL  "/"
+END
+
+PROJECTION
+"init=epsg:3857"
+END
+
+LAYER
+    NAME "default"
+    TYPE annotation
+    TRANSFORM ul
+      FEATURE
+        POINTS
+        128 100
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	640 100
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1152 100
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1664 100
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	384 356
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	868 356
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1380 356
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1892 356
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+        POINTS
+        128 612
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	640 612
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1152 612
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1664 612
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	384 868
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	868 868
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1380 868
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1892 868
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+        POINTS
+        128 1124
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	640 1124
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1152 1124
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1664 1124
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	384 1380
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	868 1380
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1380 1380
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1892 1380
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+        POINTS
+        128 1636
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	640 1636
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1152 1636
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1664 1636
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	384 1892
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	868 1892
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1380 1892
+      END
+    END
+    TRANSFORM ul
+      FEATURE
+	POINTS
+	1892 1892
+      END
+    END
+    CLASS
+      TEXT "tirexXmapserver backendXdemo metatile"
+      LABEL
+        ALIGN center
+        WRAP X
+        MAXLENGTH 0
+        FONT dvsb
+        TYPE TRUETYPE
+        SIZE 16
+        BUFFER 1
+        COLOR 51 51 164
+        FORCE TRUE
+      END
+    END
+    UNITS PIXELS #sets the units for the feature object
+  END
+END
