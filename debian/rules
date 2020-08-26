@@ -1,78 +1,15 @@
 #!/usr/bin/make -f
 
-configure: configure-stamp
-configure-stamp: 
-	dh_testdir
-	
-	# commands to configure the package.
-	touch configure-stamp
+# DH_VERBOSE := 1
 
-build: build-stamp
+# Enable hardening build flags
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
-build-stamp: configure-stamp  
-	dh_testdir
+%:
+	dh $@
 
-	# commands to compile the package.
-	$(MAKE)
-	touch $@
+override_dh_auto_test:
+	dh_auto_test || echo "Ignoring test failures"
 
-clean: 
-	dh_testdir
-	dh_testroot
-	rm -f build-stamp configure-stamp
-
-	# commands to clean up after the build process.
-	$(MAKE) clean
-	dh_clean 
-
-install: build
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs
-
-	# commands to install the package into debian/tmp
-	$(MAKE) DESTDIR=$(CURDIR)/debian/tmp install-all
-
-# Build architecture-independent files here.
-binary-indep: build install
-# We have nothing to do by default.
-
-# Build architecture-dependent files here.
-binary-arch: build install
-	dh_testdir
-	dh_testroot
-	dh_installchangelogs 
-	dh_installdocs
-	dh_installexamples
-#   the following line handles all packages *except* tirex-core
-	dh_install --no-package tirex-core --sourcedir=$(CURDIR)/debian/tmp
-#   the following line handles *only* the tirex-core package, it excludes some perl libraries that should not end up in this package
-	dh_install --no-package tirex-backend-wms --no-package tirex-backend-mapserver --no-package tirex-backend-openseamap --no-package tirex-backend-mapnik --no-package tirex-munin-plugin --no-package tirex-nagios-plugin --no-package tirex-syncd --no-package --tirex-example-map --exclude Munin --exclude Tirex::Backend::WMS --exclude Tirex::Backend::Mapserver --exclude Tirex::Backend::OpenSeaMap --exclude Tirex::Backend::TMS --exclude Backend/WMS --exclude Backend/Mapserver --exclude Backend/OpenSeaMap --exclude Backend/TMS --sourcedir=$(CURDIR)/debian/tmp
-#	dh_installmenu
-#	dh_installdebconf	
-#	dh_installlogrotate
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installmime
-#	dh_python
-	dh_installinit --name=tirex-master
-	dh_installinit --name=tirex-backend-manager
-	dh_installinit
-#	dh_installcron
-#	dh_installinfo
-	dh_installman
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-#	dh_perl
-#	dh_makeshlibs
-	dh_installdeb
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+get-orig-source:
+	. debian/get-orig-source

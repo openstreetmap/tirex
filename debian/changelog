@@ -1,6 +1,14 @@
+tirex (0.6.3-1) UNRELEASED; urgency=medium
+  
+  * targeted packaging to debian archive
+
+ -- Felix Delattre <debian@xama.nu>  Mon, 17 Aug 2020 00:00:00 +0000
+
 tirex (0.6.3) bionic; urgency=medium
   
   * modify TMS backend to take template URL parameter
+
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 29 Jun 2020 12:00:00 +0200
 
 tirex (0.6.2) bionic; urgency=medium
   
