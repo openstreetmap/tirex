@@ -1,7 +1,7 @@
 Source: tirex
 Maintainer: Debian GIS Project <pkg-grass-devel@lists.alioth.debian.org>
 Uploaders: Felix Delattre <debian@xama.nu>
-Section: web
+Section: science
 Priority: optional
 Build-Depends: debhelper (>= 10~),
                libboost-program-options-dev,
@@ -31,7 +31,7 @@ Description: Tirex raster tile rendering system
  This package contains the core piece of tirex.
 
 Package: tirex-backend-mapnik
-Section: web
+Section: utils
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
@@ -43,7 +43,7 @@ Description: Mapnik backend for the Tirex raster tile rendering system
  This package contains the backend connection with a Mapnik server
 
 Package: tirex-backend-wms
-Section: web
+Section: utils
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
@@ -54,7 +54,7 @@ Description: WMS backend for the Tirex tile rendering system
  This is the WMS backend for fetching maps from a WMS server.
 
 Package: tirex-backend-tms
-Section: web
+Section: utils
 Architecture: any
 Depends: tirex,
          libwww-perl,
@@ -67,7 +67,7 @@ Description: WMS backend for the Tirex tile rendering system
  This is the WMS backend for fetching maps from a WMS server.
 
 Package: tirex-syncd
-Section: web
+Section: utils
 Architecture: any
 Depends: tirex,
          ${shlibs:Depends},
