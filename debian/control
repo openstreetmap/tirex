@@ -1,27 +1,27 @@
 Source: tirex
-Section: web
-Priority: optional
 Maintainer: Debian GIS Project <pkg-grass-devel@lists.alioth.debian.org>
 Uploaders: Felix Delattre <debian@xama.nu>
+Section: web
+Priority: optional
 Build-Depends: debhelper (>= 10~),
                libboost-program-options-dev,
                libmapnik-dev,
 Standards-Version: 4.5.0
-Homepage: http://wiki.openstreetmap.org/wiki/Tirex
 Vcs-Browser: https://salsa.debian.org/debian-gis-team/libapache2-mod-tile
 Vcs-Git: https://salsa.debian.org/debian-gis-team/tirex.git
+Homepage: http://wiki.openstreetmap.org/wiki/Tirex
 
 Package: tirex
 Section: web
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: adduser,
+         libapache2-mod-tile,
+         libgd-gd2-perl,
          libjson-perl,
          libipc-sharelite-perl,
-         libgd-gd2-perl,
-         adduser,
-         libapache2-mod-tile,
          tirex-backend-mapnik | tirex-backend-wms | tirex-backend-tms,
+         ${shlibs:Depends},
+         ${misc:Depends},
 Suggests: tirex-backend-mapnik,
 Description: Tirex raster tile rendering system
  The Tirex suite of programs manages map raster tile rendering and caching.
@@ -47,8 +47,8 @@ Section: web
 Architecture: any
 Depends: ${shlibs:Depends},
          ${misc:Depends},
-         tirex,
          libwww-perl,
+         tirex,
 Description: WMS backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the WMS backend for fetching maps from a WMS server.
@@ -56,12 +56,12 @@ Description: WMS backend for the Tirex tile rendering system
 Package: tirex-backend-tms
 Section: web
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-         tirex,
+Depends: tirex,
          libwww-perl,
          libnet-https-nb-perl,
          libhttp-async-perl,
+         ${shlibs:Depends},
+         ${misc:Depends},
 Description: WMS backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the WMS backend for fetching maps from a WMS server.
@@ -69,9 +69,9 @@ Description: WMS backend for the Tirex tile rendering system
 Package: tirex-syncd
 Section: web
 Architecture: any
-Depends: ${shlibs:Depends},
+Depends: tirex,
+         ${shlibs:Depends},
          ${misc:Depends},
-         tirex,
 Description: Tirex sync daemon
  The Tirex suite of programs manages map tile rendering and caching.
  This is the sync daemon which listens for messages of tiles fully rendered,
@@ -82,10 +82,11 @@ Description: Tirex sync daemon
 Package: tirex-example-map
 Section: web
 Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
+Depends: libjs-leaflet,
          tirex,
-         tirex-backend-mapnik.
+         tirex-backend-mapnik,
+         ${shlibs:Depends},
+         ${misc:Depends},
 Description: Tirex example map data and configuration
  The Tirex suite of programs manages map tile rendering and caching.
  This package includes example map data and an example config for the Mapnik
