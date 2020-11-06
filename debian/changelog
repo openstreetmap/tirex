@@ -1,6 +1,10 @@
 tirex (0.6.3-1) UNRELEASED; urgency=medium
   
+  [ Felix Delattre ]
   * targeted packaging to debian archive
+
+  [ Bas Couwenberg ]
+  * Bump watch file version to 4.
 
  -- Felix Delattre <debian@xama.nu>  Mon, 17 Aug 2020 00:00:00 +0000
 
