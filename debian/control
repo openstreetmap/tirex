@@ -6,7 +6,7 @@ Priority: optional
 Build-Depends: debhelper (>= 10~),
                libboost-program-options-dev,
                libmapnik-dev,
-Standards-Version: 4.5.0
+Standards-Version: 4.5.1
 Vcs-Browser: https://salsa.debian.org/debian-gis-team/libapache2-mod-tile
 Vcs-Git: https://salsa.debian.org/debian-gis-team/tirex.git
 Homepage: http://wiki.openstreetmap.org/wiki/Tirex
