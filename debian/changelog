@@ -2,6 +2,8 @@ tirex (0.6.3) bionic; urgency=medium
   
   * modify TMS backend to take template URL parameter
 
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 29 Jun 2020 15:57:07 +0200
+
 tirex (0.6.2) bionic; urgency=medium
   
   * add TMS backend
