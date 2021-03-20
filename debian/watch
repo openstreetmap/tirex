@@ -4,4 +4,4 @@ dversionmangle=s/\+(debian|dfsg|ds|deb)\d*$//,\
 uversionmangle=s/(\d)[_\.\-\+]?((RC|rc|pre|dev|beta|alpha)\d*)$/$1~$2/;s/RC/rc/;s/\-/\./g,\
 filenamemangle=s/(?:.*?)?(?:rel|v|tirex)?[\-\_]?(\d\S+)\.(tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))/tirex-$1.$2/ \
 https://github.com/openstreetmap/tirex/releases \
-(?:.*?/archive/)?(?:rel|v|tirex)?[\-\_]?(\d[\d\-\.]+)\.(?:tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))
+(?:.*?/archive/(?:.*?/)?)?(?:rel|v|tirex)?[\-\_]?(\d[\d\-\.]+)\.(?:tgz|tbz|txz|(?:tar\.(?:gz|bz2|xz)))
