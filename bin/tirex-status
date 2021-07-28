@@ -373,6 +373,10 @@ Show status only once, default is to show it once per second.
 
 Show a table of rendering times by style and zoom level. Implies --once.
 
+=item B<-n>, B<--numbers>
+
+Show a table of rendering counts by style and zoom level. Implies --once.
+
 =item B<-r>, B<--raw>
 
 Return status in raw JSON format instead of in ANSI coloured human readable
