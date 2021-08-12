@@ -1,0 +1,38 @@
+#-----------------------------------------------------------------------------
+#
+#  Konfiguration for tms map
+#
+#  /etc/tirex/renderer/tms/demotms.conf
+#
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
+#  General configuration
+#-----------------------------------------------------------------------------
+
+#  symbolic name of this map
+name=demotms
+
+#  tile directory
+tiledir=/var/lib/tirex/tiles/demotms
+
+#  minimum zoom level allowed (default 0)
+#minz=0
+
+#  maximum zoom level allowed (default 17)
+maxz=10
+
+#-----------------------------------------------------------------------------
+#  Backend specific configuration
+#-----------------------------------------------------------------------------
+
+#  the URL template for the TMS server, must contain {x} {y} {z}
+#  DO NOT USE tile.openstreetmap.de in a production environment, this is
+#  for testing only!
+url=https://a.tile.openstreetmap.de/{z}/{x}/{y}.png
+
+#  "slots" is the maximum number of parallel requests that one backend process
+#  will make; note that if you have several backend processes, these will add up
+#slots=4
+
+#-- THE END ------------------------------------------------------------------

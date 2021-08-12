@@ -85,11 +85,57 @@ Returns a new Tirex::Job object created from the data read by this source.
 Also decides whether or not this source would like to be notified of 
 job completion, and if yes, flags the job accordingly.
 
-ModTile priorities are converted as follows:
+These are the priority levels used in the Apache mod_tile and how they 
+are translated in Tirex. (Note that in mod_tile the numbers do not imply
+higher or lower priority.)
 
-Render -> 2
-RenderPrio -> 1
-RenderBulk -> 10
+=head3 cmdRender (1 in mod_tile, 2 in Tirex)
+
+This priority is used by mod_tile if a "very old" tile is requested. The configuration
+option ModTileVeryOldThreshold controls what counts as "very old". Unless the system
+load is higher than ModTileMaxLoadOld, a render request is triggered and mod_tile waits
+for up to ModTileRequestTimeout seconds. If a tile is not produced within that time,
+the old tile is returned.
+
+=head3 cmdDirty (2 in mod_tile, 10 in Tirex)
+
+This priority is used by mod_tile if
+
+=over
+
+=item *
+the /dirty URL is manually called for a tile
+
+=item *
+an "old" or "very old" tile is requested but the load is too high to render it right 
+away (the old tile will be delivered instead)
+
+=item *
+a "missing" tile is requested but the load is too high to render it right away 
+(a 404 error will be issued)
+
+=back
+
+=head3 cmdRenderPrio (5 in mod_tile, 1 in Tirex)
+
+This priority is used by mod_tile if a "missing" tile is requested. Unless the system
+load is higher than ModTileMaxLoadMissing,  a render request is triggered and mod_tile 
+waits for up to ModTileMissingRequestTimeout seconds. If a tile is not produced within
+that time, a 404 error will be issued.
+
+=head3 cmdRenderBulk (6 in mod_tile, 20 in Tirex)
+
+Used for all "missing tile" render requests triggered by mod_tile if "ModTileBulkMode On" 
+is set in the Apache configuration. In this mode, requests for old tiles are never 
+issued. Never used if "ModTileBulkMode Off" (the default).
+
+=head3 cmdRenderLow (7 in mod_tile, 25 in Tirex)
+
+This priority is used by mod_tile if an "old" tile is requested. An "old" tile is one 
+that is older than three days or, if a planet_import_complete file is present, older
+than this file. Unless the system load is higher than ModTileMaxLoadOld, a render 
+request is triggered and mod_tile waits for up to ModTileRequestTimeout seconds. If 
+a tile is not produced within that time, the old tile is returned.
 
 =cut
 
@@ -150,7 +196,7 @@ sub set_request_write_callback
 
 =head2 $source->notify($job)
 
-Prepares a notification message about succesful tile rendering
+Prepares a notification message about successful tile rendering
 and informs the main select loop to give us a chance to write.
 
 =cut

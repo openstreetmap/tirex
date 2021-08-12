@@ -1,8 +1,8 @@
 #-----------------------------------------------------------------------------
 #
-#  Konfiguration for Mapnik renderer
+#  Konfiguration for TMS renderer
 #
-#  /etc/tirex/renderer/mapnik.conf
+#  /etc/tirex/renderer/tms.conf
 #
 #-----------------------------------------------------------------------------
 
@@ -11,17 +11,17 @@
 #-----------------------------------------------------------------------------
 
 #  symbolic name
-name=mapnik
+name=tms
 
 #  path to executable of renderer
-path=/usr/lib/tirex/backends/mapnik
+path=/usr/lib/tirex/backends/tms
 
 #  UDP port where the master can contact this renderer
 #  must be individual for each renderer
-port=9331
+port=9335
 
 #  number of processes that should be started
-procs=3
+procs=2
 
 #  syslog facility
 #syslog_facility=daemon
@@ -33,17 +33,6 @@ procs=3
 #  Backend specific configuration
 #-----------------------------------------------------------------------------
 
-#  Directory with input plugins for mapnik. The directory of your mapnik
-#  installation can be retrieved by this command: mapnik-config --input-plugins
-plugindir=/usr/lib/mapnik/3.0/input
-
-#  The directory where the Mapnik rendering engine loads its TrueType fonts from.
-#  If the style sheet references fonts that are not present here, the renderer will 
-#  throw an exception.
-fontdir=/usr/lib/mapnik/fonts
-
-#  Set this to 1 if you want fonts loaded recursively from directories
-#  inside the mapnik_fontdir directory. Defaults to 0.
-#fontdir_recurse=0
+#  none
 
 #-- THE END ------------------------------------------------------------------

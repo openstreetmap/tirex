@@ -59,6 +59,13 @@ Description: OpenSeaMap backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the OpenSeaMap backend for creating maps with the OpenSeaMap renderer.
 
+Package: tirex-backend-tms
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl, libnet-https-nb-perl, libhttp-async-perl
+Description: WMS backend for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the WMS backend for fetching maps from a WMS server.
+
 Package: tirex-syncd
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core
