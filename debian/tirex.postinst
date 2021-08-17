@@ -2,17 +2,33 @@
 
 set -e
 
-if ! getent passwd tirex >/dev/null; then
-    adduser --group --system --no-create-home --shell /bin/bash --home /var/lib/tirex tirex
-fi	
+case "$1" in
+    configure)
+	if ! getent group _tirex > /dev/null; then
+	    addgroup --force-badname --quiet --system _tirex
+	fi
+
+	if ! getent passwd _tirex > /dev/null; then
+	    adduser --force-badname --gecos "tirex daemon" \
+		    --home /nonexistent --ingroup _tirex \
+		    --no-create-home --quiet --system _tirex
+	fi
+	;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+	;;
+    *)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
+esac
 
 for dir in /var/run/tirex /var/log/tirex /var/lib/tirex /var/lib/tirex/stats /var/lib/tirex/tiles /var/lib/tirex/tiles/test; do
-    [ -d $dir ] || mkdir -p $dir && chown tirex:tirex $dir
+    [ -d $dir ] || mkdir -p $dir && chown _tirex:_tirex $dir
 done
 
 dpkg-statoverride --list /var/log/tirex >/dev/null || \
-   dpkg-statoverride --update --add tirex adm 0750 /var/log/tirex
+   dpkg-statoverride --update --add _tirex adm 0750 /var/log/tirex
 dpkg-statoverride --list /var/run/tirex >/dev/null || \
-   dpkg-statoverride --update --add tirex root 0755 /var/run/tirex
+   dpkg-statoverride --update --add _tirex root 0755 /var/run/tirex
 
 #DEBHELPER#

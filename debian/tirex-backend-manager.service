@@ -8,8 +8,8 @@ ExecStart=/usr/bin/tirex-backend-manager -f
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
-User=tirex
-Group=tirex
+User=_tirex
+Group=_tirex
 RuntimeDirectory=tirex
 
 [Install]

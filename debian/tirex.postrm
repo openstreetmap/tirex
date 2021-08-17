@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -e
+
+#DEBHELPER#
+
+if [ "$1" = "purge" ] ; then
+    deluser --quiet --system _tirex > /dev/null || true
+    delgroup --quiet --system _tirex > /dev/null || true
+fi
