@@ -4,6 +4,7 @@ Uploaders: Felix Delattre <debian@xama.nu>
 Section: science
 Priority: optional
 Build-Depends: debhelper (>= 10~),
+               dh-apache2,
                libboost-program-options-dev,
                libmapnik-dev,
 Standards-Version: 4.5.1
@@ -23,7 +24,7 @@ Depends: adduser,
          ${shlibs:Depends},
          ${misc:Depends},
 Suggests: tirex-backend-mapnik,
-Description: Tirex raster tile rendering system
+Description: Daemon that renders raster map tile using different backends
  The Tirex suite of programs manages map raster tile rendering and caching.
  This package contains the master daemon, rendering manager, test backend,
  and assorted utility programs.
@@ -62,9 +63,9 @@ Depends: tirex,
          libhttp-async-perl,
          ${shlibs:Depends},
          ${misc:Depends},
-Description: WMS backend for the Tirex tile rendering system
+Description: TMS backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
- This is the WMS backend for fetching maps from a WMS server.
+ This is the TMS backend for fetching maps from a TMS server.
 
 Package: tirex-syncd
 Section: utils
