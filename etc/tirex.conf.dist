@@ -7,7 +7,7 @@
 #-----------------------------------------------------------------------------
 
 #  Directory where statistics are stored
-#stats_dir=/var/lib/tirex/stats
+#stats_dir=/var/cache/tirex/stats
 
 #  How many rows and columns of tiles are there in a metatile.
 #metatile_rows=8

@@ -67,7 +67,7 @@ exec >>/var/log/tirex/tirex-create-stats-and-update-tiles.log 2>&1
 [ -f /osm/update/osmupdate.lock ] && exit
 
 # directory where the statistics should go
-DIR=/var/lib/tirex/stats
+DIR=/var/cache/tirex/stats
 
 DATE=`date +%FT%H`
 
