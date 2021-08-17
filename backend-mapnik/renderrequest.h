@@ -30,6 +30,7 @@ class RenderRequest
         int buffer_size;
         unsigned int srs;
         unsigned int bbox_srs;
+        unsigned int zoom;
 };
 
 #endif

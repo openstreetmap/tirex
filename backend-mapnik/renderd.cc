@@ -54,7 +54,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
 
     char linebuf[255];
     std::string tiledir;
-    std::string mapfile;
+    std::map<std::string, std::string> mapfiles;
     std::string stylename;
     unsigned int tilesize = 256;
     unsigned int mtrowcol = 8;
@@ -85,9 +85,9 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
             {
                 tiledir.assign(eq);
             }
-            else if (!strcmp(line, "mapfile"))
+            else if (!strncmp(line, "mapfile", 7))
             {
-                mapfile.assign(eq);
+                mapfiles.insert(std::pair<std::string, std::string>(line+7, eq));
             }
             else if (!strcmp(line, "scalefactor"))
             {
@@ -137,15 +137,9 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     }
     fclose(f);
 
-    if (mapfile.empty())
+    if (mapfiles.empty())
     {
         warning("cannot add %s: missing mapfile option", configfile);
-        return rv;
-    }
-
-    if (access(mapfile.c_str(), R_OK) == -1)
-    {
-        warning("cannot add %s: map file '%s' not accessible", configfile, mapfile.c_str());
         return rv;
     }
 
@@ -169,7 +163,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
 
     try
     {
-        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfile, tilesize, 
+        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfiles, tilesize, 
             scalefactor, buffersize, mtrowcol, imagetype);
         mHandlerMap[stylename]->setStatusReceiver(this);
         debug("added style '%s' from map %s", stylename.c_str(), configfile);

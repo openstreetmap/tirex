@@ -35,7 +35,7 @@
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
-MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& stylefile, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string& imagetype) :
+MetatileHandler::MetatileHandler(const std::string& tiledir, const std::map<std::string, std::string>& stylefiles, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string& imagetype) :
     mTileWidth(tilesize),
     mTileHeight(tilesize),
     mMetaTileRows(mtrowcol),
@@ -45,7 +45,35 @@ MetatileHandler::MetatileHandler(const std::string& tiledir, const std::string& 
     mScaleFactor(scalefactor),
     mTileDir(tiledir) 
 {
-    load_map(mMap, stylefile);
+    for (unsigned int i=0; i<=MAXZOOM; i++)
+    {
+        mPerZoomMap[i]=NULL;
+    }
+
+    for (auto itr = stylefiles.begin(); itr != stylefiles.end(); itr++)
+    {
+        if (itr->first == "")
+        {
+            load_map(mMap, itr->second);
+            debug("load %s without zoom restrictions", itr->second.c_str());
+        }
+        else if (itr->first.at(0) != '.')
+        {
+            throw std::invalid_argument("malformed mapfile config postfix '" + itr->first + "'");
+        }
+        else
+        {
+            char *endptr;
+            long int num = strtol(itr->first.c_str()+1, &endptr, 10);
+            if (*endptr || (num<0) || (num>MAXZOOM))
+            {
+                throw std::invalid_argument("malformed mapfile config postfix '" + itr->first + "'");
+            }
+            mPerZoomMap[num] = new mapnik::Map; 
+            debug("load %s for zoom %d", itr->second.c_str(), num);
+            load_map(*(mPerZoomMap[num]), itr->second);
+        }
+    }
 
     fourpow[0] = 1;
     twopow[0] = 1;
@@ -99,6 +127,7 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
     rr.south = (twopow[z] - y - mtr) * MERCATOR_WIDTH / twopow[z] - MERCATOR_OFFSET;
     rr.scale_factor = mScaleFactor;
     rr.buffer_size = mBufferSize;
+    rr.zoom = z;
 
     // we specify the bbox in epsg:3857, and we also want our image returned
     // in this projection.
@@ -250,6 +279,7 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
 {
     debug(">> MetatileHandler::render");
     char init[255];
+    mapnik::Map *map = mPerZoomMap[rr->zoom] ? mPerZoomMap[rr->zoom] : &mMap;
 
     sprintf(init, "+init=epsg:%d", rr->srs);
     // commented out - rely on proper SRS specification in map.xml
@@ -281,21 +311,21 @@ const RenderResponse *MetatileHandler::render(const RenderRequest *rr)
     }
 
     mapnik::box2d<double> bbox(west, south, east, north);
-    mMap.resize(rr->width, rr->height);
-    mMap.zoom_to_box(bbox);
+    map->resize(rr->width, rr->height);
+    map->zoom_to_box(bbox);
     if (rr->buffer_size > -1)
     {
-        mMap.set_buffer_size(rr->buffer_size);
+        map->set_buffer_size(rr->buffer_size);
     }
-    else if (mMap.buffer_size() < 128)
+    else if (map->buffer_size() < 128)
     {
-        mMap.set_buffer_size(128);
+        map->set_buffer_size(128);
     }
 
     debug("width: %d, height:%d", rr->width, rr->height);
     RenderResponse *resp = new RenderResponse();
     resp->image = new mapnik::image_32(rr->width, rr->height);
-    mapnik::agg_renderer<mapnik::image_32> renderer(mMap, *(resp->image), rr->scale_factor, 0u, 0u);
+    mapnik::agg_renderer<mapnik::image_32> renderer(*map, *(resp->image), rr->scale_factor, 0u, 0u);
     try
     {
         renderer.apply();
