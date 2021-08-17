@@ -16,7 +16,7 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin
 DESC="Mapnik rendering daemon for Tirex"
 NAME=tirex-backend-manager
 DAEMON=/usr/bin/$NAME
-PIDFILE=/var/run/tirex/$NAME.pid
+PIDFILE=/run/tirex/$NAME.pid
 DAEMON_ARGS=""
 SCRIPTNAME=/etc/init.d/$NAME
 
