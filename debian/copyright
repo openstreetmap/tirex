@@ -1,16 +1,16 @@
-Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0
-Source: https://github.com/openstreetmap/tirex
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Tirex
 Upstream-Contact: Frederik Ramm <frederik.ramm@geofabrik.de>
+Source: https://github.com/openstreetmap/tirex
 
 Files: *
-Copyright: (c) 2010..2020 Frederik Ramm <frederik.ramm@geofabrik.de>
-                          Jochen Topf <jochen.topf@geofabrik.de>
+Copyright: 2010-2021, Frederik Ramm <frederik.ramm@geofabrik.de>
+           2010-2021, Jochen Topf <jochen.topf@geofabrik.de>
 License: GPL-2+
 
 Files: debian/*
-Copyright: 2010..2020 Frederik Ramm <frederik.ramm@geofabrik.de>
-                      Felix Delattre <felix@delattre.de>
+Copyright: 2010-2020, Frederik Ramm <frederik.ramm@geofabrik.de>
+           2020-2021, Felix Delattre <debian@xama.nu>
 License: GPL-2+
 
 License: GPL-2+
