@@ -1,0 +1,33 @@
+---
+name: Build with Ubuntu 20.04
+
+on:
+  pull_request:
+  push:
+
+env:
+  build-dependencies: >-
+    apache2-dev
+    libboost-program-options-dev
+    libmapnik-dev
+
+jobs:
+  build-and-test:
+    name: Build with Ubuntu 20.04
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Install package(s)
+        run: sudo apt --yes install ${{ env.build-dependencies }}
+               apache2
+               libgd-gd2-perl
+               libjson-perl
+               libipc-sharelite-perl
+        shell: bash         
+      - name: Run `make`
+        run: make
+      - name: Run `make install`
+        run: sudo make install
+      - name: Run `make install-all`
+        run: sudo make install-all
