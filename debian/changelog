@@ -1,14 +1,21 @@
-tirex (0.6.3-1) UNRELEASED; urgency=medium
+tirex (0.6.4-1_exp1) UNRELEASED; urgency=medium
   
   [ Felix Delattre ]
-  * targeted packaging to debian archive
+  * Targeted packaging to debian archive
+  * Adjusted copyright information.
+  * Use tirex instead of tirex-core.
+  * Sort dependencies, specific dependencies first.
+  * Reviewed section declaration of packages.
+  * Remove packaging for example map.
+  * Place apache2 config when installing tirex.
+  * Introduced dedicated user _tirex.
 
   [ Bas Couwenberg ]
   * Bump watch file version to 4.
   * Bump Standards-Version to 4.5.1, no changes.
   * Update watch file for GitHub URL changes.
 
- -- Felix Delattre <debian@xama.nu>  Mon, 17 Aug 2020 00:00:00 +0000
+ -- Felix Delattre <debian@xama.nu>  Tue, 17 Aug 2021 17:13:23 +0000
 
 tirex (0.6.3) bionic; urgency=medium
   
