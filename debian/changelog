@@ -1,4 +1,4 @@
-tirex (0.6.4-1_exp1) UNRELEASED; urgency=medium
+tirex (0.6.4-1~exp1) UNRELEASED; urgency=medium
   
   [ Felix Delattre ]
   * Targeted packaging to debian archive
