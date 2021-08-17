@@ -78,16 +78,3 @@ Description: Tirex sync daemon
  and then copies the metatile to another server. The sync daemon is intended
  to be used in setups where you have multiple tile servers with their own
  rendering queues.
-
-Package: tirex-example-map
-Section: web
-Architecture: any
-Depends: libjs-leaflet,
-         tirex,
-         tirex-backend-mapnik,
-         ${shlibs:Depends},
-         ${misc:Depends},
-Description: Tirex example map data and configuration
- The Tirex suite of programs manages map tile rendering and caching.
- This package includes example map data and an example config for the Mapnik
- renderer.
