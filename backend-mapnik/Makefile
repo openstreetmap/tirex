@@ -11,5 +11,4 @@ clean:
 	rm -f backend-mapnik *.o
 
 install:
-	install -m 755 ${INSTALLOPTS} -d             $(DESTDIR)/usr/lib/tirex/backends/
-	install -m 755 ${INSTALLOPTS} backend-mapnik $(DESTDIR)/usr/lib/tirex/backends/mapnik
+	install -m 755 ${INSTALLOPTS} backend-mapnik $(DESTDIR)/usr/libexec/tirex-backend-mapnik

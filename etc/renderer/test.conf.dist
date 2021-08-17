@@ -14,7 +14,7 @@
 name=test
 
 #  path to executable of renderer
-path=/usr/lib/tirex/backends/test
+path=/usr/libexec/tirex-backend-test
 
 #  UDP port where the master can contact this renderer
 #  must be individual for each renderer
