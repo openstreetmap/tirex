@@ -22,4 +22,6 @@ case "$1" in
 	;;
 esac
 
+chown _tirex:_tirex /var/cache/tirex/tiles/test
+
 #DEBHELPER#
