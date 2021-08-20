@@ -1,7 +1,7 @@
 tirex (0.6.4-1~exp1) UNRELEASED; urgency=medium
-  
+
   [ Felix Delattre ]
-  * Targeted packaging to debian archive
+  * Targeted packaging to debian archive.
   * Adjusted copyright information.
   * Use tirex instead of tirex-core.
   * Sort dependencies, specific dependencies first.
@@ -9,6 +9,7 @@ tirex (0.6.4-1~exp1) UNRELEASED; urgency=medium
   * Remove packaging for example map.
   * Place apache2 config when installing tirex.
   * Introduced dedicated user _tirex.
+  * Initial package (Closes: #968676)
 
   [ Bas Couwenberg ]
   * Bump watch file version to 4.
@@ -18,19 +19,19 @@ tirex (0.6.4-1~exp1) UNRELEASED; urgency=medium
  -- Felix Delattre <debian@xama.nu>  Tue, 17 Aug 2021 17:13:23 +0000
 
 tirex (0.6.3) bionic; urgency=medium
-  
+
   * modify TMS backend to take template URL parameter
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 29 Jun 2020 12:00:00 +0200
 
 tirex (0.6.2) bionic; urgency=medium
-  
+
   * add TMS backend
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
 
 tirex (0.6.1) bionic; urgency=medium
-  
+
   * add openseamap backend
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
@@ -57,7 +58,7 @@ tirex (0.5.1) bionic; urgency=medium
 tirex (0.4.1precise1) precise; urgency=low
 
   * support (alomst) arbitrary sized meta tiles
-  * support for Mapnik2 
+  * support for Mapnik2
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Tue, 26 Jun 2012 21:45:22 +0000
 
@@ -124,6 +125,6 @@ tirex (0.1.1) jaunty; urgency=low
 
 tirex (0.1) unstable; urgency=low
 
-  * Initial release. 
+  * Initial release.
 
  -- Frederik Ramm <frederik.ramm@geofabrik.de>  Thu, 04 Feb 2010 00:57:52 +0100

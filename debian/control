@@ -13,7 +13,7 @@ Vcs-Git: https://salsa.debian.org/debian-gis-team/tirex.git
 Homepage: http://wiki.openstreetmap.org/wiki/Tirex
 
 Package: tirex
-Section: web
+Section: utils
 Architecture: any
 Depends: adduser,
          libapache2-mod-tile,

@@ -10,6 +10,3 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
 override_dh_auto_test:
 	dh_auto_test || echo "Ignoring test failures"
-
-get-orig-source:
-	. debian/get-orig-source
