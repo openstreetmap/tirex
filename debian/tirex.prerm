@@ -1,0 +1,16 @@
+#!/bin/sh
+set -e
+
+# automatically remove cached tiles
+if [ -d /var/cache/tirex/tiles ]
+then
+    rm -rf /var/cache/tirex/tiles
+fi
+
+# automatically remove stats
+if [ -d /var/cache/tirex/stats ]
+then
+    rm -rf /var/cache/tirex/stats
+fi
+
+#DEBHELPER#
