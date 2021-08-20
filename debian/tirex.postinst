@@ -22,13 +22,4 @@ case "$1" in
 	;;
 esac
 
-for dir in /var/run/tirex /var/log/tirex /var/lib/tirex /var/lib/tirex/stats /var/lib/tirex/tiles /var/lib/tirex/tiles/test; do
-    [ -d $dir ] || mkdir -p $dir && chown _tirex:_tirex $dir
-done
-
-dpkg-statoverride --list /var/log/tirex >/dev/null || \
-   dpkg-statoverride --update --add _tirex adm 0750 /var/log/tirex
-dpkg-statoverride --list /var/run/tirex >/dev/null || \
-   dpkg-statoverride --update --add _tirex root 0755 /var/run/tirex
-
 #DEBHELPER#

@@ -22,6 +22,7 @@ Depends: adduser,
          libipc-sharelite-perl,
          ${misc:Depends},
          ${perl:Depends},
+         ${shlibs:Depends},
 Recommends: tirex-backend-mapnik,
             ${misc:Recommends}
 Description: Daemon that renders raster map tile using different backends
