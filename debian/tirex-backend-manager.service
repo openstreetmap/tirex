@@ -1,7 +1,7 @@
 [Unit]
 Description=Backend of tirex rendering system
+Documentation=man:tirex-backend-manager
 After=network.target auditd.service
-Before=apache2.service tirex-master.service
 
 [Service]
 ExecStart=/usr/bin/tirex-backend-manager -f
@@ -10,7 +10,6 @@ KillMode=process
 Restart=on-failure
 User=_tirex
 Group=_tirex
-RuntimeDirectory=tirex
 
 [Install]
 WantedBy=multi-user.target
