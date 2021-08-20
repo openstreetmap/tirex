@@ -18,11 +18,13 @@ usr/share/man/man1/tirex-tiledir-check.1
 usr/share/man/man1/tirex-tiledir-stat.1
 usr/share/man/man3
 usr/share/perl5
-etc/tirex/renderer/test.conf
-etc/tirex/renderer/test/checkerboard.conf
 etc/logrotate.d/tirex-master
-etc/tirex/renderer/mapnik.conf
-debian/etc/tirex/tirex.conf    etc/tirex
-debian/tmpfiles.d/tirex.conf   usr/lib/tmpfiles.d
-usr/lib/tirex/backends/mapnik  usr/libexec
-usr/lib/tirex/backends/test    usr/libexec
+debian/etc/tirex/renderer/test.conf              etc/tirex/renderer
+debian/etc/tirex/renderer/test/checkerboard.conf etc/tirex/renderer/test
+debian/etc/tirex/tirex.conf                      etc/tirex
+debian/etc/tirex/renderer/mapnik.conf            etc/tirex/renderer
+debian/tmpfiles.d/tirex.conf                     usr/lib/tmpfiles.d
+debian/tirex-master.service                      lib/systemd/system/
+debian/tirex-backend-manager.service             lib/systemd/system/
+usr/lib/tirex/backends/mapnik                    usr/libexec/tirex/backends
+usr/lib/tirex/backends/test                      usr/libexec/tirex/backends
