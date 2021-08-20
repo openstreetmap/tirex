@@ -23,26 +23,11 @@ Depends: adduser,
          ${misc:Depends},
          ${perl:Depends},
          ${shlibs:Depends},
-Recommends: tirex-backend-mapnik,
-            ${misc:Recommends}
+Recommends: ${misc:Recommends}
 Description: Daemon that renders raster map tile using different backends
- The Tirex suite of programs manages map raster tile rendering and caching.
- This package contains the master daemon, rendering manager, test backend,
- and assorted utility programs.
- .
- This package contains the core piece of tirex.
-
-Package: tirex-backend-mapnik
-Section: utils
-Architecture: any
-Depends: ${shlibs:Depends},
-         ${misc:Depends},
-         tirex,
-Description: Mapnik backend for the Tirex raster tile rendering system
- The Tirex suite of programs manages taster map tile rendering and caching.
- This is the Mapnik backend for creating maps with the Mapnik renderer.
- .
- This package contains the backend connection with a Mapnik server
+ Tirex consists of several tools to manage map raster tile rendering and
+ caching. It contains the master daemon, rendering manager, backends for
+ mapnik and testing, and assorted utility programs.
 
 Package: tirex-syncd
 Section: utils
