@@ -33,7 +33,7 @@ Package: tirex-syncd
 Section: utils
 Architecture: any
 Depends: tirex,
-         ${shlibs:Depends},
+         ${perl:Depends},
          ${misc:Depends},
 Description: Tirex sync daemon
  The Tirex suite of programs manages map tile rendering and caching.
