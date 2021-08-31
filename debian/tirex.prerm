@@ -13,4 +13,10 @@ then
     rm -rf /var/cache/tirex/stats
 fi
 
+# automatically remove tirex log directory
+if [ -d /var/log/tirex ]
+then
+    rm -rf /var/log/tirex
+fi
+
 #DEBHELPER#

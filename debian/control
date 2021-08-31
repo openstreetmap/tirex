@@ -20,6 +20,8 @@ Architecture: any
 Depends: adduser,
          libapache2-mod-tile,
          libgd-gd2-perl,
+         libjson-perl,
+         libipc-sharelite-perl,
          ${misc:Depends},
          ${perl:Depends},
          ${shlibs:Depends},
