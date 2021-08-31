@@ -31,16 +31,3 @@ Description: Daemon that renders raster map tile using different backends
  Tirex consists of several tools to manage map raster tile rendering and
  caching. It contains the master daemon, rendering manager, backends for
  mapnik and testing, and assorted utility programs.
-
-Package: tirex-syncd
-Section: utils
-Architecture: any
-Depends: tirex,
-         ${perl:Depends},
-         ${misc:Depends},
-Description: Tirex sync daemon
- The Tirex suite of programs manages map tile rendering and caching.
- This is the sync daemon which listens for messages of tiles fully rendered,
- and then copies the metatile to another server. The sync daemon is intended
- to be used in setups where you have multiple tile servers with their own
- rendering queues.
