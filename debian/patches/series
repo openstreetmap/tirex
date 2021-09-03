@@ -1,2 +1,3 @@
 0001-Fix-simple-pod-syntax-error-for-OpenSeaMap.patch
 0002-Disconnect-configuration-overlap-between-build-and-d.patch
+0003-Add-debug-information-to-tirex-backend-manager.patch

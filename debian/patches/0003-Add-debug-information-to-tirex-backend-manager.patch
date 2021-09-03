@@ -1,0 +1,22 @@
+From: Felix Delattre <felix@delattre.de>
+Date: Fri, 3 Sep 2021 18:04:05 +0000
+Subject: Add debug information to tirex-backend-manager
+Forwarded: not-needed
+
+---
+ backend-mapnik/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/backend-mapnik/Makefile b/backend-mapnik/Makefile
+index 832358e..ec16323 100644
+--- a/backend-mapnik/Makefile
++++ b/backend-mapnik/Makefile
+@@ -1,7 +1,7 @@
+ INSTALLOPTS=-g root -o root
+ CFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
+ CXXFLAGS = $(CFLAGS) `mapnik-config --cflags`
+-CXXFLAGS += -Wall -Wextra -pedantic -Wredundant-decls -Wdisabled-optimization -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wold-style-cast
++CXXFLAGS += -Wall -Wextra -pedantic -Wredundant-decls -Wdisabled-optimization -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wold-style-cast -g
+ LDFLAGS= `mapnik-config --libs --ldflags --dep-libs`
+ 
+ backend-mapnik: renderd.o metatilehandler.o networklistener.o networkmessage.o networkrequest.o networkresponse.o debuggable.o requesthandler.o
