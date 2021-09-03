@@ -4,9 +4,15 @@ Upstream-Contact: Frederik Ramm <frederik.ramm@geofabrik.de>
 Source: https://github.com/openstreetmap/tirex
 
 Files: *
-Copyright: 2010-2021, Frederik Ramm <frederik.ramm@geofabrik.de>
-           2010-2021, Jochen Topf <jochen.topf@geofabrik.de>
+Copyright: 2010, 2019-2020, Frederik Ramm <frederik.ramm@geofabrik.de>
+                 2010-2011, Jochen Topf <jochen.topf@geofabrik.de>
+                      2012, Sven Geggus <sven-osm@geggus.net>
 License: GPL-2+
+
+Files: utils/analyze_postgis_log.pl
+Copyright: 2010-2016, Frederik Ramm <frederik@remote.org>
+License: Public-Domain
+         "This file is explicitly placed in the public domain"
 
 Files: debian/*
 Copyright: 2010-2020, Frederik Ramm <frederik.ramm@geofabrik.de>
