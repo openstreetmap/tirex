@@ -1,8 +1,8 @@
 tirex (0.6.4-1~exp1) experimental; urgency=medium
 
   [ Felix Delattre ]
+  * Initial package (Closes: #968676)
   * Import upstream version 0.6.3
-  * Targeted packaging to debian archive.
   * Adjusted copyright information.
   * Use tirex package.
   * Sort and review dependencies.
@@ -18,11 +18,10 @@ tirex (0.6.4-1~exp1) experimental; urgency=medium
   * Revisit configuration.
   * Add patch to avoid simple building error.
   * Disconnect logrotate configuration overlap.
-  * Initial package (Closes: #968676)
 
   [ Bas Couwenberg ]
   * Bump watch file version to 4.
   * Bump Standards-Version to 4.5.1, no changes.
   * Update watch file for GitHub URL changes.
 
- -- Felix Delattre <debian@xama.nu>  Sun, 29 Aug 2021 17:13:23 +0000
+ -- Felix Delattre <debian@xama.nu>  Fri, 03 Sep 2021 16:25:42 +0000
