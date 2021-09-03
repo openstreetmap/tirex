@@ -28,4 +28,3 @@ debian/tirex-master.service                      lib/systemd/system/
 debian/tirex-backend-manager.service             lib/systemd/system/
 usr/lib/tirex/backends/mapnik                    usr/libexec/tirex/backends
 usr/lib/tirex/backends/test                      usr/libexec/tirex/backends
-
