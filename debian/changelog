@@ -18,10 +18,11 @@ tirex (0.6.4-1~exp1) experimental; urgency=medium
   * Revisit configuration.
   * Add patch to avoid simple building error.
   * Disconnect logrotate configuration overlap.
+  * Bump Standards-Version to 4.6.0, no changes.
 
   [ Bas Couwenberg ]
   * Bump watch file version to 4.
   * Bump Standards-Version to 4.5.1, no changes.
   * Update watch file for GitHub URL changes.
 
- -- Felix Delattre <debian@xama.nu>  Fri, 03 Sep 2021 16:25:42 +0000
+ -- Felix Delattre <debian@xama.nu>  Wed, 08 Sep 2021 14:27:44 +0000
