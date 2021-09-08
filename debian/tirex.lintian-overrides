@@ -1,1 +1,6 @@
+# This package only provides systemd unit files:
 tirex: package-supports-alternative-init-but-no-init.d-script
+
+# Use the new standard until lintian gets updated.
+tirex: systemd-service-file-outside-lib usr/lib/systemd/system/tirex-backend-manager.service
+tirex: systemd-service-file-outside-lib usr/lib/systemd/system/tirex-master.service
