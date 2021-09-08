@@ -1,7 +1,7 @@
 tirex (0.6.4-1~exp1) experimental; urgency=medium
 
   [ Felix Delattre ]
-  * Initial package (Closes: #968676)
+  * Initial package (Closes: #968676).
   * Import upstream version 0.6.3
   * Adjusted copyright information.
   * Use tirex package.
