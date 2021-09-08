@@ -11,8 +11,8 @@ License: GPL-2+
 
 Files: utils/analyze_postgis_log.pl
 Copyright: 2010-2016, Frederik Ramm <frederik@remote.org>
-License: Public-Domain
-         "This file is explicitly placed in the public domain"
+License: public-domain
+ This file is explicitly placed in the public domain.
 
 Files: debian/*
 Copyright: 2010-2020, Frederik Ramm <frederik.ramm@geofabrik.de>
