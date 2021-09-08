@@ -1,7 +1,8 @@
 From: Felix Delattre <felix@delattre.de>
 Date: Sun, 29 Aug 2021 13:26:33 +0000
 Subject: Disconnect configuration overlap between build and debian packaging
-Forwarded: not-needed
+Origin: https://github.com/openstreetmap/tirex/pull/34/commits/ae3b7495083a942b4196e435759054d77721164e
+Bug: https://github.com/openstreetmap/tirex/pull/34
 
 ---
  Makefile | 2 --
