@@ -19,4 +19,10 @@ then
     rm -rf /var/log/tirex
 fi
 
+# automatically remove tirex share directory
+if [ -d /usr/share/tirex ]
+then
+    rm -rf /usr/share/tirex
+fi
+
 #DEBHELPER#
