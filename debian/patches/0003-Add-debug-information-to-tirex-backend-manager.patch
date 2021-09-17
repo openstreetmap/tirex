@@ -19,3 +19,4 @@ index 832358e..977a48e 100644
 +CXXFLAGS = `mapnik-config --cflags` $(CFLAGS)
  CXXFLAGS += -Wall -Wextra -pedantic -Wredundant-decls -Wdisabled-optimization -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wold-style-cast
  LDFLAGS= `mapnik-config --libs --ldflags --dep-libs`
+ 

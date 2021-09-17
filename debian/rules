@@ -5,6 +5,17 @@
 # Enable hardening build flags
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
+TEMPLATES=$(wildcard debian/*.in)
+MAPNIK_PLUGIN_BASE=$(shell echo `ls /usr/lib/mapnik/ -v | tail -n1`)
+
+versions:
+	@echo "Mapnik plugin base path: $(MAPNIK_PLUGIN_BASE)"
+
+templates:
+	for TEMPLATE in $(TEMPLATES) ; do \
+	    sed -e 's/@MAPNIK_PLUGIN_BASE@/$(MAPNIK_PLUGIN_BASE)/g' $$TEMPLATE > `echo $$TEMPLATE | sed 's/.in$$//'` ; \
+	done
+
 %:
 	dh $@ --with apache2
 
