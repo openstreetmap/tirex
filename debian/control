@@ -26,7 +26,6 @@ Depends: adduser,
          ${perl:Depends},
          ${shlibs:Depends}
 Recommends: ${misc:Recommends}
-Conflicts: renderd,
 Description: Daemon that renders raster map tile using different backends
  Tirex consists of several tools to manage map raster tile rendering and
  caching. It contains the master daemon, rendering manager, backends for
