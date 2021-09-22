@@ -14,7 +14,7 @@
 name=mapserver
 
 #  path to executable of renderer
-path=/usr/lib/tirex/backends/mapserver
+path=/usr/libexec/tirex-backend-mapserver
 
 #  UDP port where the master can contact this renderer
 #  must be individual for each renderer

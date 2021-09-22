@@ -14,7 +14,7 @@
 name=wms
 
 #  path to executable of renderer
-path=/usr/lib/tirex/backends/wms
+path=/usr/libexec/tirex-backend-wms
 
 #  UDP port where the master can contact this renderer
 #  must be individual for each renderer
