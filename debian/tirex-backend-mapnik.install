@@ -1,2 +1,2 @@
-usr/lib/tirex/backends/mapnik
+usr/libexec/tirex-backend-mapnik
 etc/tirex/renderer/mapnik.conf

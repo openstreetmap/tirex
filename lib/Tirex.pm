@@ -47,7 +47,7 @@ our $MAX_ZOOM = 30;
 our $EXIT_CODE_RESTART = 9;
 our $EXIT_CODE_DISABLE = 10;
 
-our $STATS_DIR = '/var/lib/tirex/stats';
+our $STATS_DIR = '/var/cache/tirex/stats';
 
 our $PIXEL_PER_TILE   = 256;
 
@@ -60,23 +60,23 @@ our $TIREX_CONFIGDIR                 = '/etc/tirex';
 our $TIREX_CONFIGFILENAME            = 'tirex.conf';
 our $TIREX_CONFIGFILE                = $TIREX_CONFIGDIR . '/' . $TIREX_CONFIGFILENAME;
 
-our $SOCKET_DIR                      = '/var/run/tirex';
+our $SOCKET_DIR                      = '/run/tirex';
 
 our $MASTER_SYSLOG_FACILITY          = 'daemon';
-our $MASTER_PIDFILE                  = '/var/run/tirex/tirex-master.pid';
+our $MASTER_PIDFILE                  = '/run/tirex/tirex-master.pid';
 our $MASTER_LOGFILE                  = '/var/log/tirex/jobs.log';
 our $MASTER_RENDERING_TIMEOUT        = 10; # minutes
 
 our $BACKEND_MANAGER_SYSLOG_FACILITY = 'daemon';
-our $BACKEND_MANAGER_PIDFILE         = '/var/run/tirex/tirex-backend-manager.pid';
+our $BACKEND_MANAGER_PIDFILE         = '/run/tirex/tirex-backend-manager.pid';
 our $BACKEND_MANAGER_ALIVE_TIMEOUT   = 8; # minutes - make this a tad smaller than the above
 
-our $SYNCD_PIDFILE                   = '/var/run/tirex/tirex-syncd.pid';
+our $SYNCD_PIDFILE                   = '/run/tirex/tirex-syncd.pid';
 our $SYNCD_UDP_PORT                  = 9323;
 our $SYNCD_AGGREGATE_DELAY           = 5;
 our $SYNCD_COMMAND                   = qq(tar -C/ -cf - %FILES% | ssh %HOST% -oControlMaster=auto -oControlPersist=1h -oControlPath=$SOCKET_DIR/ssh-control-%h-%r-%p -Tq "tar -C/ -xf -");
 
-our $MODTILE_SOCK                    = "/var/lib/tirex/modtile.sock";
+our $MODTILE_SOCK                    = "/run/tirex/modtile.sock";
 our $MODTILE_PERM                    = 0666;
 
 #-----------------------------------------------------------------------------

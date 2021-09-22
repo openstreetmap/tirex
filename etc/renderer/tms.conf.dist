@@ -14,7 +14,7 @@
 name=tms
 
 #  path to executable of renderer
-path=/usr/lib/tirex/backends/tms
+path=/usr/libexec/tirex-backend-tms
 
 #  UDP port where the master can contact this renderer
 #  must be individual for each renderer

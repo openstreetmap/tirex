@@ -21,5 +21,5 @@ usr/share/perl5
 etc/tirex/tirex.conf
 etc/tirex/renderer/test.conf
 etc/tirex/renderer/test/checkerboard.conf
-debian/etc/logrotate.d/tirex-master etc/logrotate.d
-usr/lib/tirex/backends/test
+etc/logrotate.d/tirex-master
+usr/libexec/tirex-backend-test
