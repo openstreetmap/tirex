@@ -264,6 +264,14 @@ Write list of tiles to FILE. See below for format.
 
 Write stats about tiles to FILE. See below for format.
 
+=item B<-z>, B<--minz=i>
+
+Start processing at min. zoom level i (default=0)
+
+=item B<-Z>, B<--maxz=i>
+
+Stop processing at max. zoom level i (default=19)
+
 =back
 
 =head1 DESCRIPTION

@@ -20,7 +20,7 @@ tiledir=/var/cache/tirex/tiles/test
 #minz=0
 
 #  maximum zoom level allowed (default 17)
-maxz=10
+maxz=20
 
 #-----------------------------------------------------------------------------
 #  Backend specific configuration

@@ -12,7 +12,7 @@ done
 
 dpkg-statoverride --list /var/log/tirex >/dev/null || \
    dpkg-statoverride --update --add tirex adm 0750 /var/log/tirex
-dpkg-statoverride --list /var/run/tirex >/dev/null || \
-   dpkg-statoverride --update --add tirex root 0755 /var/run/tirex
+dpkg-statoverride --list /run/tirex >/dev/null || \
+   dpkg-statoverride --update --add tirex root 0755 /run/tirex
 
 #DEBHELPER#

@@ -10,8 +10,9 @@
     <Layer name="ocean" status="on" srs="+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs">
         <StyleName>ocean</StyleName>
         <Datasource>
-            <Parameter name="type">shape</Parameter>
-            <Parameter name="file">/usr/share/tirex/example-map/ocean</Parameter>
+            <Parameter name="type"><![CDATA[ogr]]></Parameter>
+            <Parameter name="file"><![CDATA[ocean.gpkg]]></Parameter>
+            <Parameter name="layer"><![CDATA[ocean]]></Parameter>
         </Datasource>
     </Layer>
 </Map>

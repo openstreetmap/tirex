@@ -38,6 +38,8 @@ Config parameters for the map file:
 
 =item tilesize the tile size (should be 256 * scalefactor to avoid issues)
 
+=back
+
 =head1 METHODS
 
 =head2 $backend->init()
