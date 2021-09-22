@@ -47,7 +47,7 @@ our $MAX_ZOOM = 30;
 our $EXIT_CODE_RESTART = 9;
 our $EXIT_CODE_DISABLE = 10;
 
-our $STATS_DIR = '/var/lib/tirex/stats';
+our $STATS_DIR = '/var/cache/tirex/stats';
 
 our $PIXEL_PER_TILE   = 256;
 

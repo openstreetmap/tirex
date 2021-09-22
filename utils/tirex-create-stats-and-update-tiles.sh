@@ -69,8 +69,9 @@ exec >>/var/log/tirex/tirex-create-stats-and-update-tiles.log 2>&1
 # directory where the statistics should go
 DIR=$(sed -n 's/^stats_dir=//p' /etc/tirex/tirex.conf)
 if [ -z "$DIR" ]; then
-  DIR=/var/lib/tirex/stats
+  DIR=/var/cache/tirex/stats
 fi
+
 
 DATE=`date +%FT%H`
 
