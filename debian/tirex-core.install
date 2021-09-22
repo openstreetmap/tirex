@@ -22,4 +22,4 @@ etc/tirex/tirex.conf
 etc/tirex/renderer/test.conf
 etc/tirex/renderer/test/checkerboard.conf
 etc/logrotate.d/tirex-master
-usr/lib/tirex/backends/test
+usr/libexec/tirex-backend-test

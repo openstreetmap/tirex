@@ -17,7 +17,7 @@ DESC="Tirex sync server"
 NAME=tirex-syncd
 DAEMON=/usr/bin/$NAME
 DAEMON_ARGS=""
-PIDFILE=/var/run/tirex/$NAME.pid
+PIDFILE=/run/tirex/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 
 # Exit if the package is not installed
