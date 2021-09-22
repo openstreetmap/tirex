@@ -1,6 +1,6 @@
 INSTALLOPTS=-g root -o root
 CFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-CXXFLAGS = $(CFLAGS) `mapnik-config --cflags`
+CXXFLAGS = `mapnik-config --cflags` $(CFLAGS)
 CXXFLAGS += -Wall -Wextra -pedantic -Wredundant-decls -Wdisabled-optimization -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wold-style-cast
 LDFLAGS= `mapnik-config --libs --ldflags --dep-libs`
 
