@@ -14,7 +14,7 @@
 name=openseamap
 
 #  tile directory
-tiledir=/var/lib/tirex/tiles/openseamap
+tiledir=/var/cache/tirex/tiles/openseamap
 
 #  minimum zoom level allowed (default 0)
 #minz=0
