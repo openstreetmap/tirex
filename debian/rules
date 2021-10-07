@@ -1,15 +1,13 @@
 #!/usr/bin/make -f
 
-# DH_VERBOSE := 1
+# Uncomment this to turn on verbose mode.
+#DH_VERBOSE=1
 
 # Enable hardening build flags
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
 TEMPLATES=$(wildcard debian/*.in)
-MAPNIK_PLUGIN_BASE=$(shell echo `ls /usr/lib/mapnik/ -v | tail -n1`)
-
-versions:
-	@echo "Mapnik plugin base path: $(MAPNIK_PLUGIN_BASE)"
+MAPNIK_PLUGIN_BASE=\/usr\/lib\/mapnik\/$(shell echo `ls /usr/lib/mapnik/ -v | tail -n1`)\/input
 
 templates:
 	for TEMPLATE in $(TEMPLATES) ; do \
@@ -21,3 +19,8 @@ templates:
 
 override_dh_auto_install:
 	dh_auto_install --destdir=debian/tmp
+
+override_dh_auto_configure: templates
+	dh_auto_configure --
+
+.PHONY: templates
