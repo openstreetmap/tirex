@@ -1,2 +1,5 @@
 # This package only provides systemd unit files:
 package-supports-alternative-init-but-no-init.d-script
+
+# On purpose; links to other packages files.
+package-contains-empty-directory usr/share/tirex/mapnik/
