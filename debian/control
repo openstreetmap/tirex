@@ -30,3 +30,16 @@ Description: Daemon that renders raster map tile using different backends
  Tirex consists of several tools to manage map raster tile rendering and
  caching. It contains the master daemon, rendering manager, backends for
  mapnik and testing, and assorted utility programs.
+
+Package: tirex-example-map
+Section: web
+Architecture: all
+Depends: libjs-leaflet,
+         tirex,
+         ${misc:Depends},
+Recommends: ${misc:Recommends},
+Description: Tirex example map data and configuration
+ It comes with all connecting pieces to make tirex work
+ with Mapnik and Apache2 webserver.
+ After installation the map can be visisted in a web
+ browser by going to http://localhost/tirex-example-map.
