@@ -1,13 +1,12 @@
-tirex (0.6.4-1~exp1) experimental; urgency=medium
+tirex (0.7.0-1~exp1) experimental; urgency=medium
 
   [ Felix Delattre ]
   * Initial package (Closes: #968676).
-  * Import upstream version 0.6.3
+  * New upstream release 0.7.0
   * Adjusted copyright information.
   * Use tirex package.
   * Sort and review dependencies.
   * Review section declaration of packages.
-  * New upstream version 0.6.4
   * Place apache2 config when installing tirex.
   * Introduce dedicated user _tirex.
   * Remove experimental backends, plugins, and example map from packaging.
@@ -16,13 +15,12 @@ tirex (0.6.4-1~exp1) experimental; urgency=medium
   * Use daemon under /run.
   * Check on systemd service files.
   * Revisit configuration.
-  * Add patch to avoid simple building error.
-  * Disconnect logrotate configuration overlap.
   * Bump Standards-Version to 4.6.0, no changes.
+
 
   [ Bas Couwenberg ]
   * Bump watch file version to 4.
   * Bump Standards-Version to 4.5.1, no changes.
   * Update watch file for GitHub URL changes.
 
- -- Felix Delattre <debian@xama.nu>  Wed, 08 Sep 2021 14:27:44 +0000
+ -- Felix Delattre <debian@xama.nu>  Thu, 07 Oct 2021 14:37:41 +0000

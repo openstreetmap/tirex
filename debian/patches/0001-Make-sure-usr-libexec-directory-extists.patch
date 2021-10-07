@@ -1,0 +1,22 @@
+From: Felix Delattre <fd@gfz-potsdam.de>
+Date: Thu, 7 Oct 2021 15:11:21 +0000
+Subject: Make sure /usr/libexec directory extists.
+Origin: https://github.com/openstreetmap/tirex/pull/42/commits/97fce9e2ac64fb4b7fb3d0a99ce766a3d6273546
+Bug: https://github.com/openstreetmap/tirex/pull/42
+
+---
+ Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/Makefile b/Makefile
+index 2aecf6c..a9608fa 100644
+--- a/Makefile
++++ b/Makefile
+@@ -33,6 +33,7 @@ install: build
+ 	for program in bin/*; do \
+ 	    install -m 755 ${INSTALLOPTS} $$program $(DESTDIR)/usr/bin/; \
+     done
++	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/libexec
+ 	install -m 755 ${INSTALLOPTS} backends/test                            $(DESTDIR)/usr/libexec/tirex-backend-test
+ 	install -m 755 ${INSTALLOPTS} backends/wms                             $(DESTDIR)/usr/libexec/tirex-backend-wms
+ 	install -m 755 ${INSTALLOPTS} backends/tms                             $(DESTDIR)/usr/libexec/tirex-backend-tms

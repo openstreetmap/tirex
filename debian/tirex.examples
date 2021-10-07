@@ -1,2 +1,2 @@
 utils/*
-debian/etc/tirex/renderer/mapnik
+example-map/mapnik-example.conf
