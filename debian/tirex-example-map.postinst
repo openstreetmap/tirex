@@ -2,6 +2,6 @@
 
 set -e
 
-[ -d /var/lib/tirex/tiles/example ] || mkdir -p /var/lib/tirex/tiles/example && chown tirex:tirex /var/lib/tirex/tiles/example
+[ -d /var/cache/tirex/tiles/example ] || mkdir -p /var/cache/tirex/tiles/example && chown tirex:tirex /var/cache/tirex/tiles/example
 
 #DEBHELPER#
