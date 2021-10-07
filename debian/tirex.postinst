@@ -22,10 +22,6 @@ case "$1" in
 	;;
 esac
 
-# Create non-changing sym link to mapnik plugins
-mkdir -p /usr/share/tirex/mapnik
-ln -s $(mapnik-plugin-base) /usr/share/tirex/mapnik/input
-
 chown _tirex:_tirex /var/cache/tirex/tiles/test /var/cache/tirex/stats /var/log/tirex
 
 #DEBHELPER#
