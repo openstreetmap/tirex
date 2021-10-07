@@ -1,6 +1,6 @@
 INSTALLOPTS=-g root -o root
 CFLAGS += -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64
-CXXFLAGS = $(CFLAGS) `mapnik-config --cflags`
+CXXFLAGS = `mapnik-config --cflags` $(CFLAGS)
 CXXFLAGS += -Wall -Wextra -pedantic -Wredundant-decls -Wdisabled-optimization -Wctor-dtor-privacy -Wnon-virtual-dtor -Woverloaded-virtual -Wsign-promo -Wold-style-cast
 LDFLAGS= `mapnik-config --libs --ldflags --dep-libs`
 
@@ -11,5 +11,4 @@ clean:
 	rm -f backend-mapnik *.o
 
 install:
-	install -m 755 ${INSTALLOPTS} -d             $(DESTDIR)/usr/lib/tirex/backends/
-	install -m 755 ${INSTALLOPTS} backend-mapnik $(DESTDIR)/usr/lib/tirex/backends/mapnik
+	install -m 755 ${INSTALLOPTS} backend-mapnik $(DESTDIR)/usr/libexec/tirex-backend-mapnik

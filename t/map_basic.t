@@ -24,16 +24,16 @@ eval { Tirex::Map->new( name => 'foo', renderer => $r ); }; ($@ =~ qr{missing ti
 
 is(Tirex::Map->get('foo'), undef, 'get');
 
-my $m1 = Tirex::Map->new( name => 'foo', renderer => $r, tiledir => '/var/lib/tirex/tiles/foo', minz => 2, maxz => 10 );
+my $m1 = Tirex::Map->new( name => 'foo', renderer => $r, tiledir => '/var/cache/tirex/tiles/foo', minz => 2, maxz => 10 );
 
 isa_ok($m1, 'Tirex::Map', 'class');
 is($m1->get_name(), 'foo', 'name');
-is($m1->get_tiledir(), '/var/lib/tirex/tiles/foo', 'tiledir');
+is($m1->get_tiledir(), '/var/cache/tirex/tiles/foo', 'tiledir');
 is($m1->get_minz(),  2, 'minz');
 is($m1->get_maxz(), 10, 'maxz');
 is($m1->get_renderer(), $r, 'renderer');
 
-is($m1->to_s(), 'Map foo: renderer=mapnik tiledir=/var/lib/tirex/tiles/foo zoom=2-10', 'to_s');
+is($m1->to_s(), 'Map foo: renderer=mapnik tiledir=/var/cache/tirex/tiles/foo zoom=2-10', 'to_s');
 
 is(Tirex::Map->get('foo'), $m1, 'get');
 is(Tirex::Map->get('bar'), undef, 'get');
@@ -41,17 +41,17 @@ is(Tirex::Map->get('bar'), undef, 'get');
 is_deeply(Tirex::Map->status(), [
     {
         name => 'foo',
-        tiledir => '/var/lib/tirex/tiles/foo',
+        tiledir => '/var/cache/tirex/tiles/foo',
         minz => 2,
         maxz => 10,
         renderer => $r->get_name(),
     }
 ]);
 
-eval { Tirex::Map->new( name => 'foo', renderer => $r, tiledir => '/var/lib/tirex/tiles/foo' ); };
+eval { Tirex::Map->new( name => 'foo', renderer => $r, tiledir => '/var/cache/tirex/tiles/foo' ); };
 ($@ =~ qr{exists}) ? pass() : fail();
 
-my $m2 = Tirex::Map->new( name => 'default_z', renderer => $r, tiledir => '/var/lib/tirex/tiles/foo' );
+my $m2 = Tirex::Map->new( name => 'default_z', renderer => $r, tiledir => '/var/cache/tirex/tiles/foo' );
 is($m2->get_minz(),  0, 'minz');
 is($m2->get_maxz(), 17, 'maxz');
 

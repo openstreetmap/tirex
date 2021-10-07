@@ -14,7 +14,7 @@
 name=demotms
 
 #  tile directory
-tiledir=/var/lib/tirex/tiles/demotms
+tiledir=/var/cache/tirex/tiles/demotms
 
 #  minimum zoom level allowed (default 0)
 #minz=0

@@ -33,12 +33,11 @@ install: build
 	for program in bin/*; do \
 	    install -m 755 ${INSTALLOPTS} $$program $(DESTDIR)/usr/bin/; \
     done
-	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 ${INSTALLOPTS} backends/test                            $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 ${INSTALLOPTS} backends/wms                             $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 ${INSTALLOPTS} backends/tms                             $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 ${INSTALLOPTS} backends/mapserver                       $(DESTDIR)/usr/lib/tirex/backends
-	install -m 755 ${INSTALLOPTS} backends/openseamap                      $(DESTDIR)/usr/lib/tirex/backends
+	install -m 755 ${INSTALLOPTS} backends/test                            $(DESTDIR)/usr/libexec/tirex-backend-test
+	install -m 755 ${INSTALLOPTS} backends/wms                             $(DESTDIR)/usr/libexec/tirex-backend-wms
+	install -m 755 ${INSTALLOPTS} backends/tms                             $(DESTDIR)/usr/libexec/tirex-backend-tms
+	install -m 755 ${INSTALLOPTS} backends/mapserver                       $(DESTDIR)/usr/libexec/tirex-backend-mapserver
+	install -m 755 ${INSTALLOPTS} backends/openseamap                      $(DESTDIR)/usr/libexec/tirex-backend-openseamap
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex
 	install -m 644 ${INSTALLOPTS} etc/tirex.conf.dist                      $(DESTDIR)/etc/tirex/tirex.conf
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer
@@ -61,8 +60,6 @@ install: build
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/fonts.lst         $(DESTDIR)/etc/tirex/renderer/mapserver/fonts.lst
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/mapnik
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapnik.conf.dist            $(DESTDIR)/etc/tirex/renderer/mapnik.conf
-	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/logrotate.d
-	install -m 644 ${INSTALLOPTS} debian/logrotate.d-tirex-master          $(DESTDIR)/etc/logrotate.d/tirex-master
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/share/man/man1/
 	for program in bin/*; do \
         if grep -q "=head" $$program; then \
