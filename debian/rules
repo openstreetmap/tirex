@@ -6,21 +6,10 @@
 # Enable hardening build flags
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
-TEMPLATES=$(wildcard debian/*.in)
-MAPNIK_PLUGIN_BASE=\/usr\/lib\/mapnik\/$(shell echo `ls /usr/lib/mapnik/ -v | tail -n1`)\/input
-
-templates:
-	for TEMPLATE in $(TEMPLATES) ; do \
-	    sed -e 's/@MAPNIK_PLUGIN_BASE@/$(MAPNIK_PLUGIN_BASE)/g' $$TEMPLATE > `echo $$TEMPLATE | sed 's/.in$$//'` ; \
-	done
-
 %:
 	dh $@ --with apache2
 
 override_dh_auto_install:
 	dh_auto_install --destdir=debian/tmp
-
-override_dh_auto_configure: templates
-	dh_auto_configure --
 
 .PHONY: templates

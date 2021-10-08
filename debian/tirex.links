@@ -1,0 +1,3 @@
+#!/bin/bash
+
+echo "$(mapnik-plugin-base) /usr/share/tirex/mapnik/input"
