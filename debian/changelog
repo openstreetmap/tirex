@@ -17,7 +17,6 @@ tirex (0.7.0-1~exp1) experimental; urgency=medium
   * Revisit configuration.
   * Bump Standards-Version to 4.6.0, no changes.
 
-
   [ Bas Couwenberg ]
   * Bump watch file version to 4.
   * Bump Standards-Version to 4.5.1, no changes.
