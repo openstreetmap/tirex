@@ -273,6 +273,6 @@ int main(int argc, char **argv)
 {
     RenderDaemon mtd(argc, argv);
     mtd.run();
-    exit(9); // return with EXIT_CODE_RESTART==9 which means everything is ok, the backend can be restartet if the backend-manager wants to
+    exit(9); // return with EXIT_CODE_RESTART==9 which means everything is ok, the backend can be restarted if the backend-manager wants to
 }
 

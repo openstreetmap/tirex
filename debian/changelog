@@ -1,3 +1,9 @@
+tirex (0.8.0) focal; urgency=medium
+
+  * more stringent error handling. when a backend dies, don't restart - let backend manager die as well.
+
+ -- Frederik Ramm <frederik.ramm@geofabrik.de>  Fri, 13 Aug 2021 11:55:10 +0200
+
 tirex (0.6.4) focal; urgency=medium
 
   * allow adding a dot and zoom level after mapfile parameter to override map file for specific zoom levels
