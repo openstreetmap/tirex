@@ -1,5 +1,11 @@
 tirex (0.7.0-1) unstable; urgency=medium
 
+  * Move from experimental to unstable.
+
+ -- Felix Delattre <debian@xama.nu>  Mon, 22 Nov 2021 16:56:21 +0000
+
+tirex (0.7.0-1~exp1) experimental; urgency=medium
+
   [ Felix Delattre ]
   * Initial package (Closes: #968676).
   * New upstream release 0.7.0
