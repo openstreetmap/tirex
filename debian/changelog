@@ -1,4 +1,4 @@
-tirex (0.7.0-1~exp1) experimental; urgency=medium
+tirex (0.7.0-1) unstable; urgency=medium
 
   [ Felix Delattre ]
   * Initial package (Closes: #968676).
