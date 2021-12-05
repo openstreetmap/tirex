@@ -82,6 +82,6 @@ bucket name=background minprio=20 maxproc=2 maxload=4
 #  command to execute for replicating the space-separated list of files
 #  %FILES% to host %HOST%. By default uses a ssh connection with a 
 #  persistent control connection that will be re-created on demand.
-#syncd_command=tar -C/ -cf - %FILES% | ssh %HOST% -oControlMaster=auto -oControlPersist=1h -oControlPath=/run/tirex/ssh-control-%h-%r-%p -Tq "tar -C/ -xf -"
+#syncd_command="tar -C/ -cf - %FILES% | ssh %HOST% -oControlMaster=auto -oControlPersist=1h -oControlPath=/run/tirex/ssh-control-%h-%r-%p -Tq 'tar -C/ -xf -'"
 
 #-- THE END ------------------------------------------------------------------
