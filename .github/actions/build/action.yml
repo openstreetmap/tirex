@@ -1,0 +1,7 @@
+---
+runs:
+  using: composite
+  steps:
+    - name: Run `make`
+      run: make
+      shell: bash --noprofile --norc -euxo pipefail {0}
