@@ -10,7 +10,7 @@ use warnings;
 use Test::More qw( no_plan );
 
 use JSON;
- 
+
 use lib 'lib';
 
 use Tirex;
@@ -97,11 +97,12 @@ my $expected_status = {
     num_rendering => 0,
     rendering     => [],
     stats         => {
-        count_requested => 0,
-        count_expired   => 0,
-        count_timeouted => 0,
         count_error     => 0,
+        count_expired   => 0,
+        count_requested => 0,
+        count_timeouted => 0,
         count_rendered  => {},
+        max_render_time => {},
         sum_render_time => {},
     },
 };
