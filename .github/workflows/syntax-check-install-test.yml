@@ -79,7 +79,7 @@ jobs:
             [[ "${FILE,,}" =~ "mapserver" ]] && continue
             perl -Mstrict -Mdiagnostics -cw "${FILE}"
           done
-        shell: bash --noprofile --norc -euxo pipefail {0}
+        shell: bash
 
       - name: Build & Install `mapnik`
         uses: ./.github/actions/mapnik/build-and-install
