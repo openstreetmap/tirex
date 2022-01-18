@@ -22,7 +22,7 @@ package Tirex;
 
 our $DEBUG = 0;
 
-our $VERSION = '0.6.2';
+our $VERSION = '0.6.4';
 
 =head1 NAME
 
