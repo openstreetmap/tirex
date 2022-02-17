@@ -74,7 +74,7 @@ our $BACKEND_MANAGER_ALIVE_TIMEOUT   = 8; # minutes - make this a tad smaller th
 our $SYNCD_PIDFILE                   = '/run/tirex/tirex-syncd.pid';
 our $SYNCD_UDP_PORT                  = 9323;
 our $SYNCD_AGGREGATE_DELAY           = 5;
-our $SYNCD_COMMAND                   = qq(tar -C/ -cf - %FILES% | ssh %HOST% -oControlMaster=auto -oControlPersist=1h -oControlPath=$SOCKET_DIR/ssh-control-%h-%r-%p -Tq "tar -C/ -xf -");
+our $SYNCD_COMMAND                   = qq(rsync --archive --relative --no-implied-dirs --rsh="ssh -oControlMaster=auto -oControlPersist=1h -oControlPath=$SOCKET_DIR/ssh-control-%h-%r-%p -Tq" %FILES% "%HOST%:/");
 
 our $MODTILE_SOCK                    = "/run/tirex/modtile.sock";
 our $MODTILE_PERM                    = 0666;
