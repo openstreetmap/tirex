@@ -199,14 +199,22 @@ sub main
             my $t0 = [Time::HiRes::gettimeofday];
             my $image = $self->create_metatile($map, $metatile);
 
-            $self->set_status('writing metatile');
+            if ($image)
+            {
+                $self->set_status('writing metatile');
 
-            $self->write_metatile($image, $filename, $metatile);
+                $self->write_metatile($image, $filename, $metatile);
 
-            $msg = $msg->reply();
-            $msg->{'render_time'} = int(Time::HiRes::tv_interval($t0) * 1000); # in milliseconds
+                $msg = $msg->reply();
+                $msg->{'render_time'} = int(Time::HiRes::tv_interval($t0) * 1000); # in milliseconds
 
-            ::syslog('debug', 'sending response: %s', $msg->to_s()) if ($Tirex::DEBUG);
+                ::syslog('debug', 'sending response: %s', $msg->to_s()) if ($Tirex::DEBUG);
+            }
+            else
+            {
+                ::syslog('err', 'backend error');
+                $msg = $msg->reply('ERROR_BACKEND', 'The backend failed to produce a meta tile');
+            }
         }
         else
         {
