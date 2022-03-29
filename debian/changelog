@@ -1,3 +1,9 @@
+tirex (0.6.3-bfs1) UNRELEASED; urgency=medium
+
+  * backport bugfix b77f9619df7f923b66da23200352213d11f0c90d for TMS
+
+ -- root <root@craig.geofabrik.de>  Tue, 29 Mar 2022 09:40:02 +0000
+
 tirex (0.6.3) bionic; urgency=medium
   
   * modify TMS backend to take template URL parameter
