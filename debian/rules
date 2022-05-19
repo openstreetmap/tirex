@@ -10,6 +10,6 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 	dh $@ --with apache2
 
 override_dh_auto_install:
-	dh_auto_install --destdir=debian/tmp
+	dh_auto_install --destdir=debian/tmp -- install-all
 
 .PHONY: templates

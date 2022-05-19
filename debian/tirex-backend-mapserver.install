@@ -1,6 +1,4 @@
 usr/libexec/tirex-backend-mapserver
-usr/share/perl5/Tirex/Backend/Mapserver.pm
-usr/share/man/man3/Tirex::Backend::Mapserver.3pm
 etc/tirex/renderer/mapserver.conf
 etc/tirex/renderer/mapserver/msdemo.conf
 etc/tirex/renderer/mapserver/msdemo.map
