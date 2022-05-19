@@ -1,0 +1,33 @@
+#!/bin/sh
+set -e
+
+if [ "$1" = "remove" ]; then
+
+    # automatically remove cached tiles
+    if [ -d /var/cache/tirex/tiles ]
+    then
+        rm -rf /var/cache/tirex/tiles
+    fi
+    
+    # automatically remove stats
+    if [ -d /var/cache/tirex/stats ]
+    then
+        rm -rf /var/cache/tirex/stats
+    fi
+    
+    # automatically remove tirex log directory
+    if [ -d /var/log/tirex ]
+    then
+        rm -rf /var/log/tirex
+    fi
+    
+    # automatically remove tirex share directory
+    if [ -d /usr/share/tirex ]
+    then
+        rm -rf /usr/share/tirex
+    fi
+
+fi
+
+#DEBHELPER#
+
