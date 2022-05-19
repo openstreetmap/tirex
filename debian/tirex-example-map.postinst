@@ -1,7 +1,10 @@
-#! /bin/sh
+#!/bin/sh
 
 set -e
 
-[ -d /var/cache/tirex/tiles/example ] || mkdir -p /var/cache/tirex/tiles/example && chown tirex:tirex /var/cache/tirex/tiles/example
+echo "Check out the tirex example map by visiting:"
+echo " http://localhost/tirex-example-map"
+
+chown _tirex:_tirex /var/cache/tirex/tiles/tirex-example
 
 #DEBHELPER#

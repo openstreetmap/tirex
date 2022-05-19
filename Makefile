@@ -61,8 +61,6 @@ install: build
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapserver/fonts.lst         $(DESTDIR)/etc/tirex/renderer/mapserver/fonts.lst
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/tirex/renderer/mapnik
 	install -m 644 ${INSTALLOPTS} etc/renderer/mapnik.conf.dist            $(DESTDIR)/etc/tirex/renderer/mapnik.conf
-	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/etc/logrotate.d
-	install -m 644 ${INSTALLOPTS} etc/logrotate.d/tirex-master             $(DESTDIR)/etc/logrotate.d/tirex-master
 	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/share/man/man1/
 	for program in bin/*; do \
         if grep -q "=head" $$program; then \

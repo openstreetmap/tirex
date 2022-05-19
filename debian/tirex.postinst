@@ -1,0 +1,27 @@
+#! /bin/sh
+
+set -e
+
+case "$1" in
+    configure)
+	if ! getent group _tirex > /dev/null; then
+	    addgroup --force-badname --quiet --system _tirex
+	fi
+
+	if ! getent passwd _tirex > /dev/null; then
+	    adduser --force-badname --gecos "tirex daemon" \
+		    --home /nonexistent --ingroup _tirex \
+		    --no-create-home --quiet --system _tirex
+	fi
+	;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+	;;
+    *)
+	echo "postinst called with unknown argument \`$1'" >&2
+	exit 1
+	;;
+esac
+
+chown _tirex:_tirex /var/cache/tirex/tiles/test /var/cache/tirex/stats /var/log/tirex
+
+#DEBHELPER#

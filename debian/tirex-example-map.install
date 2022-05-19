@@ -1,2 +1,4 @@
-etc/tirex/renderer/mapnik/example.conf
-usr/share/tirex/example-map
+debian/etc/tirex/renderer/mapnik/tirex-example.conf  etc/tirex/renderer/mapnik
+debian/share/index.html                              usr/share/tirex/example-map
+example-map/example.xml                              usr/share/tirex/example-map
+example-map/ocean.gpkg                               usr/share/tirex/example-map
