@@ -1,14 +1,12 @@
 tirex (0.7.0-2) unstable; urgency=medium
 
   [ Frederik Ramm ]
-
   * Avoid deletion of tile cache on upgrade.
 
   [ Bas Couwenberg ]
-
   * Bump Standards-Version to 4.6.1, no changes.
 
- -- Felix Delattre <debian@xama.nu>  Wed, 03 Aug 2022 08:07:45 +0000
+ -- Felix Delattre <debian@xama.nu>  Wed, 03 Aug 2022 08:27:51 +0000
 
 tirex (0.7.0-1) unstable; urgency=medium
 
