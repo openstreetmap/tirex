@@ -1,3 +1,10 @@
+tirex (0.7.0-3) UNRELEASED; urgency=medium
+
+  * Team upload.
+  * Add Rules-Requires-Root to control file.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Tue, 29 Nov 2022 18:59:10 +0100
+
 tirex (0.7.0-2) unstable; urgency=medium
 
   [ Frederik Ramm ]
