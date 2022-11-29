@@ -1,2 +1,6 @@
 # This package only provides systemd unit files:
 package-supports-alternative-init-but-no-init.d-script
+
+# False positive, lat/lon
+typo-in-manual-page lon long *
+
