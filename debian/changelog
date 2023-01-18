@@ -3,6 +3,7 @@ tirex (0.7.0-3) UNRELEASED; urgency=medium
   * Team upload.
   * Add Rules-Requires-Root to control file.
   * Update lintian overrides.
+  * Bump Standards-Version to 4.6.2, no changes.
 
  -- Bas Couwenberg <sebastic@debian.org>  Tue, 29 Nov 2022 18:59:10 +0100
 
