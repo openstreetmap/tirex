@@ -1,4 +1,4 @@
-tirex (0.7.0-3) UNRELEASED; urgency=medium
+tirex (0.7.0-3) unstable; urgency=medium
 
   * Team upload.
   * Add Rules-Requires-Root to control file.
@@ -7,7 +7,7 @@ tirex (0.7.0-3) UNRELEASED; urgency=medium
   * Move systemd services to /lib/systemd.
     (closes: #1034222)
 
- -- Bas Couwenberg <sebastic@debian.org>  Tue, 29 Nov 2022 18:59:10 +0100
+ -- Bas Couwenberg <sebastic@debian.org>  Tue, 11 Apr 2023 10:20:03 +0200
 
 tirex (0.7.0-2) unstable; urgency=medium
 
