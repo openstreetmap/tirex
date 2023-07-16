@@ -18,7 +18,7 @@ usr/share/man/man1/tirex-tiledir-check.1
 usr/share/man/man1/tirex-tiledir-stat.1
 usr/share/man/man3
 usr/share/perl5
-debian/etc/logrotate.d/tirex                     etc/logrotate.d/tirex
+debian/etc/logrotate.d/tirex                     etc/logrotate.d
 debian/etc/tirex/renderer/test.conf              etc/tirex/renderer
 debian/etc/tirex/renderer/test/checkerboard.conf etc/tirex/renderer/test
 debian/etc/tirex/tirex.conf                      etc/tirex
