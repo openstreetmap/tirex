@@ -2,6 +2,7 @@ tirex (0.7.0-4) UNRELEASED; urgency=medium
 
   * Team upload.
   * Bump debhelper compat to 13.
+  * Enable Salsa CI.
 
  -- Bas Couwenberg <sebastic@debian.org>  Tue, 13 Jun 2023 16:20:21 +0200
 
