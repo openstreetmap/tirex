@@ -9,4 +9,8 @@ export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 %:
 	dh $@ --with apache2
 
+execute_after_dh_installsystemd:
+	dh_installsystemd -ptirex --name tirex-master
+	dh_installsystemd -ptirex --name tirex-backend-manager
+
 .PHONY: templates
