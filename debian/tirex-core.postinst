@@ -6,7 +6,7 @@ if ! getent passwd tirex >/dev/null; then
     adduser --group --system --no-create-home --shell /bin/bash --home /var/lib/tirex tirex
 fi	
 
-for dir in /var/run/tirex /var/log/tirex /var/lib/tirex /var/cache/tirex/stats /var/lib/tirex/tiles /var/lib/tirex/tiles/test; do
+for dir in /run/tirex /var/log/tirex /var/lib/tirex /var/cache/tirex/stats /var/cache/tirex/tiles /var/cache/tirex/tiles/test; do
     [ -d $dir ] || mkdir -p $dir && chown tirex:tirex $dir
 done
 
