@@ -5,6 +5,7 @@ Section: science
 Priority: optional
 Build-Depends: debhelper-compat (= 13),
                dh-apache2,
+               dh-sequence-apache2,
                libboost-program-options-dev,
                libipc-sharelite-perl,
                libjson-perl,
