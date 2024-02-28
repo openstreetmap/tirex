@@ -58,7 +58,7 @@ installed. Call
 to create the packages. The following packages will be created in the parent
 directory:
 
-    tirex-core
+    tirex
     tirex-backend-mapnik
     tirex-backend-wms
     tirex-backend-mapserver

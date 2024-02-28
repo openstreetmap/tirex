@@ -155,18 +155,22 @@ sub format_status
         my @styles = keys %{$d->{'rm'}->{'stats'}->{'sum_render_time'}};
         my $maxzoom = 0;
         map { $maxzoom = max($maxzoom, scalar(@{$d->{'rm'}->{'stats'}->{'sum_render_time'}->{$_}})); } @styles;
-        $r = "style     zoom |";
+        my $max_name_len = 0;
+        map { $max_name_len = max($max_name_len, length($_)); } @styles;
+
+        $r = "style" . " " x ($max_name_len-9) . "zoom |";
         for (my $i = 0; $i < $maxzoom; $i++)
         {
             $r .= sprintf("%7d ", $i);
         }
         $r .= "\n";
-        $r .= "---------------+";
-        $r .= "----------" x $maxzoom;
+        $r .= "-" x $max_name_len;
+        $r .= "-+";
+        $r .= "--------" x $maxzoom;
         $r .= "\n";
-        foreach (@styles)
+        foreach (sort @styles)
         {
-            $r .= sprintf("%-15s|", $_);
+            $r .= sprintf("%-${max_name_len}s |", $_);
             for (my $i = 0; $i < $maxzoom; $i++)
             {
                 my $time = $d->{'rm'}->{'stats'}->{'sum_render_time'}->{$_}->[$i];

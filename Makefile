@@ -33,6 +33,7 @@ install: build
 	for program in bin/*; do \
 	    install -m 755 ${INSTALLOPTS} $$program $(DESTDIR)/usr/bin/; \
     done
+	install -m 755 ${INSTALLOPTS} -d                                       $(DESTDIR)/usr/libexec
 	install -m 755 ${INSTALLOPTS} backends/test                            $(DESTDIR)/usr/libexec/tirex-backend-test
 	install -m 755 ${INSTALLOPTS} backends/wms                             $(DESTDIR)/usr/libexec/tirex-backend-wms
 	install -m 755 ${INSTALLOPTS} backends/tms                             $(DESTDIR)/usr/libexec/tirex-backend-tms
