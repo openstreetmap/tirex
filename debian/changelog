@@ -7,6 +7,7 @@ tirex (0.7.1-1) UNRELEASED; urgency=medium
   * Bump debhelper compat to 13.
   * Enable Salsa CI.
   * Switch to dh-sequence-*.
+  * Refresh patches.
 
   [ Helmut Grohne ]
   * Let dh_installsystemd choose the location of systemd units.
