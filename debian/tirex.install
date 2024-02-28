@@ -1,0 +1,30 @@
+usr/bin/tirex-backend-manager
+usr/bin/tirex-batch
+usr/bin/tirex-check-config
+usr/bin/tirex-master
+usr/bin/tirex-rendering-control
+usr/bin/tirex-send
+usr/bin/tirex-status
+usr/bin/tirex-tiledir-check
+usr/bin/tirex-tiledir-stat
+usr/share/man/man1/tirex-backend-manager.1
+usr/share/man/man1/tirex-batch.1
+usr/share/man/man1/tirex-check-config.1
+usr/share/man/man1/tirex-master.1
+usr/share/man/man1/tirex-rendering-control.1
+usr/share/man/man1/tirex-send.1
+usr/share/man/man1/tirex-status.1
+usr/share/man/man1/tirex-tiledir-check.1
+usr/share/man/man1/tirex-tiledir-stat.1
+usr/share/man/man3
+usr/share/perl5
+debian/etc/logrotate.d/tirex                     etc/logrotate.d
+debian/etc/tirex/renderer/test.conf              etc/tirex/renderer
+debian/etc/tirex/renderer/test/checkerboard.conf etc/tirex/renderer/test
+debian/etc/tirex/tirex.conf                      etc/tirex
+debian/etc/tirex/renderer/mapnik.conf            etc/tirex/renderer
+debian/tmpfiles.d/tirex.conf                     usr/lib/tmpfiles.d
+debian/tirex-master.service                      usr/lib/systemd/system/
+debian/tirex-backend-manager.service             usr/lib/systemd/system/
+usr/libexec/tirex-backend-mapnik
+usr/libexec/tirex-backend-test

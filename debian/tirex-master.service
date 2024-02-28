@@ -1,5 +1,6 @@
 [Unit]
 Description=Master process of tirex rendering system
+Documentation=man:tirex-master
 After=network.target auditd.service
 Before=apache2.service
 
@@ -8,9 +9,8 @@ ExecStart=/usr/bin/tirex-master -f
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
-User=tirex
-Group=tirex
-RuntimeDirectory=tirex
+User=_tirex
+Group=_tirex
 
 [Install]
 WantedBy=multi-user.target

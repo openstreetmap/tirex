@@ -1,31 +1,59 @@
 Source: tirex
-Section: web
-Priority: extra
-Maintainer: Frederik Ramm <frederik.ramm@geofabrik.de>
-Build-Depends: debhelper (>= 7), libboost-program-options-dev, libmapnik-dev
-Homepage: http://wiki.openstreetmap.org/wiki/Tirex
-Standards-Version: 3.8.0
+Maintainer: Debian GIS Project <pkg-grass-devel@lists.alioth.debian.org>
+Uploaders: Felix Delattre <debian@xama.nu>
+Section: science
+Priority: optional
+Build-Depends: debhelper-compat (= 12),
+               dh-apache2,
+               libboost-program-options-dev,
+               libipc-sharelite-perl,
+               libjson-perl,
+               libmapnik-dev
+Standards-Version: 4.6.0
+Vcs-Browser: https://salsa.debian.org/debian-gis-team/tirex
+Vcs-Git: https://salsa.debian.org/debian-gis-team/tirex.git
+Homepage: https://wiki.openstreetmap.org/wiki/Tirex
 
-Package: tirex-core
+Package: tirex
+Section: utils
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libjson-perl, libipc-sharelite-perl, libgd-gd2-perl, adduser
-Provides: tirex-master
-Suggests: libapache-mod-tile, tirex-backend-mapnik
-Description: Core of the Tirex tile rendering system
- The Tirex suite of programs manages map tile rendering and caching.
- This package contains the master daemon, rendering manager, test backend,
- and assorted utility programs.
+Depends: adduser,
+         libapache2-mod-tile,
+         libgd-gd2-perl,
+         libjson-perl,
+         libipc-sharelite-perl,
+         ${misc:Depends},
+         ${perl:Depends},
+         ${shlibs:Depends}
+Recommends: ${misc:Recommends}
+Description: Daemon that renders raster map tile using different backends
+ Tirex consists of several tools to manage map raster tile rendering and
+ caching. It contains the master daemon, rendering manager, backends for
+ mapnik and testing, and assorted utility programs.
+
+Package: tirex-example-map
+Section: web
+Architecture: all
+Depends: libjs-leaflet,
+         tirex,
+         ${misc:Depends},
+Recommends: ${misc:Recommends},
+Description: Tirex example map data and configuration
+ It comes with all connecting pieces to make tirex work
+ with Mapnik and Apache2 webserver.
+ After installation the map can be visisted in a web
+ browser by going to http://localhost/tirex-example-map.
 
 Package: tirex-munin-plugin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, munin-node
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, munin-node
 Description: Munin plugin for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This package contains plugins that help to graph Tirex activity with Munin.
 
 Package: tirex-nagios-plugin
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex
 Suggests: nagios3 | nagios-nrpe-server
 Description: Nagios plugins for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
@@ -33,53 +61,38 @@ Description: Nagios plugins for the Tirex tile rendering system
 
 Package: tirex-backend-wms
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, libwww-perl
 Description: WMS backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the WMS backend for fetching maps from a WMS server.
 
 Package: tirex-backend-mapserver
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl, libmapscript-perl, ttf-dejavu-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, libwww-perl, libmapscript-perl, ttf-dejavu-core
 Description: Mapserver backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the Mapserver backend for rendering maps with Mapserver.
 
 Package: tirex-backend-mapnik
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex
 Description: Mapnik backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the Mapnik backend for creating maps with the Mapnik renderer.
 
 Package: tirex-backend-openseamap
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, default-jre-headless | java8-runtime-headless
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, default-jre-headless | java8-runtime-headless
 Description: OpenSeaMap backend for the Tirex tile rendering system
  The Tirex suite of programs manages map tile rendering and caching.
  This is the OpenSeaMap backend for creating maps with the OpenSeaMap renderer.
 
-Package: tirex-backend-tms
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core, libwww-perl, libnet-https-nb-perl, libhttp-async-perl
-Description: WMS backend for the Tirex tile rendering system
- The Tirex suite of programs manages map tile rendering and caching.
- This is the WMS backend for fetching maps from a WMS server.
-
 Package: tirex-syncd
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-core
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex
 Description: Tirex sync daemon
  The Tirex suite of programs manages map tile rendering and caching.
  This is the sync daemon which listens for messages of tiles fully rendered,
  and then copies the metatile to another server. The sync daemon is intended
  to be used in setups where you have multiple tile servers with their own
  rendering queues.
-
-Package: tirex-example-map
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, tirex-backend-mapnik
-Description: Tirex example map data
- The Tirex suite of programs manages map tile rendering and caching.
- This package includes example map data and an example config for the Mapnik
- renderer.

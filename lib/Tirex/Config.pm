@@ -72,6 +72,10 @@ sub parse_line
     {
         $confhash->{$prefix.$1} = $2;
     }
+    elsif ($line =~ /^([a-z0-9_]+)\s*=\s*"(\S*)"\s*$/)
+    {
+        $confhash->{$prefix.$1} = $2;
+    }
     elsif ($line =~ /^([a-z0-9_]+)\s+(.*?)\s*$/)
     {
         my $obj = $1;

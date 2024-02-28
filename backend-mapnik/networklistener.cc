@@ -193,7 +193,7 @@ void NetworkListener::run()
             if (mMaxRequests > -1 && ++mRequestCount > mMaxRequests) 
             {
                 error("maxrequests reached, terminating");
-		exit(1);
+                break;
             }
         }
     }

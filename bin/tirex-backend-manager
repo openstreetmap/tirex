@@ -141,6 +141,9 @@ my $TERM_TIMEOUT   =  5;
 # timeout when waiting for alive messages from workers
 my $SELECT_TIMEOUT = 10;
 
+# hash that catalogues worker processes
+my $workers;
+
 #-----------------------------------------------------------------------------
 # Main loop
 #-----------------------------------------------------------------------------
@@ -148,7 +151,7 @@ my $SELECT_TIMEOUT = 10;
     my $sockets = {};
     while (1)
     {
-        my $workers = {};
+        $workers = {};
 
         Tirex::Renderer->read_config_dir($config_dir);
         syslog('info', 'Found config for renderers: %s', join(' ', map { $_->get_name(); } Tirex::Renderer->all()));
@@ -160,22 +163,15 @@ my $SELECT_TIMEOUT = 10;
 
         while (! $received_sighup)
         {
-            start_workers($workers, $sockets);
-            check_for_alive_messages($workers);
-            cleanup_dead_workers($workers);
-            kill_old_workers($workers);
+            start_workers($sockets);
+            check_for_alive_messages();
+            cleanup_dead_workers();
+            kill_old_workers();
 
             if ($received_sigterm)
             {
                 syslog('info', 'TERM/INT received, forwarding to children: %s', join(' ', keys %$workers));
-
-                foreach my $pid (keys %$workers)
-                {
-                    kill('HUP', $pid);
-                }
-
-                unlink($pidfile); # ignore return code
-                exit(0);
+                exit_gracefully(0);
             }
 
             sleep 1;
@@ -192,6 +188,19 @@ my $SELECT_TIMEOUT = 10;
     }
 }
 
+#-----------------------------------------------------------------------------
+# Terminate and also kill all children.
+#-----------------------------------------------------------------------------
+sub exit_gracefully
+{
+    my $exitcode = shift;
+    foreach my $pid (keys %$workers)
+    {
+        kill('HUP', $pid);
+    }
+    unlink($pidfile); # ignore return code
+    exit($exitcode);
+}
 
 #-----------------------------------------------------------------------------
 # Open sockets for all renderers or re-use old ones after a SIGHUP
@@ -251,7 +260,6 @@ sub open_sockets
 #-----------------------------------------------------------------------------
 sub start_workers
 {
-    my $workers = shift;
     my $sockets = shift;
 
     foreach my $renderer (Tirex::Renderer->enabled())
@@ -327,8 +335,6 @@ sub create_pipe
 #-----------------------------------------------------------------------------
 sub check_for_alive_messages
 {
-    my $workers = shift;
-
     my $select = IO::Select->new();
     foreach my $worker (values %$workers)
     {
@@ -353,33 +359,24 @@ sub check_for_alive_messages
 #-----------------------------------------------------------------------------
 sub cleanup_dead_workers
 {
-    my $workers = shift;
-
     while ((my $pid = waitpid(-1, WNOHANG)) > 0) 
     {
-        my $exit_code = $? >> 8;
-        my $signal    = $? & 127;
-        syslog('warning', 'child %d terminated (exit_code=%d, signal=%d)', $pid, $exit_code, $signal);
-
         # this will happen if a worker child dies which we don't know about
         # because we got a SIGHUP in between
         next unless ($workers->{$pid});
 
-        # if the return code of the child is something other than $EXIT_CODE_RESTART, the renderer is disabled
+        my $exit_code = $? >> 8;
+        my $signal    = $? & 127;
+        syslog('warning', 'child %d terminated (exit_code=%d, signal=%d)', $pid, $exit_code, $signal);
+
+        # if the return code of the child is something other than $EXIT_CODE_RESTART, we quit.
         # this does not happen if the worker child was killed because of a timeout
-        #if ($exit_code != $Tirex::EXIT_CODE_RESTART && ! defined $workers->{$pid}->{'hungup'})
-        #{
-        #    my $renderer = $workers->{$pid}->{'renderer'};
-        #    if ($renderer->get_debug())
-        #    {
-        #        syslog('debug', 'renderer %s not disabled because we are in debug mode', $renderer->get_name());
-        #    }
-        #    else
-        #    {
-        #        $renderer->disable();
-        #        syslog('err', 'disabled renderer %s', $renderer->get_name());
-        #    }
-        #}
+        if ($exit_code != $Tirex::EXIT_CODE_RESTART && ! defined $workers->{$pid}->{'hungup'})
+        {
+            my $renderer = $workers->{$pid}->{'renderer'};
+            syslog('err', 'terminating due to unexpected error in renderer %s', $renderer->get_name());
+            exit_gracefully(2);
+        }
 
         $workers->{$pid}->{'handle'}->close();
         $workers->{$pid}->{'renderer'}->remove_worker($pid);
@@ -393,8 +390,6 @@ sub cleanup_dead_workers
 #-----------------------------------------------------------------------------
 sub kill_old_workers
 {
-    my $workers = shift;
-
     my $now = time();
 
     foreach my $worker (values %$workers) 
@@ -466,7 +461,6 @@ sub sigterm_handler
 {
     $received_sigterm = 1;
 }
-
 
 __END__
 

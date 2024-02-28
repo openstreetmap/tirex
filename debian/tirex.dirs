@@ -1,0 +1,4 @@
+var/cache/tirex/tiles
+var/cache/tirex/tiles/test
+var/cache/tirex/stats
+var/log/tirex

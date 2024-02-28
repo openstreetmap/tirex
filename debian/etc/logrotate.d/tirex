@@ -1,0 +1,10 @@
+# /etc/logrotate.d/tirex
+/var/log/tirex/jobs.log {
+  daily
+  rotate 35
+  dateext
+  compress
+  missingok
+  notifempty
+  create 0644 _tirex _tirex
+}

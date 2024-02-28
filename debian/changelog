@@ -1,116 +1,37 @@
-tirex (0.6.4) focal; urgency=medium
-
-  * allow adding a dot and zoom level after mapfile parameter to override map file for specific zoom levels
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Fri, 13 Aug 2021 11:55:10 +0200
-
-tirex (0.6.3) bionic; urgency=medium
+tirex (0.8.0-pre) unstable; urgency=medium
   
-  * modify TMS backend to take template URL parameter
+  * preliminary build for github HEAD
 
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 29 Jun 2020 15:57:07 +0200
+ -- Frederik Ramm <ramm@geofabrik.de>  Thu, 19 May 2022 13:41:14 +0200
 
-tirex (0.6.2) bionic; urgency=medium
-  
-  * add TMS backend
+tirex (0.7.0-1) unstable; urgency=medium
 
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
+  * Move from experimental to unstable.
 
-tirex (0.6.1) bionic; urgency=medium
-  
-  * add openseamap backend
+ -- Felix Delattre <debian@xama.nu>  Mon, 22 Nov 2021 16:56:21 +0000
 
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 21 Aug 2019 16:10:48 +0200
+tirex (0.7.0-1~exp1) experimental; urgency=medium
 
-tirex (0.6.0) bionic; urgency=medium
+  [ Felix Delattre ]
+  * Initial package (Closes: #968676).
+  * New upstream release 0.7.0
+  * Adjusted copyright information.
+  * Use tirex package.
+  * Sort and review dependencies.
+  * Review section declaration of packages.
+  * Place apache2 config when installing tirex.
+  * Introduce dedicated user _tirex.
+  * Remove experimental backends, plugins, and example map from packaging.
+  * Load utils into /usr/share.
+  * Handle tiles and stats in cache directory.
+  * Use daemon under /run.
+  * Check on systemd service files.
+  * Revisit configuration.
+  * Bump Standards-Version to 4.6.0, no changes.
 
-  * tirex-syncd to use ssh master, also allow multiple destinations
+  [ Bas Couwenberg ]
+  * Bump watch file version to 4.
+  * Bump Standards-Version to 4.5.1, no changes.
+  * Update watch file for GitHub URL changes.
 
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Sat, 02 Mar 2019 14:23:23 +0000
-
-tirex (0.5.2) bionic; urgency=medium
-
-  * die after serving X requests
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
-
-tirex (0.5.1) bionic; urgency=medium
-
-  * jpeg tiles
-  * mapnik 3
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 14 Dec 2015 20:06:23 +0000
-
-tirex (0.4.1precise1) precise; urgency=low
-
-  * support (alomst) arbitrary sized meta tiles
-  * support for Mapnik2 
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Tue, 26 Jun 2012 21:45:22 +0000
-
-tirex (0.3.1debian1) precise; urgency=low
-
-  * fix epsg3857 bug
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Tue, 08 May 2012 20:27:04 +0000
-
-tirex (0.3.0) jaunty; urgency=low
-
-  * add mapserver backend
-
- -- Sven Geggus <sven-osm@geggus.net>  Fri, 03 Feb 2012 19:43:24 +0100
-
-tirex (0.2.0) jaunty; urgency=low
-
-  * new renderd architecture allows several different renderers at the same time
-  * lots of other small improvements
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 3 May 2010 10:30:44 +0100
-
-tirex (0.1.7) jaunty; urgency=low
-
-  * bugfixes on zoom level 1+2
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 15 Mar 2010 21:48:44 +0100
-
-tirex (0.1.6) jaunty; urgency=low
-
-  * munin plugin overhaul
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Fri, 26 Feb 2010 22:38:03 +0100
-
-tirex (0.1.5) jaunty; urgency=low
-
-  * new commands to stop/continue buckets
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 24 Feb 2010 15:03:40 +0100
-
-tirex (0.1.4) jaunty; urgency=low
-
-  * new features+utilities, manpages
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Thu, 18 Feb 2010 12:02:16 +0100
-
-tirex (0.1.3) jaunty; urgency=low
-
-  * lots of new features
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Mon, 15 Feb 2010 19:17:53 +0100
-
-tirex (0.1.2) jaunty; urgency=low
-
-  * fixed renderd starter dying
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 10 Feb 2010 17:15:52 +0100
-
-tirex (0.1.1) jaunty; urgency=low
-
-  * new build
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Wed, 10 Feb 2010 11:40:21 +0100
-
-tirex (0.1) unstable; urgency=low
-
-  * Initial release. 
-
- -- Frederik Ramm <frederik.ramm@geofabrik.de>  Thu, 04 Feb 2010 00:57:52 +0100
+ -- Felix Delattre <debian@xama.nu>  Thu, 07 Oct 2021 14:37:41 +0000

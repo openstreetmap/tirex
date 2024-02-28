@@ -1,24 +1,43 @@
-Tirex Rendering System
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: Tirex
+Upstream-Contact: Frederik Ramm <frederik.ramm@geofabrik.de>
+Source: https://github.com/openstreetmap/tirex
 
-Copyright (C) 2010  Frederik Ramm <frederik.ramm@geofabrik.de> and
-                    Jochen Topf <jochen.topf@geofabrik.de>
+Files: *
+Copyright: 2010, 2019-2020, Frederik Ramm <frederik.ramm@geofabrik.de>
+                 2010-2011, Jochen Topf <jochen.topf@geofabrik.de>
+                      2012, Sven Geggus <sven-osm@geggus.net>
+License: GPL-2+
 
-Initially developed by Geofabrik GmbH, Karlsruhe, Germany, with 
-support from Enaikoon GmbH, Berlin, Germany.
- 
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
+Files: example-map/ocean.gpkg
+Copyright: 2009-2016, Natural Earth
+License: public-domain
+ This data is explicitly placed in the public domain.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+Files: utils/analyze_postgis_log.pl
+Copyright: 2010-2016, Frederik Ramm <frederik@remote.org>
+License: public-domain
+ This file is explicitly placed in the public domain.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+Files: debian/*
+Copyright: 2010-2020, Frederik Ramm <frederik.ramm@geofabrik.de>
+           2020-2021, Felix Delattre <debian@xama.nu>
+License: GPL-2+
 
-On Debian systems, the license text can usually be found in
-/usr/share/common-licenses.
+License: GPL-2+
+ This package is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 2 of the License, or
+ (at your option) any later version.
+ .
+ This package is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+ .
+ You should have received a copy of the GNU General Public License
+ along with this package; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
+ .
+ On Debian systems, the complete text of the GNU General Public License
+ version 2 or later can be found in `/usr/share/common-licenses/GPL-2'.
