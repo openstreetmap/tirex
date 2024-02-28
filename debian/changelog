@@ -8,6 +8,7 @@ tirex (0.7.1-1) UNRELEASED; urgency=medium
   * Enable Salsa CI.
   * Switch to dh-sequence-*.
   * Refresh patches.
+  * Update lintian overrides.
 
   [ Helmut Grohne ]
   * Let dh_installsystemd choose the location of systemd units.
