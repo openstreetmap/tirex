@@ -3,7 +3,8 @@ Maintainer: Debian GIS Project <pkg-grass-devel@lists.alioth.debian.org>
 Uploaders: Felix Delattre <debian@xama.nu>
 Section: science
 Priority: optional
-Build-Depends: debhelper-compat (= 13),
+Build-Depends: architecture-is-64-bit,
+               debhelper-compat (= 13),
                dh-apache2,
                dh-sequence-apache2,
                libboost-program-options-dev,
