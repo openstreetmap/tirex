@@ -4,6 +4,7 @@ include:
 
 variables:
   SALSA_CI_AUTOPKGTEST_ARGS: '--no-auto-control'
+  SALSA_CI_DISABLE_BUILD_PACKAGE_I386: 1
   SALSA_CI_ENABLE_BUILD_PACKAGE_TWICE: 1
 
 blhc:
