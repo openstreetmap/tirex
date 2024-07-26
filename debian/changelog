@@ -4,6 +4,65 @@ tirex (0.8.0-pre) unstable; urgency=medium
 
  -- Frederik Ramm <ramm@geofabrik.de>  Thu, 19 May 2022 13:41:14 +0200
 
+tirex (0.7.1-3) unstable; urgency=medium
+
+  * Team upload.
+  * Add patch to fix FTBFS with Mapnik 4.0.
+    (closes: #1069109)
+
+ -- Bas Couwenberg <sebastic@debian.org>  Mon, 17 Jun 2024 08:04:22 +0200
+
+tirex (0.7.1-2) unstable; urgency=medium
+
+  * Team upload.
+
+  [ datendelphin ]
+  * Fix logrotate entry in tirex.install.
+
+  [ Bas Couwenberg ]
+  * Add architecture-is-64-bit to build dependencies to match mod_tile.
+
+ -- Bas Couwenberg <sebastic@debian.org>  Mon, 06 May 2024 18:05:29 +0200
+
+tirex (0.7.1-1) unstable; urgency=medium
+
+  * Team upload.
+
+  [ Bas Couwenberg ]
+  * New upstream release.
+  * Bump debhelper compat to 13.
+  * Enable Salsa CI.
+  * Switch to dh-sequence-*.
+  * Refresh patches.
+  * Update lintian overrides.
+
+  [ Helmut Grohne ]
+  * Let dh_installsystemd choose the location of systemd units.
+    (closes: #1052715)
+
+ -- Bas Couwenberg <sebastic@debian.org>  Sat, 16 Mar 2024 10:01:46 +0100
+
+tirex (0.7.0-3) unstable; urgency=medium
+
+  * Team upload.
+  * Add Rules-Requires-Root to control file.
+  * Update lintian overrides.
+  * Bump Standards-Version to 4.6.2, no changes.
+  * Move systemd services to /lib/systemd.
+    (closes: #1034222)
+
+ -- Bas Couwenberg <sebastic@debian.org>  Tue, 11 Apr 2023 10:20:03 +0200
+
+tirex (0.7.0-2) unstable; urgency=medium
+
+  [ Frederik Ramm ]
+  * Avoid deletion of tile cache on upgrade.
+
+  [ Bas Couwenberg ]
+  * Bump Standards-Version to 4.6.1, no changes.
+
+ -- Felix Delattre <debian@xama.nu>  Wed, 03 Aug 2022 08:27:51 +0000
+
 tirex (0.7.0-1) unstable; urgency=medium
 
   * Move from experimental to unstable.
