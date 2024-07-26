@@ -7,9 +7,10 @@
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
 
 %:
-	dh $@ --with apache2
+	dh $@
 
-override_dh_auto_install:
-	dh_auto_install --destdir=debian/tmp -- install-all
+execute_after_dh_installsystemd:
+	dh_installsystemd -ptirex --name tirex-master
+	dh_installsystemd -ptirex --name tirex-backend-manager
 
 .PHONY: templates

@@ -59,15 +59,14 @@ to create the packages. The following packages will be created in the parent
 directory:
 
     tirex
-    tirex-backend-mapnik
-    tirex-backend-wms
-    tirex-backend-mapserver
-    tirex-example-map
-    tirex-munin-plugin
-    tirex-nagios-plugin
-    tirex-syncd
 
 Call 'make deb-clean' to cleanup after a 'make deb'.
+
+This package is also maintained in Debian by the [Debian GIS Team](https://wiki.debian.org/Teams/DebianGis).
+
+ * [Debian packages](https://packages.debian.org/search?keywords=tirex)
+ * [Ubuntu packages](https://packages.ubuntu.com/search?keywords=tirex)
+ * [Debian Salsa/git packaging repo](https://salsa.debian.org/debian-gis-team/tirex)
 
 ## TESTS
 
