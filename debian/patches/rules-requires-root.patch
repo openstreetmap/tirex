@@ -1,0 +1,12 @@
+Description: Fix FTBFS Rules-Requires-Root: no.
+Author: Bas Couwenberg <sebastic@debian.org>
+Forwarded: not-needed
+
+--- a/Makefile
++++ b/Makefile
+@@ -1,4 +1,4 @@
+-INSTALLOPTS=-g root -o root
++INSTALLOPTS=
+ build: Makefile.perl
+ 	cd backend-mapnik; $(MAKE) $(MFLAGS)
+ 	$(MAKE) -f Makefile.perl
