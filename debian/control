@@ -46,3 +46,49 @@ Description: Tirex example map data and configuration
  with Mapnik and Apache2 webserver.
  After installation the map can be visisted in a web
  browser by going to http://localhost/tirex-example-map.
+
+Package: tirex-munin-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, munin-node
+Description: Munin plugin for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This package contains plugins that help to graph Tirex activity with Munin.
+
+Package: tirex-nagios-plugin
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex
+Suggests: nagios3 | nagios-nrpe-server
+Description: Nagios plugins for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This package contains plugins that help to monitor Tirex activity with Nagios.
+
+Package: tirex-backend-wms
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, libwww-perl
+Description: WMS backend for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the WMS backend for fetching maps from a WMS server.
+
+Package: tirex-backend-mapserver
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, libwww-perl, libmapscript-perl, ttf-dejavu-core
+Description: Mapserver backend for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the Mapserver backend for rendering maps with Mapserver.
+
+Package: tirex-backend-openseamap
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex, default-jre-headless | java8-runtime-headless
+Description: OpenSeaMap backend for the Tirex tile rendering system
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the OpenSeaMap backend for creating maps with the OpenSeaMap renderer.
+
+Package: tirex-syncd
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, tirex
+Description: Tirex sync daemon
+ The Tirex suite of programs manages map tile rendering and caching.
+ This is the sync daemon which listens for messages of tiles fully rendered,
+ and then copies the metatile to another server. The sync daemon is intended
+ to be used in setups where you have multiple tile servers with their own
+ rendering queues.
