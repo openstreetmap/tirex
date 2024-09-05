@@ -1,6 +1,10 @@
 tirex (0.8.0-pre) unstable; urgency=medium
 
+  [ Frederik Ramm ]
   * preliminary build for github HEAD
+
+  [ Amanda McCann ]
+  * Ensure tirex stats are initialized to 0 not null cf issue #29
 
  -- Frederik Ramm <ramm@geofabrik.de>  Thu, 19 May 2022 13:41:14 +0200
 

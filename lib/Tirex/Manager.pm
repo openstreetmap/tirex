@@ -296,12 +296,16 @@ sub done
         {
             ::syslog('debug', 'job rendering done id=%s map=%s x=%d y=%d z=%d', $job->get_id(), $job->get_map(), $job->get_x(), $job->get_y(), $job->get_z()) if ($Tirex::DEBUG);
 
-            # update statistics
-            $self->{'stats'}->{'count_rendered' }->{$job->get_map()}->[$job->get_z()] ||= 0;
+            # Initialize stats at 0 for all zoom levels up to, and incl, the zoom of this job.
+            # Otherwise there are nulls in status JSON cf. https://github.com/openstreetmap/tirex/issues/29
+            foreach my $stat_name ( 'count_rendered', 'sum_render_time', 'max_render_time' ) {
+                while ( $#{$self->{'stats'}->{$stat_name}->{$job->get_map()}} <= $job->get_z() ) {
+                    push( @{$self->{'stats'}->{$stat_name}->{$job->get_map()}}, 0 );
+                }
+            }
             $self->{'stats'}->{'count_rendered' }->{$job->get_map()}->[$job->get_z()]++;
-            $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] ||= 0;
             $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] += $msg->{'render_time'};
-            my $max = $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()] || 0;
+            my $max = $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()];
             $max = $msg->{'render_time'} if $msg->{'render_time'} > $max;
             $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()] = $max;
 
