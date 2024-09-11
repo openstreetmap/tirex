@@ -1,6 +1,10 @@
 tirex (0.8.0-pre) unstable; urgency=medium
 
+  [ Frederik Ramm ]
   * preliminary build for github HEAD
+
+  [ Amanda McCann ]
+  * Default master timeout raised from 10 to 60 minutes
 
  -- Frederik Ramm <ramm@geofabrik.de>  Thu, 19 May 2022 13:41:14 +0200
 
