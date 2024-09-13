@@ -11,6 +11,7 @@ use Carp;
 use IO::Socket::INET;
 
 use Tirex;
+use Tirex::Map;
 use Tirex::Manager::Bucket;
 use Tirex::Manager::RenderingJobs;
 
@@ -297,11 +298,19 @@ sub done
             ::syslog('debug', 'job rendering done id=%s map=%s x=%d y=%d z=%d', $job->get_id(), $job->get_map(), $job->get_x(), $job->get_y(), $job->get_z()) if ($Tirex::DEBUG);
 
             # update statistics
-            $self->{'stats'}->{'count_rendered' }->{$job->get_map()}->[$job->get_z()] ||= 0;
+
+            if (!defined($self->{'stats'}->{'count_rendered'}->{$job->get_map()})) {
+                # initialize stats with zeroes for this map style
+                # Otherwise there are nulls in status JSON cf. https://github.com/openstreetmap/tirex/issues/29
+                my $maxz = Tirex::Map->get($job->get_map())->get_maxz();
+                foreach my $stat_name ( 'count_rendered', 'sum_render_time', 'max_render_time' ) {
+                    my @zeroes = (0) x ($maxz + 1);
+                    $self->{'stats'}->{$stat_name}->{$job->get_map()} = \@zeroes;
+                }
+            }
             $self->{'stats'}->{'count_rendered' }->{$job->get_map()}->[$job->get_z()]++;
-            $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] ||= 0;
             $self->{'stats'}->{'sum_render_time'}->{$job->get_map()}->[$job->get_z()] += $msg->{'render_time'};
-            my $max = $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()] || 0;
+            my $max = $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()];
             $max = $msg->{'render_time'} if $msg->{'render_time'} > $max;
             $self->{'stats'}->{'max_render_time'}->{$job->get_map()}->[$job->get_z()] = $max;
 
