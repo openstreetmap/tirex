@@ -103,6 +103,7 @@ my $expected_status = {
         count_error     => 0,
         count_rendered  => {},
         sum_render_time => {},
+        max_render_time => {},
     },
 };
 my $is_status = $rm->status();
