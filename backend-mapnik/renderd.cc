@@ -227,7 +227,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
 #endif
 
     tmp = getenv("TIREX_BACKEND_CFG_fontdir_recurse");
-    bool fr = tmp ? atoi(tmp) : false;
+    bool fr = tmp ? atoi(tmp) : true;
     tmp = getenv("TIREX_BACKEND_CFG_fontdir");
     if (tmp) loadFonts(tmp, fr);
 
