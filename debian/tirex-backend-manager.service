@@ -9,6 +9,7 @@ ExecStart=/usr/bin/tirex-backend-manager -f
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 Restart=on-failure
+RestartPreventExitStatus=INVALIDARGUMENT
 User=_tirex
 Group=_tirex
 
