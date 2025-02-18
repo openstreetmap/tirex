@@ -205,7 +205,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
     else if (strfac == "daemon") fac = LOG_DAEMON;
     else
     {
-        die("Cannot use log facility '%s' - only local0-local7, user, daemon are allowed.", strfac.c_str());
+        die(2, "Cannot use log facility '%s' - only local0-local7, user, daemon are allowed.", strfac.c_str());
     }
     openlog("tirex-backend-mapnik", Debuggable::msDebugLogging ? LOG_PERROR|LOG_PID : LOG_PID, fac);
     info("Renderer started (name=%s)", getenv("TIREX_BACKEND_NAME"));
@@ -244,7 +244,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
     }
 
     if (mHandlerMap.empty())
-        die("Cannot load any Mapnik styles");
+        die(2, "Cannot load any Mapnik styles");
 
 }
 

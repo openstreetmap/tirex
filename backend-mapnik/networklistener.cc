@@ -64,7 +64,7 @@ NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<st
     else
     {
         mSocket = socket(AF_INET, SOCK_DGRAM, 0);
-        if (mSocket < 0) die ("cannot open socket: %s", strerror(errno));
+        if (mSocket < 0) die (2, "cannot open socket: %s", strerror(errno));
         int one = 1;
         setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(int));
         length = sizeof(server);
@@ -72,7 +72,7 @@ NetworkListener::NetworkListener(int port, int sockfd, int parentfd, std::map<st
         server.sin_family = AF_INET;
         server.sin_addr.s_addr = inet_addr("127.0.0.1");
         server.sin_port = htons(port);
-        if (bind(mSocket, reinterpret_cast<sockaddr *>(&server), length) < 0) die("cannot bind to port %d: %s", port, strerror(errno));
+        if (bind(mSocket, reinterpret_cast<sockaddr *>(&server), length) < 0) die(2, "cannot bind to port %d: %s", port, strerror(errno));
         debug("bound to port %d", port);
     }
 }

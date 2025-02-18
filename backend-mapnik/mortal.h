@@ -26,7 +26,7 @@ class Mortal
 {
     protected:
 
-    void die(const char *fmt, ...)
+    void die(int exitcode, const char *fmt, ...)
     {
         char *cpy = static_cast<char *>(malloc(strlen(fmt) + 256));
         sprintf(cpy, "%s\n", fmt);
@@ -34,7 +34,7 @@ class Mortal
         va_start(ap, fmt);
         vfprintf(stderr, cpy, ap);
         va_end(ap);
-        exit(1);
+        exit(exitcode);
     }
 };
 
