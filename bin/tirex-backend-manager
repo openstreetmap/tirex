@@ -55,7 +55,7 @@ die("refusing to run as root\n") if ($< == 0);
 my @argv = @ARGV;
 
 my %opts = ();
-GetOptions( \%opts, 'help|h', 'debug|d', 'foreground|f', 'config|c=s' ) or exit(2);
+GetOptions( \%opts, 'help|h', 'debug|d', 'foreground|f', 'config|c=s' ) or exit($Tirex::EXIT_CODE_INVALIDARGUMENT);
 
 if ($opts{'help'})
 {
@@ -375,7 +375,7 @@ sub cleanup_dead_workers
         {
             my $renderer = $workers->{$pid}->{'renderer'};
             syslog('err', 'terminating due to unexpected error in renderer %s', $renderer->get_name());
-            exit_gracefully(2);
+            exit_gracefully($Tirex::EXIT_CODE_INVALIDARGUMENT);
         }
 
         $workers->{$pid}->{'handle'}->close();

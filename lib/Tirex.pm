@@ -44,6 +44,7 @@ our $MAX_PACKET_SIZE = 512;
 # max zoom level we will ever allow
 our $MAX_ZOOM = 30;
 
+our $EXIT_CODE_INVALIDARGUMENT = 2;
 our $EXIT_CODE_RESTART = 9;
 our $EXIT_CODE_DISABLE = 10;
 
