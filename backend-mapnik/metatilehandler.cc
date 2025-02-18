@@ -178,8 +178,8 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
             return NetworkResponse::makeErrorResponse(request, "renderer internal error");
         }
 
-        char tmpfilename[PATH_MAX];
-        snprintf(tmpfilename, PATH_MAX, "%s.%d.tmp", metafilename, getpid());
+        std::string tmpfilename = metafilename; 
+        tmpfilename += "." + std::to_string(getpid()) + ".tmp";
         std::ofstream outfile(tmpfilename, std::ios::out | std::ios::binary | std::ios::trunc);
         outfile.write(reinterpret_cast<const char*>(&m), sizeof(m));
 
@@ -223,11 +223,11 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
 
         if (outfile.fail())
         {
-            unlink(tmpfilename);
+            unlink(tmpfilename.c_str());
             return NetworkResponse::makeErrorResponse(request, "cannot write metatile");
         }
 
-        rename(tmpfilename, metafilename);
+        rename(tmpfilename.c_str(), metafilename);
         debug("created %s", metafilename);
 
         resp = new NetworkResponse(request);
