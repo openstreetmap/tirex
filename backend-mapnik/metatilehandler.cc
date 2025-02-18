@@ -25,7 +25,12 @@
 #include <mapnik/agg_renderer.hpp>
 #include <mapnik/image_util.hpp>
 #include <mapnik/load_map.hpp>
+
+#if MAPNIK_VERSION >= 400000
 #include <mapnik/geometry/box2d.hpp>
+#else
+#include <mapnik/box2d.hpp>
+#endif
 
 #if MAPNIK_VERSION >= 300000
 # include <mapnik/datasource.hpp>
