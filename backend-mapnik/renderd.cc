@@ -239,8 +239,7 @@ RenderDaemon::RenderDaemon(int argc, char **argv) :
         while (tkn)
         {
             if (!loadMapnikWrapper(tkn)) {
-                warning("Unable to load map");
-                exit(2);
+                die(2, "Unable to load map");
             }
             tkn = strtok(NULL, " ");
         }
