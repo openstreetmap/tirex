@@ -11,6 +11,8 @@ KillMode=process
 
 Restart=on-failure
 RestartPreventExitStatus=INVALIDARGUMENT
+StartLimitIntervalSec=10min
+StartLimitBurst=5
 
 User=_tirex
 Group=_tirex
