@@ -10,6 +10,7 @@ ExecReload=/bin/kill -HUP $MAINPID
 KillMode=process
 
 Restart=on-failure
+RestartSec=10s
 StartLimitIntervalSec=10min
 StartLimitBurst=5
 

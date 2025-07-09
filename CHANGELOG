@@ -4,7 +4,8 @@ tirex (0.8.0) unstable; urgency=medium
   * preliminary build for github HEAD
 
   [ Amanda McCann ]
-  * If any map style fails to load, tirex-backend-manager server will fail.
+  * If any map style fails to load, tirex-backend-manager server will fail, and
+    will only be restarted a few times
   * Ensure tirex stats are initialized to 0 not null cf issue #29
   * Default master timeout raised from 10 to 60 minutes
   * mapnik fontdir_recurse default changed to true
