@@ -1,8 +1,19 @@
 tirex (0.8.0-1) unstable; urgency=medium
   
+  [ Frederik Ramm ]
   * preliminary build for github HEAD
 
+  [ Amanda McCann ]
+  * If any map style fails to load, tirex-backend-manager server will fail, and
+    will only be restarted a few times
+  * Ensure tirex stats are initialized to 0 not null cf issue #29
+  * Default master timeout raised from 10 to 60 minutes
+  * mapnik fontdir_recurse default changed to true
+  * Correct syntax in example map to match current mapnik API
+  * Cleanups to our debian packaging setup
+
  -- Frederik Ramm <ramm@geofabrik.de>  Thu, 19 May 2022 13:41:14 +0200
+
 
 tirex (0.7.1-4) UNRELEASED; urgency=medium
 
