@@ -48,7 +48,35 @@ respectively. You can also install everything with
 
     make install-all
 
-## DEBIAN/UBUNTU
+## Debian & Ubuntu
+
+### `git-buildpackage`, `cowbuilder` & Backports
+
+[Geofabrik](https://www.geofabrik.de/) maintains backports of Tirex on it's
+[github fork](https://github.com/geofabrik/tirex).
+
+| OS                                   | Branch                                                                       |
+|--------------------------------------|------------------------------------------------------------------------------|
+| Ubuntu 24.04.2 LTS (Noble Numbat)    | [`geofabrik/noble`](https://github.com/geofabrik/tirex/tree/geofabrik/noble) |
+| Ubuntu 22.04.2 LTS (Jammy Jellyfish) | [`geofabrik/jammy`](https://github.com/geofabrik/tirex/tree/geofabrik/jammy) |
+
+To build these backports, clone the repo, switch to the branch and call:
+
+	gbp buildpackage --git-pbuilder --git-ignore-branch --git-dist=DIST
+
+(e.g. `… --git-dist=noble`).
+
+This will produce files like `tirex_0.8.0-1~geofabriknoble1_amd64.deb`
+
+The Debian GIS Team's guide to [Packaging with
+Git](https://debian-gis-team.pages.debian.net/policy/packaging.html#git-packaging),
+explains how to set up a build environment, and [create a cowbuilder
+environment](https://debian-gis-team.pages.debian.net/policy/packaging.html#git-pbuilder).
+
+Geofabrik makes no guarantee that the backport(s) will work for the duration
+that the OS release is supported upstream.
+
+### Directly building
 
 To create Debian/Ubuntu packages you need the package 'devscripts'
 installed. Call
@@ -61,6 +89,8 @@ directory:
     tirex
 
 Call 'make deb-clean' to cleanup after a 'make deb'.
+
+### Packages in OS
 
 This package is also maintained in Debian by the [Debian GIS Team](https://wiki.debian.org/Teams/DebianGis).
 
