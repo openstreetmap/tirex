@@ -6,7 +6,7 @@ is a web server that hands out pre-rendered map raster images to clients.
 The web page for Tirex is at http://wiki.openstreetmap.org/wiki/Tirex .
 See there for more information.
 
-## PREREQUISITES
+## Prerequisites
 
 You'll need the following Perl modules to run Tirex:
 
@@ -17,7 +17,7 @@ You'll need the following Perl modules to run Tirex:
 
 You'll need a C++ compiler and build tools to compile the Mapnik backend.
 
-## BUILDING
+## Building
 
 To build Tirex run
 
@@ -28,7 +28,7 @@ the man pages for the Perl modules.
 
 Call 'make clean' to cleanup after a 'make'.
 
-## INSTALLING
+## Installing
 
 To install Tirex call
 
