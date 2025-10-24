@@ -107,3 +107,35 @@ libtest-harness-perl) installed.
 There are some other tests in the 'test' directory. See the description at the
 beginning of the scripts for information on how to use them.
 
+## Using
+
+Tirex is intended to be a drop-in replacement for `renderd`. It maintains
+and processes a rendering queue and stores its output in a metatile directory
+structure on disk. (Other storage backends are not supported.) In order to 
+use this to run a tile server, you will also need mod_tile to publish the tiles,
+as well as a data source for the backend to produce tiles from. The standard
+rendering backend is `backend_mapnik` which works with the `mapnik` library,
+and you will usually run that with an `openstreetmap-carto` map style pointed
+to an OpenStreetMap database populated with `osm2pgsql` - although Tirex 
+itself is data source agnostic and you can use with without something other
+than OpenStreetMap if you wish.
+
+### Components
+
+In a running system you will usually have one instance of `tirex-master` that
+controls the rendering queue, and one instance of `tirex-backend-manager` 
+that starts up backends as needed. The utility `tirex-status` allows you 
+to watch what is going on with the queue, and `tirex-batch` can be used
+to enqueue render jobs. (In a standard tile server setup, `tirex-batch` 
+would likely be used once initially to pre-render some tiles, but later
+render requests would come from `mod_tile` which is not part of Tirex.)
+
+### Configuration
+
+Tirex has a global configuration file in `/etc/tirex/tirex.conf`, 
+then one renderer config file per rendering backend in `/etc/tirex/renderer/$NAME_OF_BACKEND.conf`
+and, if the backend supports multiple maps, one map config file per map in
+`/etc/tirex/renderer/$NAME_OF_BACKEND/$NAME_OF_MAP.conf`.
+
+https://wiki.openstreetmap.org/wiki/Tirex/Config has details about the available configuration options.
+
