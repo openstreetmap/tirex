@@ -33,7 +33,7 @@ is($m1->get_minz(),  2, 'minz');
 is($m1->get_maxz(), 10, 'maxz');
 is($m1->get_renderer(), $r, 'renderer');
 
-is($m1->to_s(), 'Map foo: renderer=mapnik tiledir=/var/cache/tirex/tiles/foo zoom=2-10', 'to_s');
+is($m1->to_s(), 'Map foo: renderer=mapnik tiledir=/var/cache/tirex/tiles/foo zoom=2-10 tiledir_depth=5', 'to_s');
 
 is(Tirex::Map->get('foo'), $m1, 'get');
 is(Tirex::Map->get('bar'), undef, 'get');
@@ -42,6 +42,7 @@ is_deeply(Tirex::Map->status(), [
     {
         name => 'foo',
         tiledir => '/var/cache/tirex/tiles/foo',
+        tiledir_depth => 5,
         minz => 2,
         maxz => 10,
         renderer => $r->get_name(),

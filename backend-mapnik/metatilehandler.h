@@ -28,6 +28,7 @@
 #include "renderresponse.h"
 
 #define MAXZOOM 25
+#define MAXDEPTH 10
 
 struct entry {
     int offset;
@@ -45,7 +46,7 @@ class MetatileHandler : public RequestHandler
 {
     public:
 
-    MetatileHandler(const std::string& tiledir, const std::map<std::string,std::string>& stylefiles, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string & imagetype);
+    MetatileHandler(const std::string& tiledir, unsigned int tiledir_depth, const std::map<std::string,std::string>& stylefiles, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string & imagetype);
     ~MetatileHandler();
     const NetworkResponse *handleRequest(const NetworkRequest *request);
     void xyz_to_meta(char *path, size_t len, const char *tile_dir, int x, int y, int z) const;
@@ -65,6 +66,7 @@ class MetatileHandler : public RequestHandler
     std::string mImageType;
     int mBufferSize;
     double mScaleFactor;
+    unsigned int mTileDirDepth;
     std::string mTileDir;
     mapnik::Map mMap;
     mapnik::Map *mPerZoomMap[MAXZOOM+1];

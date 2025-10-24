@@ -40,7 +40,7 @@
 #define MERCATOR_WIDTH 40075016.685578488
 #define MERCATOR_OFFSET 20037508.342789244
 
-MetatileHandler::MetatileHandler(const std::string& tiledir, const std::map<std::string, std::string>& stylefiles, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string& imagetype) :
+MetatileHandler::MetatileHandler(const std::string& tiledir, unsigned int tiledir_depth, const std::map<std::string, std::string>& stylefiles, unsigned int tilesize, double scalefactor, int buffersize, unsigned int mtrowcol, const std::string& imagetype) :
     mTileWidth(tilesize),
     mTileHeight(tilesize),
     mMetaTileRows(mtrowcol),
@@ -48,11 +48,17 @@ MetatileHandler::MetatileHandler(const std::string& tiledir, const std::map<std:
     mImageType(imagetype),
     mBufferSize(buffersize),
     mScaleFactor(scalefactor),
+    mTileDirDepth(tiledir_depth),
     mTileDir(tiledir) 
 {
     for (unsigned int i=0; i<=MAXZOOM; i++)
     {
         mPerZoomMap[i]=NULL;
+    }
+
+    if (tiledir_depth > MAXDEPTH)
+    {
+        throw std::invalid_argument("tiledir depth must not be greater than " + MAXDEPTH);
     }
 
     for (auto itr = stylefiles.begin(); itr != stylefiles.end(); itr++)
@@ -253,28 +259,51 @@ const NetworkResponse *MetatileHandler::handleRequest(const NetworkRequest *requ
 
 void MetatileHandler::xyz_to_meta(char *path, size_t len, const char *tile_dir, int x, int y, int z) const
 {
-    unsigned char i, hash[5];
+    unsigned int i;
+    unsigned char hash[MAXDEPTH];
+    size_t printed;
 
-    for (i=0; i<5; i++) {
+    for (i=0; i<mTileDirDepth; i++) {
         hash[i] = ((x & 0x0f) << 4) | (y & 0x0f);
         x >>= 4;
         y >>= 4;
     }
-    snprintf(path, len, "%s/%d/%u/%u/%u/%u/%u.meta", tile_dir, z, hash[4], hash[3], hash[2], hash[1], hash[0]);
+    printed = snprintf(path, len, "%s/%d", tile_dir, z);
+    path+=printed;
+    len-=printed;
+    for (i=mTileDirDepth-1; i>0; i--)
+    {
+        printed = snprintf(path, len, "/%u", hash[i]);
+        path += printed;
+        len -= printed;
+    }
+    snprintf(path, len, "/%u.meta", hash[0]);
     return;
 }
 
 bool MetatileHandler::mkdirp(const char *tile_dir, int x, int y, int z) const
 {
-    unsigned char i, hash[5];
+    unsigned int i;
+    unsigned char hash[MAXDEPTH];
     char path[PATH_MAX];
+    char *p = path;
+    size_t printed;
+    size_t len=PATH_MAX-1;
 
-    for (i=0; i<5; i++) {
+    for (i=0; i<mTileDirDepth; i++) {
         hash[i] = ((x & 0x0f) << 4) | (y & 0x0f);
         x >>= 4;
         y >>= 4;
     }
-    snprintf(path, PATH_MAX, "%s/%d/%u/%u/%u/%u", tile_dir, z, hash[4], hash[3], hash[2], hash[1]);
+    printed = snprintf(p, len, "%s/%d", tile_dir, z);
+    p+=printed;
+    len-=printed;
+    for (i=mTileDirDepth-1; i>0; i--)
+    {
+        printed = snprintf(p, len, "/%u", hash[i]);
+        p+= printed;
+        len -= printed;
+    }
     try
     {
         boost::filesystem::create_directories(path);

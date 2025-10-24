@@ -97,6 +97,7 @@ sub new
     Carp::croak('missing name'    ) unless (defined $self->{'name'    });
     Carp::croak('missing renderer') unless (defined $self->{'renderer'});
     Carp::croak('missing tiledir' ) unless (defined $self->{'tiledir' });
+    $self->{'tiledir_depth'} = 5    unless (defined $self->{'tiledir_depth' });
     Carp::croak("map with name $self->{'name'} exists") if ($Maps{$self->{'name'}});
 
     $self->{'minz'} =  0 unless (defined $self->{'minz'});
@@ -171,6 +172,14 @@ Get tile directory of this map.
 =cut
 
 sub get_tiledir { return shift->{'tiledir'}; }
+
+=head2 $map->get_tiledir_depth()
+
+Get tile directory depth of this map.
+
+=cut
+
+sub get_tiledir_depth { return shift->{'tiledir_depth'}; }
 
 =head2 $map->get_minz()
 

@@ -83,6 +83,7 @@ sub new_from_filename_and_map
     my $class    = shift;
     my $filename = shift;
     my $map      = shift;
+    my $depth = Tirex::Map->get($map)->get_tiledir_depth();
 
     # remove leading / or ./
     $filename =~ s{^\.?/}{};
@@ -96,7 +97,7 @@ sub new_from_filename_and_map
     my $x = 0;
     my $y = 0;
 
-    Carp::croak("not a valid metatile filename: too many or too few components") unless (scalar(@path_components) == 5);
+    Carp::croak("not a valid metatile filename: too many or too few components") unless (scalar(@path_components) == $depth);
 
     while (defined (my $c = shift @path_components))
     {
@@ -268,12 +269,13 @@ Format is something like:
 sub get_filename
 {
     my $self = shift;
+    my $depth = Tirex::Map->get_map_for_metatile($self)->get_tiledir_depth();
 
     my @path_components;
     my $x = $self->{'x'};
     my $y = $self->{'y'};
 
-    foreach (0..4)
+    foreach (1..$depth)
     {
        my $v = $x & 0x0f;
        $v <<= 4;

@@ -62,6 +62,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
     int buffersize = -1;
     std::string imagetype = "png256";
     int lineno = 0;
+    int tiledir_depth = 5;
 
     while (char *line = fgets(linebuf, sizeof(linebuf), f))
     {
@@ -84,6 +85,10 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
             if (!strcmp(line, "tiledir"))
             {
                 tiledir.assign(eq);
+            }
+            else if (!strcmp(line, "tiledir_depth"))
+            {
+                tiledir_depth = atoi(eq);
             }
             else if (!strncmp(line, "mapfile", 7))
             {
@@ -163,7 +168,7 @@ bool RenderDaemon::loadMapnikWrapper(const char *configfile)
 
     try
     {
-        mHandlerMap[stylename] = new MetatileHandler(tiledir, mapfiles, tilesize, 
+        mHandlerMap[stylename] = new MetatileHandler(tiledir, tiledir_depth, mapfiles, tilesize, 
             scalefactor, buffersize, mtrowcol, imagetype);
         mHandlerMap[stylename]->setStatusReceiver(this);
         debug("added style '%s' from map %s", stylename.c_str(), configfile);

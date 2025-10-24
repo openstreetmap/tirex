@@ -12,8 +12,12 @@ use Test::More qw( no_plan );
 use lib 'lib';
 
 use Tirex;
+use Tirex::Map;
 
 #-----------------------------------------------------------------------------
+
+Tirex::Map->new( name => 'test', renderer => 'rand', tiledir => '/x', minz => 2, maxz => 20, tiledir_depth => 5 );
+Tirex::Map->new( name => 'test7', renderer => 'rand', tiledir => '/x', minz => 2, maxz => 30, tiledir_depth => 7 );
 
 eval { Tirex::Metatile->new( map => 'test', x =>  1, y => 2, z =>   1); }; if ($@ =~ /y must be between 0 and/) { pass(); } else { fail(); }
 eval { Tirex::Metatile->new( map => 'test', x =>  1, y => 2, z => 100); }; if ($@ =~ /z must be between 0 and/) { pass(); } else { fail(); }
@@ -45,6 +49,20 @@ ok(! $mt2->equals($mt1), 'mt1 != mt2');
 my $mt2g = Tirex::Metatile->new_from_filename_and_map( $mt2->get_filename(), $mt2->get_map() );
 isa_ok($mt2g, 'Tirex::Metatile', 'create mt2g from filename of mt2');
 ok($mt2g->equals($mt2), 'mt2g and mt2 are the same');
+
+my $mt3 = Tirex::Metatile->new( map => 'test7', x => 4426706, y => 2707373, z => 23 );
+isa_ok($mt3, 'Tirex::Metatile');
+
+is($mt3->get_x(), 4426704, 'mt3 x');
+is($mt3->get_y(), 2707368, 'mt3 y');
+is($mt3->get_z(),      23, 'mt3 z');
+is($mt3->get_map(),  'test7', 'mt3 map');
+is($mt3->get_filename(), '23/0/66/57/132/191/218/8.meta', 'mt3 get_filename');
+is($mt3->to_s(),     'map=test7 z=23 x=4426704 y=2707368', 'mt3 to_s');
+
+my $mt3g = Tirex::Metatile->new_from_filename_and_map( $mt3->get_filename(), $mt3->get_map() );
+isa_ok($mt3g, 'Tirex::Metatile', 'create mt3g from filename of mt3');
+ok($mt3g->equals($mt3), 'mt3g and mt3 are the same');
 
 #-----------------------------------------------------------------------------
 
