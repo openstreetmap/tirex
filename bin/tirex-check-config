@@ -109,6 +109,9 @@ my %known_config_options = (
     'sync_to_host'                    => [ undef,                                   \&valid_domain_name],
     'syncd_pidfile'                   => [ $Tirex::SYNCD_PIDFILE ,                  \&valid_file],
     'syncd_udp_port'                  => [ $Tirex::SYNCD_UDP_PORT,                  \&valid_port],
+    'syncd_aggregate_delay'           => [ $Tirex::SYNCD_AGGREGATE_DELAY,           \&valid_positive_int],
+    'syncd_command'                   => [ $Tirex::SYNCD_COMMAND,                   \&valid_nonempty_string],
+
 );
 
 print "\n  Config options in config file:\n";
@@ -239,7 +242,7 @@ foreach my $file (sort keys %renderer_dir)
     printf("!   Found extra file '%s', will be ignored\n", $file);
 }
 
-print "\nAt this point this check program should read and check the\nrenderer and map configs but currently doesn't. Patched welcome.\n";
+print "\nAt this point this check program should read and check the\nrenderer and map configs but currently doesn't. Patches welcome.\n";
 
 
 #-----------------------------------------------------------------------------
@@ -247,6 +250,14 @@ print "\nAt this point this check program should read and check the\nrenderer an
 exit($err ? 2 : $warn ? 1 : 0);
 
 #-----------------------------------------------------------------------------
+
+sub valid_nonempty_string
+{
+    my $string = shift;
+
+    return if ($string =~ /\S+/);
+    return('X', 'must be non-empty string');
+}
 
 sub valid_port
 {
