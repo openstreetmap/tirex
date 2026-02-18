@@ -155,7 +155,7 @@ sub format_status
         my @styles = keys %{$d->{'rm'}->{'stats'}->{'sum_render_time'}};
         my $maxzoom = 0;
         map { $maxzoom = max($maxzoom, scalar(@{$d->{'rm'}->{'stats'}->{'sum_render_time'}->{$_}})); } @styles;
-        my $max_name_len = 0;
+        my $max_name_len = 10;
         map { $max_name_len = max($max_name_len, length($_)); } @styles;
 
         $r = "style" . " " x ($max_name_len-9) . "zoom |";
@@ -175,7 +175,7 @@ sub format_status
             {
                 my $time = $d->{'rm'}->{'stats'}->{'sum_render_time'}->{$_}->[$i];
                 my $count = $d->{'rm'}->{'stats'}->{'count_rendered'}->{$_}->[$i];
-                if (defined($time) && defined($count))
+                if (defined($time) && defined($count) && ($count>0))
                 {
                     $r .= sprintf "%7.1fs", $time / $count / 1000 + 0.05;
                 }
